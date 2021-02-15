@@ -1,0 +1,27 @@
+<div class="modal fade" id="testFollowModal" tabindex="-1" aria-labelledby="followModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="followModalLabel">Test Follow Event</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form id="channel-follow-test">
+                <div class="col-12">
+                  <label for="username" class="form-label">Username</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="username" placeholder="Username" required>
+                  <div class="invalid-feedback">
+                      A username is required.
+                    </div>
+                  </div>
+                </div>
+              </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" onclick="channelFollowTest()">Test</button>
+        </div>
+        </div>
+    </div>
+</div>

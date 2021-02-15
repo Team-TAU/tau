@@ -1,0 +1,58 @@
+version: '3'
+
+services:
+  app:
+    restart: unless-stopped
+    container_name: tau-app
+    environment:
+      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DJANGO_DB=${DJANGO_DB}
+      - DJANGO_DB_USER=${DJANGO_DB_USER}
+      - DJANGO_DB_PW=${DJANGO_DB_PW}
+      - DJANGO_DB_URL=tau-db
+      - DJANGO_CONFIGURATION=Local
+      - TWITCH_APP_ID=${TWITCH_APP_ID}
+      - TWITCH_CLIENT_SECRET=${TWITCH_CLIENT_SECRET}
+      - TWITCH_WEBHOOK_SECRET=${TWITCH_WEBHOOK_SECRET}
+      - USE_NGROK=True
+    depends_on:
+      - db
+      - redis
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/workspace:cached
+    ports:
+      - "8000:8000"
+
+    command: >
+      bash -c "./manage.py migrate
+      && ./manage.py collectstatic --noinput
+      && /usr/bin/supervisord -n -c /code/supervisord.conf"
+    # Runs app on the same network as the database container, allows "forwardPorts" in devcontainer.json function.
+    # network_mode: service:db
+  
+  db:
+    image: postgres:latest
+    restart: unless-stopped
+    container_name: tau-db
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./db/scripts/init-user-db.sh:/docker-entrypoint-initdb.d/init-user-db.sh
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PW}
+      - DJANGO_DB=${DJANGO_DB}
+      - DJANGO_DB_USER=${DJANGO_DB_USER}
+      - DJANGO_DB_PW=${DJANGO_DB_PW}
+
+    # Add "forwardPorts": ["5432"] to **devcontainer.json** to forward PostgreSQL locally.
+    # (Adding the "ports" property to this file will not forward from a Codespace.)
+
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    container_name: tau-redis
+
+volumes:
+  postgres-data:

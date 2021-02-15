@@ -1,0 +1,10 @@
+[run]
+branch = True
+omit = *migrations*,
+       *urls*,
+       *test*,
+       *admin*,
+       ./manage.py,
+       ./tau/config/*,
+       ./tau/wsgi.py,
+       *__init__*

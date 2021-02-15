@@ -1,0 +1,49 @@
+<div class="modal fade" id="testCheersModal" tabindex="-1" aria-labelledby="cheersModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="cheersModalLabel">Test Cheer Event</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form id="channel-cheer-test">
+                <div class="col-12">
+                  <label for="username" class="form-label">Username</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="username" placeholder="Username" required>
+                  <div class="invalid-feedback">
+                      A username is required.
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <label for="bits" class="form-label">Bits</label>
+                  <div class="input-group">
+                    <input type="number" class="form-control" id="bits" placeholder="Bits" required>
+                  <div class="invalid-feedback">
+                      Bits is required.
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <label for="message" class="form-label">Message</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="message" placeholder="Message..." required>
+                  <div class="invalid-feedback">
+                      Message is required.
+                    </div>
+                  </div>
+                </div>
+                <div class="form-check">
+                  <input type="checkbox" class="form-check-input" id="is_anonymous">
+                  <label class="form-check-label" for="is_anonymous">Anonymous</label>
+                </div>
+              </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" onclick="channelCheerTest()">Test</button>
+        </div>
+        </div>
+    </div>
+</div>

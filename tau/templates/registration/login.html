@@ -1,0 +1,31 @@
+<!-- templates/registration/login.html -->
+{% extends 'base-no-header.html' %}
+{% load static %}
+{% block title %}Login{% endblock %}
+
+{% block content %}    
+<form method="POST">
+  <img src="{% static 'img/logo-grey.png' %}" style="width: 150px; height: 150px; margin-bottom: 15px;">
+  <h1 class="h3 mb-3 fw-normal text-secondary">Log In</h1>{% csrf_token %}
+  <label for="id_username" class="visually-hidden">Username</label>
+  <input 
+    type="text"
+    name="username"
+    id="id_username"
+    class="form-control group-top"
+    placeholder="Username"
+    required
+    autofocus
+  >
+  <label for="password" class="visually-hidden">Password</label>
+  <input
+    type="password"
+    name="password"
+    id="id_password"
+    class="form-control group-bot"
+    placeholder="Password"
+    required
+  >
+  <button class="w-100 btn btn-lg btn-secondary" type="submit">Sign in</button>
+</form>
+{% endblock %}

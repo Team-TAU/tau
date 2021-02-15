@@ -1,0 +1,44 @@
+<!-- templates/registration/first-run.html -->
+{% extends 'base-no-header.html' %}
+{% load static %}
+{% block title %}First Run{% endblock %}
+
+{% block content %}    
+<form method="POST">
+  <img src="{% static 'img/logo-grey.png' %}" style="width: 150px; height: 150px; margin-bottom: 15px;">
+  <h1 class="h3 mb-3 fw-normal">First Run</h1>{% csrf_token %}
+  <p>
+    First you need to setup your &tau; account.  This does not have to match
+    your twitch username (you will add your twitch account later).
+  </p>
+  <label for="id_username" class="visually-hidden">Username</label>
+  <input
+    type="text"
+    name="username"
+    id="id_username"
+    class="form-control group-top"
+    placeholder="Username"
+    required
+    autofocus
+  >
+  <label for="id_password1" class="visually-hidden">Password</label>
+  <input
+    type="password"
+    name="password1"
+    id="id_password1"
+    class="form-control group-mid"
+    placeholder="Password"
+    required
+  >
+  <label for="id_password2" class="visually-hidden">Password</label>
+  <input
+    type="password"
+    name="password2"
+    id="id_password2"
+    class="form-control group-bot"
+    placeholder="Password Again"
+    required
+  >
+  <button class="w-100 btn btn-lg btn-secondary" type="submit">Create Account</button>
+</form>
+{% endblock %}

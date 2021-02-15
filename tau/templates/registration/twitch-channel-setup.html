@@ -1,0 +1,26 @@
+<!-- templates/registration/twitch-channel-setup.html -->
+{% extends 'base-no-header.html' %}
+{% load static %}
+{% block title %}Twitch Channel Setup{% endblock %}
+
+{% block content %}    
+<form method="POST">
+  <img src="{% static 'img/logo-grey.png' %}" style="width: 150px; height: 150px; margin-bottom: 15px;">
+  <h1 class="h3 mb-3 fw-normal">Twitch Channel Setup</h1>{% csrf_token %}
+  <p>
+      Please enter your twitch channel name below.  After submitting, you will be forwarded to Twitch's API authentication page,
+      where you may need to log into your twitch account, and then approve Tau's access to your stream's information.
+  </p>
+  <label for="id_channel_name" class="visually-hidden">Channel Name</label>
+  <input 
+    type="text"
+    name="channel_name"
+    id="id_channel_name"
+    class="form-control"
+    placeholder="Channel Name"
+    required
+    autofocus
+  >
+  <button class="w-100 btn btn-lg btn-secondary" type="submit">Setup Channel</button>
+</form>
+{% endblock %}

@@ -1,0 +1,36 @@
+<div class="modal fade" id="testRaidModal" tabindex="-1" aria-labelledby="raidModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="raidModalLabel">Test Raid Event</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form id="channel-raid-test">
+                <div class="col-12">
+                  <label for="username" class="form-label">Raider</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="from_broadcaster_user_name" placeholder="Raider" required>
+                  <div class="invalid-feedback">
+                      A raider is required.
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <label for="viewers" class="form-label">Viewers</label>
+                  <div class="input-group">
+                    <input type="number" class="form-control" id="viewers" placeholder="Viewers" required>
+                  <div class="invalid-feedback">
+                      Viewers is required.
+                    </div>
+                  </div>
+                </div>
+              </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" onclick="channelRaidTest()">Test</button>
+        </div>
+        </div>
+    </div>
+</div>
