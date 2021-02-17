@@ -43,6 +43,7 @@
 {% include 'modal-forms/follow-modal.html' %}
 {% include 'modal-forms/points-redemption-modal.html' %}
 {% include 'modal-forms/raid-modal.html' %}
+{% include 'modal-forms/subs-modal.html' %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/6.6.2/rxjs.umd.min.js"
   integrity="sha512-kN8bAZFoIra6Z7dDPNMD3efoGLn7QpOZgBcNpLwKIoBM5rXLVxt9nPHNo+4WrIsT0RBc/h2sXtN08n1ALxn4yw=="
   crossorigin="anonymous"></script>
@@ -62,6 +63,7 @@
 <script src="{% static 'js/follow.js' %}"></script>
 <script src="{% static 'js/points-redemption.js' %}"></script>
 <script src="{% static 'js/raid.js' %}"></script>
+<script src="{% static 'js/subscribe.js' %}"></script>
 {% else %}
   <p>You are not logged in</p>
   <a href="{% url 'login' %}">Log In</a>

@@ -3,6 +3,7 @@ import json
 from random import randrange
 import websockets
 
+from channels.db import database_sync_to_async
 from asgiref.sync import sync_to_async
 from constance import config
 
@@ -89,9 +90,9 @@ class WebSocketClient():
         else:
             event_type = data["topic"]
         payload = {
-            event_type: event_type,
-            event_source: TwitchEvent.PUBSUB,
-            event_data: data,
+            'event_type': event_type,
+            'event_source': TwitchEvent.PUBSUB,
+            'event_data': data,
         }
         await database_sync_to_async(self.create_twitch_event)(payload)
 

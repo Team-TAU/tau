@@ -34,8 +34,8 @@ class TauStatusConsumer(AsyncJsonWebsocketConsumer):
                     token = data['token']
                     user = await database_sync_to_async(Token.objects.get(key=token).user)()
                     self.scope['user'] = user
-            except Exception as e:
-                    print(e)
+            except Exception as err:
+                print(err)
         if not self.scope['user'].id:
             self.close()
 

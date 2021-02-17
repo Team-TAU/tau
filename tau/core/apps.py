@@ -19,12 +19,16 @@ class CoreConfig(AppConfig):
     @staticmethod
     def setup_webhooks(public_url):
         if config.TWITCH_APP_ACCESS_TOKEN != '':
+            print('---- Setting up WebHooks for Twitch ----')
             refresh_access_token()                  # refresh the access token
+            print('     [Access tokens refreshed]')
             CoreConfig.teardown_webhooks()          # clear all old webhooks
+            print('     [Old WebHooks torn down]')
             CoreConfig.init_webhooks(public_url)    # init new webhooks
+            print('     [New WebHooks Initialized]\n')
         else:
             print(
-                'You have not yet set up a username, or authorized Tau to connect ' \
+                'You have not yet set up a username, or authorized Tau to connect '
                 'to your twitch account.  Webhooks will be set up after you do so.'
             )
 
@@ -33,14 +37,15 @@ class CoreConfig(AppConfig):
         # pyngrok will only be installed if it is used.
         from pyngrok import ngrok
 
+        print('---- Setting up ngrok tunnel ----')
         # Get the dev server port (defaults to 8000 for Django, can be overridden with the
         # last arg when calling `runserver`)
         addrport = urlparse("https://{}".format(sys.argv[-1]))
         port = addrport.port if addrport.netloc and addrport.port else 8000
 
-        # Open a ngrok tunnel to the dev server
+        # Open an ngrok tunnel to the dev server
         public_url = ngrok.connect(port).public_url.replace('http', 'https')
-        print("ngrok tunnel \"{}\" -> \"http://127.0.0.1:{}\"".format(public_url, port))
+        print(f"     [Tunnel url: {public_url}]\n")
 
         # Update any base URLs or webhooks to use the public ngrok URL
         settings.BASE_URL = public_url

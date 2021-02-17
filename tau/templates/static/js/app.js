@@ -97,6 +97,7 @@ const handleEventMessage = (message) => {
             appendPointsRedemption(message);
             break;
         case 'subscribe':
+            appendSubscribe(message);
             break;
     }
 }

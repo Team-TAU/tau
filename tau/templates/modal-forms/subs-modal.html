@@ -1,0 +1,68 @@
+<div class="modal fade" id="testSubModal" tabindex="-1" aria-labelledby="subModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="subModalLabel">Test Sub Event</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form id="channel-sub-test">
+                <div class="col-12">
+                  <label for="username" class="form-label">Username</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="username" placeholder="Username" required>
+                  <div class="invalid-feedback">
+                      A username is required.
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <label for="tier" class="form-label">Tier</label>
+                  <div class="input-group">
+                    <select class="form-control" id="tier" required>
+                      <option value="1000">Tier 1</option>
+                      <option value="2000">Tier 2</option>
+                      <option value="3000">Tier 3</option>
+                      <option value="prime">Prime</option>
+                    </select>
+                  </div>
+                  <div class="invalid-feedback">
+                    A tier is required.
+                  </div>
+                </div>
+                <div class="col-12">
+                  <label for="message" class="form-label">Message</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="message" placeholder="Message..." required>
+                  <div class="invalid-feedback">
+                      Message is required.
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <label for="cumulative_months" class="form-label">Cumulative Months</label>
+                  <div class="input-group">
+                    <input type="number" class="form-control" id="cumulative_months" placeholder="Cumulative Months" required>
+                  <div class="invalid-feedback">
+                      Cumulative Months is required.
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <label for="streak_months" class="form-label">Streak Months</label>
+                  <div class="input-group">
+                    <input type="number" class="form-control" id="streak_months" placeholder="Streak Months" required>
+                  <div class="invalid-feedback">
+                      Streak Months is required.
+                    </div>
+                  </div>
+                </div>
+              </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" onclick="channelSubscribeTest()">Test</button>
+        </div>
+        </div>
+    </div>
+</div>

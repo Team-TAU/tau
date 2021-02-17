@@ -68,3 +68,11 @@ At the very end of the logs in your terminal, you should see an indication that 
 To connect your bot or overlay code to TAU, you will need a TAU auth token.  This can be obtained by clicking the hamberger icon in the TAU dashboard, then clicking "Show Auth Token."
 
 Then simply point your bot's websocket client at `ws://localhost:8000/ws/twitch-events/` .  After it connects, send a websocket message from the client with the following JSON payload: `{"token": "YOUR_TOKEN HERE"}`.  After providing your token, TAU will begin to stream all twitch events to your websocket connection.  Fin.
+
+# Updating
+
+After pulling the latest code from github, you will need to rebuild the app container before re-launching TAU.  You can do so as follows:
+
+1. If TAU is running, stop it using `docker-compose down`
+2. Rebuild the app container: `docker-compose build app`
+3. Fire TAU back up: `docker-compose up`
