@@ -1,11 +1,12 @@
 const channelRaidTest = () => {
     const form = document.getElementById('channel-raid-test');
     const eles = form.elements;
-    const from_broadcaster_user_name = eles.namedItem('from_broadcaster_user_name').value;
+    const from_broadcaster_user_name = eles.namedItem('raid-from_broadcaster_user_name').value;
+    const from_broadcaster_user_id = eles.namedItem('raid-from_broadcaster_user_id').value;
 
     const payload = {
         from_broadcaster_user_name,
-        from_broadcaster_user_id: "98765",
+        from_broadcaster_user_id: from_broadcaster_user_id,
         from_broadcaster_user_login: from_broadcaster_user_name.toLowerCase(),
         to_broadcaster_user_id: broadcaster_user_id,
         to_broadcaster_user_login: broadcaster_user_name.toLowerCase(),

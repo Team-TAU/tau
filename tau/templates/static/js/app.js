@@ -186,3 +186,12 @@ const replayEvent = (id) => {
         console.log(resp);
     })
 }
+
+const getUserId = (username_id, userid_id) => {
+    const username = document.getElementById(username_id).value;
+    const sub = ajaxGet(`http://localhost:8000/api/v1/twitch-user/?login=${username}`).subscribe(resp => {
+        if (resp.data.length > 0) {
+            document.getElementById(userid_id).value = resp.data[0].id
+        }
+    });
+}

@@ -8,11 +8,27 @@
         <div class="modal-body">
             <form id="channel-cheer-test">
                 <div class="col-12">
-                  <label for="username" class="form-label">Username</label>
+                  <label for="cheer-username" class="form-label">Username</label>
                   <div class="input-group">
-                    <input type="text" class="form-control" id="username" placeholder="Username" required>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="cheer-username"
+                      placeholder="Username"
+                      required
+                      onblur="getUserId('cheer-username', 'cheer-user-id')"
+                      >
                   <div class="invalid-feedback">
                       A username is required.
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <label for="cheer-user-id" class="form-label">User ID</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="cheer-user-id" placeholder="User ID" required>
+                  <div class="invalid-feedback">
+                      A User ID is required.
                     </div>
                   </div>
                 </div>

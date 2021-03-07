@@ -6,6 +6,7 @@ from django.template import loader
 from django.contrib.auth import login
 
 from rest_framework.authtoken.models import Token
+from rest_framework.decorators import api_view
 from constance import config
 
 from tau.users.models import User
@@ -46,6 +47,7 @@ def first_run_view(request):
         template = loader.get_template('registration/first-run.html')
         return HttpResponse(template.render({}, request))
 
+@api_view()
 def channel_point_rewards(request):
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'You must be logged into access this endpoint.'})
@@ -64,18 +66,18 @@ def channel_point_rewards(request):
     rewards_data = rewards_r.json()
     return JsonResponse(rewards_data)
 
+@api_view()
 def get_twitch_user(request):
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'You must be logged into access this endpoint.'})
-    login=request.GET['login']
+    login_search=request.GET['login']
     client_id = os.environ.get('TWITCH_APP_ID', None)
     headers = {
         'Authorization': 'Bearer {}'.format(config.TWITCH_ACCESS_TOKEN),
         'Client-Id': client_id
     }
     url = f'https://api.twitch.tv/helix/' \
-          f'users?login={login}'
-    print(url)
+          f'users?login={login_search}'
     user_r = requests.get(
         url,
         headers=headers
@@ -104,6 +106,7 @@ def get_channel_name_view(request):
         template = loader.get_template('registration/twitch-channel-setup.html')
         return HttpResponse(template.render({}, request))
 
+@api_view()
 def get_tau_token(request):
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'You must be logged into access this endpoint.'})
