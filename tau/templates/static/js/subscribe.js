@@ -1,7 +1,8 @@
 const channelSubscribeTest = () => {
     const form = document.getElementById('channel-sub-test');
     const eles = form.elements;
-    const user_name = eles.namedItem('username').value;
+    const user_name = eles.namedItem('sub-username').value;
+    const user_id = eles.namedItem('sub-user-id').value;
     const tier = eles.namedItem('tier').value;
     const message = eles.namedItem('message').value;
     const cumulative_months = eles.namedItem('cumulative_months').value;
@@ -15,7 +16,7 @@ const channelSubscribeTest = () => {
                 "user_name": user_name.toLowerCase(),
                 "display_name": user_name,
                 "channel_name": broadcaster_user_name,
-                "user_id": "13405587",
+                "user_id": user_id,
                 "channel_id": broadcaster_user_id,
                 "time": new Date().toISOString(),
                 "sub_plan": tier,

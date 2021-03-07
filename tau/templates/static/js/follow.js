@@ -1,10 +1,11 @@
 const channelFollowTest = () => {
     const form = document.getElementById('channel-follow-test');
     const eles = form.elements;
-    const user_name = eles.namedItem('username').value
+    const user_name = eles.namedItem('follow-username').value
+    const user_id = eles.namedItem('follow-user-id').value
     const payload = {
-        user_name: user_name,
-        user_id: 1234,
+        user_name,
+        user_id,
         user_login: user_name.toLowerCase(),
         broadcaster_user_id,
         broadcaster_user_name,

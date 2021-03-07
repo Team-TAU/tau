@@ -8,11 +8,27 @@
         <div class="modal-body">
             <form id="channel-raid-test">
                 <div class="col-12">
-                  <label for="username" class="form-label">Raider</label>
+                  <label for="raid-from_broadcaster_user_name" class="form-label">Raider</label>
                   <div class="input-group">
-                    <input type="text" class="form-control" id="from_broadcaster_user_name" placeholder="Raider" required>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="raid-from_broadcaster_user_name"
+                      placeholder="Raider"
+                      required
+                      onblur="getUserId('raid-from_broadcaster_user_name', 'raid-from_broadcaster_user_id')"
+                    >
                   <div class="invalid-feedback">
                       A raider is required.
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <label for="raid-from_broadcaster_user_id" class="form-label">Raider ID</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="raid-from_broadcaster_user_id" placeholder="Raider ID" required>
+                  <div class="invalid-feedback">
+                      A raider ID is required.
                     </div>
                   </div>
                 </div>

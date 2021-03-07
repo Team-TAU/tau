@@ -107,5 +107,5 @@ class WebSocketClient():
     async def set_config(self, key, value):
         await sync_to_async(setattr)(config, key, value)
 
-    async def create_twitch_event(self, payload):
+    def create_twitch_event(self, payload):
         return TwitchEvent.objects.create(**payload)
