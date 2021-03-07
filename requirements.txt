@@ -52,3 +52,5 @@ django-extensions==3.1.0
 
 # Websockets
 websockets==8.1
+
+django-cors-headers==3.7.0

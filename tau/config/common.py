@@ -23,6 +23,7 @@ class Common(Configuration):
         'django.contrib.staticfiles',
         'constance.backends.database',
         'django_extensions',
+        'corsheaders',
 
         # Third party apps
         'channels',                  # websockets
@@ -38,6 +39,7 @@ class Common(Configuration):
 
     # https://docs.djangoproject.com/en/2.0/topics/http/middleware/
     MIDDLEWARE = (
+        'corsheaders.middleware.CorsMiddleware',
         'django.middleware.security.SecurityMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
         'django.middleware.common.CommonMiddleware',
@@ -48,6 +50,7 @@ class Common(Configuration):
     )
 
     ALLOWED_HOSTS = ["*"]
+    CORS_ALLOW_ALL_ORIGINS = True
     ROOT_URLCONF = 'tau.urls'
     SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
     WSGI_APPLICATION = 'tau.wsgi.application'

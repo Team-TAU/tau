@@ -2,11 +2,12 @@ const channelCheerTest = () => {
     const form = document.getElementById('channel-cheer-test');
     const eles = form.elements;
     is_anonymous = eles.namedItem('is_anonymous').checked;
-    user_name = eles.namedItem('username').value;
+    user_name = eles.namedItem('cheer-username').value;
+    user_id = eles.namedItem('cheer-user-id').value;
 
     const payload = {
         is_anonymous,
-        user_id: !is_anonymous ? '12345' : null,
+        user_id: !is_anonymous ? user_id : null,
         user_name: !is_anonymous ? user_name : null,
         user_login: !is_anonymous ? user_name.toLowerCase() : null,
         broadcaster_user_id,
