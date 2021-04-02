@@ -1,16 +1,13 @@
-import sys
 import os
-from urllib.parse import urlparse
 
 import requests
 
 from django.apps import AppConfig
-from django.conf import settings
 
 from constance import config
 
 import tau.twitchevents.webhook_payloads as webhook_payloads
-from .utils import refresh_access_token
+from .utils import refresh_access_token, setup_ngrok
 
 class CoreConfig(AppConfig):
     name = 'tau.core'
@@ -34,22 +31,7 @@ class CoreConfig(AppConfig):
 
     @staticmethod
     def setup_ngrok():
-        # pyngrok will only be installed if it is used.
-        from pyngrok import ngrok
-
-        print('---- Setting up ngrok tunnel ----')
-        # Get the dev server port (defaults to 8000 for Django, can be overridden with the
-        # last arg when calling `runserver`)
-        addrport = urlparse("https://{}".format(sys.argv[-1]))
-        port = addrport.port if addrport.netloc and addrport.port else 8000
-
-        # Open an ngrok tunnel to the dev server
-        public_url = ngrok.connect(port).public_url.replace('http', 'https')
-        print(f"     [Tunnel url: {public_url}]\n")
-
-        # Update any base URLs or webhooks to use the public ngrok URL
-        settings.BASE_URL = public_url
-        return public_url
+        return setup_ngrok()
 
     @staticmethod
     def init_webhooks(base_url):

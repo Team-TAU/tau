@@ -30,7 +30,7 @@ const channelPointsRedemptionTest = () => {
         redeemed_at,
         reward
     };
-    const sub = ajaxPost('http://localhost:8000/api/v1/twitch-events/point-redemption/test/', payload).subscribe(resp => {
+    const sub = ajaxPost(`http://localhost:${port}/api/v1/twitch-events/point-redemption/test/`, payload).subscribe(resp => {
         console.log(resp);
     });
     console.log(rewards);

@@ -15,6 +15,10 @@ services:
       - TWITCH_CLIENT_SECRET=${TWITCH_CLIENT_SECRET}
       - TWITCH_WEBHOOK_SECRET=${TWITCH_WEBHOOK_SECRET}
       - USE_NGROK=True
+      - USE_NGROK_TOKEN=${USE_NGROK_TOKEN}
+      - NGROK_TOKEN=${NGROK_TOKEN}
+      - TAU_PORT=${TAU_PORT}
+      - TAU_SERVER_ADDR=${TAU_SERVER_ADDR}
     depends_on:
       - db
       - redis
@@ -24,7 +28,7 @@ services:
     volumes:
       - ./:/workspace:cached
     ports:
-      - "8000:8000"
+      - ${TAU_PORT}:${TAU_PORT}
 
     command: >
       bash -c "./manage.py migrate
