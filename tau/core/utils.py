@@ -2,6 +2,8 @@ import os
 
 import requests
 
+from django.conf import settings
+
 from constance import config
 
 def check_access_token():
@@ -47,3 +49,26 @@ def get_all_statuses():
     return [
         {'event_type': key, 'old_value': None, 'new_value': getattr(config, key)} for key in keys
     ]
+
+def setup_ngrok():
+    # pyngrok will only be installed if it is used.
+    from pyngrok import ngrok
+
+    print('---- Setting up ngrok tunnel ----')
+    # Get the dev server port (defaults to 8000 for Django, can be overridden with the
+    # last arg when calling `runserver`)
+    # addrport = urlparse("https://{}".format(sys.argv[-1]))
+    # port = addrport.port if addrport.netloc and addrport.port else 8000
+    port = os.environ.get("TAU_PORT", 8000)
+
+    if os.environ.get("USE_NGROK_TOKEN", False):
+        token = os.environ.get("NGROK_TOKEN", None)
+        ngrok.set_auth_token(token)
+
+    # Open an ngrok tunnel to the dev server
+    public_url = ngrok.connect(port).public_url.replace('http', 'https')
+    print(f"     [Tunnel url: {public_url}]\n")
+
+    # Update any base URLs or webhooks to use the public ngrok URL
+    settings.BASE_URL = public_url
+    return public_url

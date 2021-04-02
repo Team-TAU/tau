@@ -2,11 +2,14 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
-
+from django.core.management.commands.runserver import Command as runserver
 
 def main():
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tau.config")
     os.environ.setdefault("DJANGO_CONFIGURATION", "Local")
+    port = os.environ.get("TAU_PORT", 8000)
+    runserver.default_port = port
+    runserver.default_addr = "0.0.0.0"
 
     try:
         from configurations.management import execute_from_command_line

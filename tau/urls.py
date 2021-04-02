@@ -19,11 +19,13 @@ from .core.views import (
     channel_point_rewards,
     get_twitch_user,
     get_tau_token,
+    HeartbeatViewSet,
 )
 
 router = DefaultRouter()
 router.register(r'twitch-events', TwitchEventViewSet, basename='twitch-events')
 router.register(r'twitch-events', TwitchEventModelViewSet)
+router.register(r'heartbeat', HeartbeatViewSet, basename='heartbeat')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

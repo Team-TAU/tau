@@ -1,13 +1,18 @@
 import asyncio
 import json
 from random import randrange
+import requests
 import websockets
+from pyngrok import ngrok
+
+from django.conf import settings
 
 from channels.db import database_sync_to_async
-from asgiref.sync import sync_to_async
 from constance import config
 
+from tau.core.apps import CoreConfig
 from .models import TwitchEvent
+
 
 class WebSocketClient():
     url = 'wss://pubsub-edge.twitch.tv'
@@ -37,7 +42,8 @@ class WebSocketClient():
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self.connect())
         tasks = [
-            asyncio.ensure_future(self.heartbeat()),
+            asyncio.ensure_future(self.twitch_heartbeat()),
+            asyncio.ensure_future(self.ngrok_heartbeat()),
             asyncio.ensure_future(self.recieve()),
         ]
         loop.run_until_complete(asyncio.wait(tasks))
@@ -59,7 +65,7 @@ class WebSocketClient():
                 if delay < 120:
                     delay = max(delay*2, 120)
 
-    async def heartbeat(self):
+    async def twitch_heartbeat(self):
         while True:
             try:
                 await self.connection.send(json.dumps(self.ping_message))
@@ -68,6 +74,20 @@ class WebSocketClient():
             except websockets.exceptions.ConnectionClosed:
                 # Wait 10s to see if connection is re-established
                 await asyncio.sleep(10)
+
+    async def ngrok_heartbeat(self):
+        while True:
+            try:
+                r = requests.get(f'{settings.BASE_URL}/api/v1/heartbeat/')
+                r.raise_for_status()
+            except:
+                ngrok.kill() # need to kill ngrok process to start new one.
+                print('---- WARNING ngrok tunnel down!  Re-establishing. ----')
+                public_url = CoreConfig.setup_ngrok()
+                await database_sync_to_async(CoreConfig.setup_webhooks)(public_url)
+
+            delay = 5
+            await asyncio.sleep(delay)
 
     async def recieve(self):
         while True:
@@ -78,8 +98,6 @@ class WebSocketClient():
                     await self.handle_data(message_dict['data'])
                 elif message_dict['type'] == 'RECONNECT':
                     await self.handle_reconnect()
-                else:
-                    print(message_dict)
             except websockets.exceptions.ConnectionClosed:
                 print('Websocket to twitch closed... reconnecting')
                 await self.connect()
@@ -105,7 +123,7 @@ class WebSocketClient():
         await self.connect()
 
     async def set_config(self, key, value):
-        await sync_to_async(setattr)(config, key, value)
+        await database_sync_to_async(setattr)(config, key, value)
 
     def create_twitch_event(self, payload):
         return TwitchEvent.objects.create(**payload)
