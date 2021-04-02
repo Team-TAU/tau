@@ -37,7 +37,7 @@ secret. In order to do so:
 3. In order to manage applications, you will need to enable 2FA for your account.
 4. Click "+ Register Your Application".
 5. Fill in a name for TAU. I recommend TAU- YourTwitchName.
-6. Add `http://localhost:8000/twitch-callback/` as an OAuth Redirect URL. (Note the trailing slash, this is required)
+6. Add `http://localhost:PORT/twitch-callback/` as an OAuth Redirect URL. (Note the trailing slash, this is required)
 7. Select a category for what you'll be using TAU for. Chat Bot is what I've used.
 8. Click "Create"
 9. Click "Manage" for the TAU app.
@@ -63,11 +63,11 @@ docker-compose up
 
 If all goes to plan, you should see indications that the containers `tau-db`, `tau-redis`, and `tau-app` have started up, and you should see some logging output on your screen. In order to shut down the container, simply hit `ctrl-c`.  For future runs, you simply need to execute the `docker-compose up` command, as all of your settings will be saved.
 
-At the very end of the logs in your terminal, you should see an indication that wsworker and server have entered a RUNNING state. At this point fire up a browser window and navigate to `http://localhost:8000` . A wizard will guide you through setting up your TAU user account (this is only stored on your local container), have you enter your Twitch Channel Name, and then will have you authorize TAU to have access to your realtime data. After providing authorization, you will be sent back to a dashboard which shows both the current realtime connection status, as well as a real-time monitoring of your client-side websocket.
+At the very end of the logs in your terminal, you should see an indication that wsworker and server have entered a RUNNING state. At this point fire up a browser window and navigate to `http://localhost:PORT` . A wizard will guide you through setting up your TAU user account (this is only stored on your local container), have you enter your Twitch Channel Name, and then will have you authorize TAU to have access to your realtime data. After providing authorization, you will be sent back to a dashboard which shows both the current realtime connection status, as well as a real-time monitoring of your client-side websocket.
 
 To connect your bot or overlay code to TAU, you will need a TAU auth token.  This can be obtained by clicking the hamberger icon in the TAU dashboard, then clicking "Show Auth Token."
 
-Then simply point your bot's websocket client at `ws://localhost:8000/ws/twitch-events/` .  After it connects, send a websocket message from the client with the following JSON payload: `{"token": "YOUR_TOKEN HERE"}`.  After providing your token, TAU will begin to stream all twitch events to your websocket connection.  Fin.
+Then simply point your bot's websocket client at `ws://localhost:PORT/ws/twitch-events/` .  After it connects, send a websocket message from the client with the following JSON payload: `{"token": "YOUR_TOKEN HERE"}`.  After providing your token, TAU will begin to stream all twitch events to your websocket connection.  Fin.
 
 # Updating
 

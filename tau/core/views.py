@@ -7,6 +7,10 @@ from django.contrib.auth import login
 
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework import viewsets
+
 from constance import config
 
 from tau.users.models import User
@@ -87,6 +91,7 @@ def get_twitch_user(request):
 
 def get_channel_name_view(request):
     if request.method == 'POST':
+        port = os.environ.get('PORT', 8000)
         form = ChannelNameForm(request.POST)
         if form.is_valid():
             # Process the data
@@ -94,7 +99,7 @@ def get_channel_name_view(request):
             client_id = os.environ.get('TWITCH_APP_ID', None)
             url = f'https://id.twitch.tv/oauth2/authorize?' \
                   f'client_id={client_id}&' \
-                  f'redirect_uri=http://localhost:8000/twitch-callback/&' \
+                  f'redirect_uri=http://localhost:{port}/twitch-callback/&' \
                   f'response_type=code&' \
                   f'scope=bits:read channel:read:redemptions channel:' \
                         f'read:hype_train channel_subscriptions'
@@ -115,6 +120,7 @@ def get_tau_token(request):
         return JsonResponse({'token': token.key})
 
 def process_twitch_callback_view(request):
+    port = os.environ.get('PORT', 8000)
     params = request.GET
     auth_code = params['code']
     client_id = os.environ.get('TWITCH_APP_ID', None)
@@ -124,7 +130,7 @@ def process_twitch_callback_view(request):
         'client_secret': client_secret,
         'code': auth_code,
         'grant_type': 'authorization_code',
-        'redirect_uri': 'http://localhost:8000/twitch-callback/'
+        'redirect_uri': f'http://localhost:{port}/twitch-callback/'
     })
     response_data = auth_r.json()
     config.TWITCH_ACCESS_TOKEN = response_data['access_token']
@@ -148,3 +154,10 @@ def process_twitch_callback_view(request):
     channel_id = user_data['data'][0]['id']
     config.CHANNEL_ID = channel_id
     return HttpResponseRedirect('/')
+
+class HeartbeatViewSet(viewsets.ViewSet):
+    permission_classes = (IsAuthenticatedOrReadOnly, )
+
+    def list(self, request, *args, **kwargs):
+        response = {'message': 'pong'}
+        return Response(response)

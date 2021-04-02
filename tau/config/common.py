@@ -7,7 +7,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class Common(Configuration):
-    BASE_URL = "http://localhost:8000"
+    BASE_PORT = os.environ.get("TAU_PORT", 8000)
+    BASE_URL = f"http://localhost:{BASE_PORT}"
 
     IS_SERVER = len(sys.argv) > 1 and "shell" not in sys.argv
     DEV_SERVER = len(sys.argv) > 1 and sys.argv[1] == "runserver"

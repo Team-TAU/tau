@@ -1,4 +1,5 @@
 import time
+import os
 
 import requests
 
@@ -23,7 +24,8 @@ class Command(BaseCommand):
             print('---- Waiting for WebHooks to come online ----')
             while 1:
                 try:
-                    r = requests.get('http://localhost:8000/api/v1/')
+                    port = os.environ.get("TAU_PORT", 8000)
+                    r = requests.get(f'http://localhost:{port}/api/v1/heartbeat/')
                     if r.status_code < 500:
                         break
                 except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
