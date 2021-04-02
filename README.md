@@ -15,9 +15,9 @@ Setting up TAU only takes a few minutes, and provides you with that
 one true source of Twitch realtime API goodness. Please see the
 setup instructions below.
 
-\*Note 1- TAU is very early stage software. There may be potential bugs
+_Note 1- TAU is very early stage software. There may be potential bugs
 and even security issues. I am very open to PRs and discussions that
-will help TAU become more stable and secure. Use at your own risk.
+will help TAU become more stable and secure. Use at your own risk._
 
 _Note 2- TAU is written using django/python, however, acting as an
 API proxy, you can connect any codebase to its websockets._
@@ -81,3 +81,7 @@ After pulling the latest code from github, you will need to rebuild the app cont
 1. If TAU is running, stop it using `docker-compose down`
 2. Rebuild the app container: `docker-compose build app`
 3. Fire TAU back up: `docker-compose up`
+
+# Todo/Issues
+
+Currently, while hypetrain events are forwarded on to any local clients connected to the TAU websocket connection, they are not shown in the TAU dashboard, nor do they have test events available.
