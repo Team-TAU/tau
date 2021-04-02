@@ -16,11 +16,14 @@ COPY requirements.txt /tmp/pip-tmp/requirements.txt
 run pip install -r /tmp/pip-tmp/requirements.txt
 run rm -rf /tmp/pip-tmp
 
+COPY supervisord.conf /tmp/supervisord-tmp/supervsiord.conf
+COPY supervisord-redis.conf /tmp/supervsiord-tmp/supervisord-redis.conf
+RUN if [ "${REDIS}" != "external" ]; then cp /tmp/supervsiord-tmp/supervisord-redis.conf /etc/supervisord.conf; else cp /tmp/supervisord-tmp/supervsiord.conf /etc/supervisord.conf; fi
+
+
 # Adds our application code to the image
 COPY . /code
 WORKDIR /code
-
-RUN if [ "${REDIS}" != "external" ]; then cp /code/supervisord-redis.conf /etc/supervisord.conf; else cp /code/supervsiord.conf /etc/supervsiord.conf; fi
 
 CMD ./manage.py migrate && \
     ./manage.py collectstatic --noinput && \
