@@ -32,7 +32,7 @@ const channelSubscribeTest = () => {
             }
         }
     }
-    const sub = ajaxPost('http://localhost:8000/api/v1/twitch-events/subscribe/test/', payload).subscribe(resp => {
+    const sub = ajaxPost(`http://localhost:${port}/api/v1/twitch-events/subscribe/test/`, payload).subscribe(resp => {
         console.log(resp);
     });
     return false;

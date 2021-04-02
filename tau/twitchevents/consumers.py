@@ -9,8 +9,6 @@ class TwitchEventConsumer(AsyncJsonWebsocketConsumer):
         super().__init__(*args, **kwargs)
 
     async def connect(self):
-        print('Connected', self.channel_name)
-        print(self.scope['user'])
         await self.channel_layer.group_add(
             self.group_name, self.channel_name
         )

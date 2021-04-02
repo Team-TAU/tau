@@ -1,12 +1,12 @@
 let rewards = [];
-
+let port = window.location.port;
 // Once the window/scripts/etc. have all been loaded, set up our json and text websockets.
 window.onload = (event) => {
-    setupJsonWebsocket('ws://localhost:8000/ws/tau-status/', handleStatusMessage)
-    setupJsonWebsocket('ws://localhost:8000/ws/twitch-events/', handleEventMessage);
+    setupJsonWebsocket(`ws://localhost:${port}/ws/tau-status/`, handleStatusMessage)
+    setupJsonWebsocket(`ws://localhost:${port}/ws/twitch-events/`, handleEventMessage);
     const prModal = document.getElementById('testPointsRedemptionModal');
     prModal.addEventListener('shown.bs.modal', function () {
-        ajaxGet('http://localhost:8000/api/v1/channel-point-rewards/').subscribe(resp => {
+        ajaxGet(`http://localhost:${port}/api/v1/channel-point-rewards/`).subscribe(resp => {
             const data = resp.data;
             rewards = data;
             const select = document.getElementById('reward');
@@ -23,7 +23,7 @@ window.onload = (event) => {
     });
     const tokenModal = document.getElementById('tokenModal');
     tokenModal.addEventListener('shown.bs.modal', function () {
-        ajaxGet('http://localhost:8000/api/v1/tau-user-token/').subscribe(resp => {
+        ajaxGet(`http://localhost:${port}/api/v1/tau-user-token/`).subscribe(resp => {
             const token = resp.token;
             document.getElementById('token').value = token;
         });
@@ -182,14 +182,14 @@ const eventTemplate = (title, eventObj, replay = null) => {
 }
 
 const replayEvent = (id) => {
-    const sub = ajaxPost(`http://localhost:8000/api/v1/twitch-events/${id}/replay/`, {}).subscribe(resp => {
+    const sub = ajaxPost(`http://localhost:${port}/api/v1/twitch-events/${id}/replay/`, {}).subscribe(resp => {
         console.log(resp);
     })
 }
 
 const getUserId = (username_id, userid_id) => {
     const username = document.getElementById(username_id).value;
-    const sub = ajaxGet(`http://localhost:8000/api/v1/twitch-user/?login=${username}`).subscribe(resp => {
+    const sub = ajaxGet(`http://localhost:${port}/api/v1/twitch-user/?login=${username}`).subscribe(resp => {
         if (resp.data.length > 0) {
             document.getElementById(userid_id).value = resp.data[0].id
         }
