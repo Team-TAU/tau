@@ -1,8 +1,12 @@
 FROM python:3.8
 ENV PYTHONUNBUFFERED 1
 
+ARG REDIS='external'
+
 # Install supervisord
 RUN apt-get update && apt-get install -y supervisor
+RUN if [ "${REDIS}" != "external" ]; then apt-get update && apt-get install -y redis-server; fi
+
 RUN mkdir -p /var/log/supervisor
 
 # Allows docker to cache installed dependencies between builds
@@ -16,13 +20,9 @@ run rm -rf /tmp/pip-tmp
 COPY . /code
 WORKDIR /code
 
-
-EXPOSE 8000
-
-# # Migrates the database, uploads staticfiles, and runs the production server
-# CMD ./manage.py migrate && \
-#     ./manage.py collectstatic --noinput && \
-#     ./manage.py runserver 0.0.0.0:8000
+RUN if [ "${REDIS}" != "external" ]; then cp /code/supervisord-redis.conf /etc/supervisord.conf; else cp /code/supervsiord.conf /etc/supervsiord.conf; fi
 
 CMD ./manage.py migrate && \
-    /usr/bin/supervisord
+    ./manage.py collectstatic --noinput && \
+    /usr/bin/supervisord -n -c /etc/supervisord.conf
+
