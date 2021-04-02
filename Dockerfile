@@ -25,6 +25,8 @@ RUN if [ "${REDIS}" != "external" ]; then cp /tmp/supervsiord-tmp/supervisord-re
 COPY . /code
 WORKDIR /code
 
+EXPOSE $TAU_PORT
+
 CMD ./manage.py migrate && \
     ./manage.py collectstatic --noinput && \
     /usr/bin/supervisord -n -c /etc/supervisord.conf
