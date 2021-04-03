@@ -6,11 +6,14 @@ services:
     container_name: tau-app
     environment:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
+      - DJANGO_DB_TYPE=${DJANGO_DB_TYPE}
       - DJANGO_DB=${DJANGO_DB}
       - DJANGO_DB_USER=${DJANGO_DB_USER}
       - DJANGO_DB_PW=${DJANGO_DB_PW}
       - DJANGO_DB_URL=tau-db
       - DJANGO_CONFIGURATION=Local
+      - REDIS=${REDIS}
+      - REDIS_SERVER=${REDIS_SERVER}
       - TWITCH_APP_ID=${TWITCH_APP_ID}
       - TWITCH_CLIENT_SECRET=${TWITCH_CLIENT_SECRET}
       - TWITCH_WEBHOOK_SECRET=${TWITCH_WEBHOOK_SECRET}
@@ -33,7 +36,7 @@ services:
     command: >
       bash -c "./manage.py migrate
       && ./manage.py collectstatic --noinput
-      && /usr/bin/supervisord -n -c /code/supervisord.conf"
+      && /usr/bin/supervisord -n -c /etc/supervisord.conf"
     # Runs app on the same network as the database container, allows "forwardPorts" in devcontainer.json function.
     # network_mode: service:db
   

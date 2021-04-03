@@ -91,7 +91,12 @@ def get_twitch_user(request):
 
 def get_channel_name_view(request):
     if request.method == 'POST':
-        port = os.environ.get('PORT', 8000)
+        port = os.environ.get('TAU_PORT', 8000)
+        if port == 80:
+            port_text = ''
+        else:
+            port_text = f':{port}'
+        base_url = os.environ.get('BASE_URL', 'http://localhost')
         form = ChannelNameForm(request.POST)
         if form.is_valid():
             # Process the data
@@ -99,7 +104,7 @@ def get_channel_name_view(request):
             client_id = os.environ.get('TWITCH_APP_ID', None)
             url = f'https://id.twitch.tv/oauth2/authorize?' \
                   f'client_id={client_id}&' \
-                  f'redirect_uri=http://localhost:{port}/twitch-callback/&' \
+                  f'redirect_uri={base_url}{port_text}/twitch-callback/&' \
                   f'response_type=code&' \
                   f'scope=bits:read channel:read:redemptions channel:' \
                         f'read:hype_train channel_subscriptions'
@@ -120,7 +125,12 @@ def get_tau_token(request):
         return JsonResponse({'token': token.key})
 
 def process_twitch_callback_view(request):
-    port = os.environ.get('PORT', 8000)
+    port = os.environ.get('TAU_PORT', 8000)
+    if port == 80:
+        port_text = ''
+    else:
+        port_text = f':{port}'
+    base_url = os.environ.get('BASE_URL', 'http://localhost')
     params = request.GET
     auth_code = params['code']
     client_id = os.environ.get('TWITCH_APP_ID', None)
@@ -130,7 +140,7 @@ def process_twitch_callback_view(request):
         'client_secret': client_secret,
         'code': auth_code,
         'grant_type': 'authorization_code',
-        'redirect_uri': f'http://localhost:{port}/twitch-callback/'
+        'redirect_uri': f'{base_url}{port_text}/twitch-callback/'
     })
     response_data = auth_r.json()
     config.TWITCH_ACCESS_TOKEN = response_data['access_token']
