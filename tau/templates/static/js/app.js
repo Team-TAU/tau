@@ -1,11 +1,13 @@
 let rewards = [];
-let port = window.location.port;
-let host = window.location.host;
-let protocol = window.location.protocol;
+const port = window.location.port;
+const host = window.location.host;
+const protocol = window.location.protocol;
+const socketProtocol = protocol === 'https' ? 'wss' : 'ws';
+
 // Once the window/scripts/etc. have all been loaded, set up our json and text websockets.
 window.onload = (event) => {
-    setupJsonWebsocket(`wss://${host}:${port}/ws/tau-status/`, handleStatusMessage)
-    setupJsonWebsocket(`wss://${host}:${port}/ws/twitch-events/`, handleEventMessage);
+    setupJsonWebsocket(`${socketProtocol}://${host}:${port}/ws/tau-status/`, handleStatusMessage)
+    setupJsonWebsocket(`${socketProtocol}://${host}:${port}/ws/twitch-events/`, handleEventMessage);
     const prModal = document.getElementById('testPointsRedemptionModal');
     prModal.addEventListener('shown.bs.modal', function () {
         ajaxGet(`${protocol}//${host}:${port}/api/v1/channel-point-rewards/`).subscribe(resp => {
