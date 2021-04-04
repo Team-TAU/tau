@@ -1,6 +1,6 @@
 let rewards = [];
 const port = window.location.port;
-const host = window.location.host;
+const host = window.location.hostname;
 const protocol = window.location.protocol;
 const socketProtocol = protocol === 'https' ? 'wss' : 'ws';
 
