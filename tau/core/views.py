@@ -91,7 +91,7 @@ def get_twitch_user(request):
 
 def get_channel_name_view(request):
     if request.method == 'POST':
-        port = os.environ.get('TAU_PORT', 8000)
+        port = os.environ.get('PORT', 8000)
         if int(port) == 80:
             port_text = ''
         else:
@@ -125,7 +125,7 @@ def get_tau_token(request):
         return JsonResponse({'token': token.key})
 
 def process_twitch_callback_view(request):
-    port = os.environ.get('TAU_PORT', 8000)
+    port = int(os.environ.get('PORT', 8000))
     if int(port) == 80:
         port_text = ''
     else:

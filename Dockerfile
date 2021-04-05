@@ -30,7 +30,7 @@ COPY ./scripts/loadenv.sh /root/.bashrc
 # Sets work directory to /code
 WORKDIR /code
 
-EXPOSE $TAU_PORT
+EXPOSE $PORT
 
 CMD ./manage.py migrate && \
     ./manage.py collectstatic --noinput && \

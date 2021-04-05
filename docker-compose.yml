@@ -13,7 +13,7 @@ services:
     volumes:
       - ./:/code:cached
     ports:
-      - ${TAU_PORT}:${TAU_PORT}
+      - ${PORT}:${PORT}
 
     command: >
       bash -c "source ./scripts/loadenv.sh 
