@@ -1,4 +1,4 @@
-# TAU - Twith API Unifier.
+# TAU - Twitch API Unifier.
 
 TAU provides a single, locally-managed websocket connection for
 all of Twitch's realtime APIs. Currently the Twitch realtime
