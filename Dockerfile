@@ -32,7 +32,8 @@ WORKDIR /code
 
 EXPOSE $PORT
 
-CMD ./manage.py migrate && \
+CMD source ./scripts/loadenv.sh && \
+    ./manage.py migrate && \
     ./manage.py collectstatic --noinput && \
     /usr/bin/supervisord -n -c /etc/supervisord.conf
 
