@@ -38,10 +38,9 @@ class Command(BaseCommand):
                 public_url = CoreConfig.setup_ngrok()
             else:
                 public_url = settings.BASE_URL
-                
             # Setup Webhooks
+            print(f'Setting webhooks with base url: {public_url}.')
             CoreConfig.setup_webhooks(public_url)
-
             # Establish Websocket Connection
             client = WebSocketClient()
             client.run()
