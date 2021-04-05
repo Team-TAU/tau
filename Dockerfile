@@ -32,8 +32,8 @@ WORKDIR /code
 
 EXPOSE $PORT
 
-CMD source ./scripts/loadenv.sh && \
+CMD bash -c "source ./scripts/loadenv.sh && \
     ./manage.py migrate && \
     ./manage.py collectstatic --noinput && \
-    /usr/bin/supervisord -n -c /etc/supervisord.conf
+    /usr/bin/supervisord -n -c /etc/supervisord.conf"
 
