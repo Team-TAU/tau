@@ -109,3 +109,5 @@ venv.bak/
 .vscode/
 
 /db/db.sqlite3
+
+supervisord.pid
