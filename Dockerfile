@@ -23,6 +23,11 @@ RUN if [ "${REDIS}" != "external" ]; then cp /tmp/supervsiord-tmp/supervisord-re
 
 # Adds our application code to the image
 COPY . /code
+
+# Adds loadenv to profile.d
+COPY ./scripts/loadenv.sh /root/.bashrc
+
+# Sets work directory to /code
 WORKDIR /code
 
 EXPOSE $TAU_PORT

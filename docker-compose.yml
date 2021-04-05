@@ -4,24 +4,6 @@ services:
   app:
     restart: unless-stopped
     container_name: tau-app
-    environment:
-      - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}
-      - DJANGO_DB_TYPE=${DJANGO_DB_TYPE}
-      - DJANGO_DB=${DJANGO_DB}
-      - DJANGO_DB_USER=${DJANGO_DB_USER}
-      - DJANGO_DB_PW=${DJANGO_DB_PW}
-      - DJANGO_DB_URL=tau-db
-      - DJANGO_CONFIGURATION=Local
-      - REDIS=${REDIS}
-      - REDIS_SERVER=${REDIS_SERVER}
-      - TWITCH_APP_ID=${TWITCH_APP_ID}
-      - TWITCH_CLIENT_SECRET=${TWITCH_CLIENT_SECRET}
-      - TWITCH_WEBHOOK_SECRET=${TWITCH_WEBHOOK_SECRET}
-      - USE_NGROK=True
-      - USE_NGROK_TOKEN=${USE_NGROK_TOKEN}
-      - NGROK_TOKEN=${NGROK_TOKEN}
-      - TAU_PORT=${TAU_PORT}
-      - TAU_SERVER_ADDR=${TAU_SERVER_ADDR}
     depends_on:
       - db
       - redis
@@ -29,12 +11,13 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - ./:/workspace:cached
+      - ./:/code:cached
     ports:
       - ${TAU_PORT}:${TAU_PORT}
 
     command: >
-      bash -c "./manage.py migrate
+      bash -c "source ./scripts/loadenv.sh 
+      && ./manage.py migrate
       && ./manage.py collectstatic --noinput
       && /usr/bin/supervisord -n -c /etc/supervisord.conf"
     # Runs app on the same network as the database container, allows "forwardPorts" in devcontainer.json function.
