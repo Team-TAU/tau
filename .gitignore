@@ -108,6 +108,6 @@ venv.bak/
 
 .vscode/
 
-/db/db.sqlite3
+/db/data/db.sqlite3
 
 supervisord.pid
