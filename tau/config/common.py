@@ -7,10 +7,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class Common(Configuration):
-    HOSTNAME = os.environ.get("HOSTNAME", "localhost")
+    PUBLIC_URL = os.environ.get("PUBLIC_URL", "localhost")
     PROTOCOL = os.environ.get("PROTOCOL", "http:")
     BASE_PORT = int(os.environ.get("PORT", 8000))
-    BASE_URL = f"{PROTOCOL}//{HOSTNAME}"
+    BASE_URL = f"{PROTOCOL}//{PUBLIC_URL}"
     
     if BASE_PORT not in [80, 443]:
         BASE_URL = BASE_URL + f":{BASE_PORT}"
