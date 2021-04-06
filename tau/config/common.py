@@ -11,6 +11,7 @@ class Common(Configuration):
     PROTOCOL = os.environ.get("PROTOCOL", "http:")
     BASE_PORT = int(os.environ.get("PORT", 8000))
     BASE_URL = f"{PROTOCOL}//{HOSTNAME}"
+    
     if BASE_PORT not in [80, 443]:
         BASE_URL = BASE_URL + f":{BASE_PORT}"
 
