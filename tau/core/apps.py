@@ -86,6 +86,7 @@ class CoreConfig(AppConfig):
                 'https://api.twitch.tv/helix/eventsub/subscriptions?id={}'.format(row['id']),
                 headers=headers
             )
+
         config.STATUS_CHANNEL_UPDATE = 'DISCONNECTED'
         config.STATUS_CHANNEL_FOLLOW = 'DISCONNECTED'
         config.STATUS_CHANNEL_CHEER = 'DISCONNECTED'
