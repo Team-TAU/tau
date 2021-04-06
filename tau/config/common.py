@@ -64,10 +64,10 @@ class Common(Configuration):
     REDIS_SERVER = os.environ.get('REDIS_SERVER', 'tau-redis')
 
     CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [(REDIS_SERVER, 6379)],
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                "hosts": [(REDIS_SERVER, 6379)],
             },
         },
     }
