@@ -8,6 +8,9 @@ from django.conf import settings
 def main():
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tau.config")
     os.environ.setdefault("DJANGO_CONFIGURATION", "Local")
+    port = os.environ.get("TAU_PORT", 8000)
+    runserver.default_port = port
+    runserver.default_addr = "0.0.0.0"
 
     port = os.environ.get("PORT", 8000)
     addr = os.environ.get("INT_SERVER_ADDR", "0.0.0.0")
