@@ -6,19 +6,20 @@ from configurations import Configuration
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-class Common(Configuration):
+class Common(Configuration):  # pylint: disable=no-init
     PUBLIC_URL = os.environ.get("PUBLIC_URL", "localhost")
     PROTOCOL = os.environ.get("PROTOCOL", "http:")
     BASE_PORT = int(os.environ.get("PORT", 8000))
     BASE_URL = f"{PROTOCOL}//{PUBLIC_URL}"
-    
+
     if BASE_PORT not in [80, 443]:
         BASE_URL = BASE_URL + f":{BASE_PORT}"
 
     IS_SERVER = len(sys.argv) > 1 and "shell" not in sys.argv
     DEV_SERVER = len(sys.argv) > 1 and sys.argv[1] == "runserver"
 
-    USE_NGROK = os.environ.get("USE_NGROK", "False") == "True" and os.environ.get("RUN_MAIN", None) != "true"
+    USE_NGROK = (os.environ.get("USE_NGROK", "False") == "True" and
+                    os.environ.get("RUN_MAIN", None) != "true")
 
     INSTALLED_APPS = (
         'django.contrib.admin',
@@ -237,7 +238,7 @@ class Common(Configuration):
     # Django Rest Framework
     REST_FRAMEWORK = {
         'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-        'PAGE_SIZE': int(os.getenv('DJANGO_PAGINATION_LIMIT', 10)),
+        'PAGE_SIZE': int(os.getenv('DJANGO_PAGINATION_LIMIT', '10')),
         'DATETIME_FORMAT': '%Y-%m-%dT%H:%M:%S%z',
         'DEFAULT_RENDERER_CLASSES': (
             'rest_framework.renderers.JSONRenderer',
@@ -271,6 +272,8 @@ class Common(Configuration):
         ),
         'STATUS_CHANNEL_RAID': ('INACTIVE', 'Channel Raid Connection Status', str),
         'STATUS_CHANNEL_HYPE_TRAIN_BEGIN': ('INACTIVE', 'Hype Train Begin Connection Status', str),
-        'STATUS_CHANNEL_HYPE_TRAIN_PROGRESS': ('INACTIVE', 'Hype Train Progress Connection Status', str),
+        'STATUS_CHANNEL_HYPE_TRAIN_PROGRESS': (
+            'INACTIVE', 'Hype Train Progress Connection Status', str
+        ),
         'STATUS_CHANNEL_HYPE_TRAIN_END': ('INACTIVE', 'Hype Train End Connection Status', str)
     }

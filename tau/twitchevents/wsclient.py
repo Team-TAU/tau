@@ -81,7 +81,7 @@ class WebSocketClient():
             try:
                 r = requests.get(f'{settings.BASE_URL}/api/v1/heartbeat/')
                 r.raise_for_status()
-            except:
+            except:  # pylint: disable=bare-except
                 ngrok.kill() # need to kill ngrok process to start new one.
                 print('---- WARNING ngrok tunnel down!  Re-establishing. ----')
                 public_url = CoreConfig.setup_ngrok()
