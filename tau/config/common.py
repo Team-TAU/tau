@@ -7,8 +7,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class Common(Configuration):
-    BASE_PORT = os.environ.get("TAU_PORT", 8000)
-    BASE_URL = f"http://localhost:{BASE_PORT}"
+    PUBLIC_URL = os.environ.get("PUBLIC_URL", "localhost")
+    PROTOCOL = os.environ.get("PROTOCOL", "http:")
+    BASE_PORT = int(os.environ.get("PORT", 8000))
+    BASE_URL = f"{PROTOCOL}//{PUBLIC_URL}"
+    
+    if BASE_PORT not in [80, 443]:
+        BASE_URL = BASE_URL + f":{BASE_PORT}"
 
     IS_SERVER = len(sys.argv) > 1 and "shell" not in sys.argv
     DEV_SERVER = len(sys.argv) > 1 and sys.argv[1] == "runserver"
@@ -57,11 +62,13 @@ class Common(Configuration):
     WSGI_APPLICATION = 'tau.wsgi.application'
     ASGI_APPLICATION = 'tau.asgi.application'
 
+    REDIS_SERVER = os.environ.get('REDIS_SERVER', 'tau-redis')
+
     CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels_redis.core.RedisChannelLayer',
-        'CONFIG': {
-            "hosts": [('tau-redis', 6379)],
+        'default': {
+            'BACKEND': 'channels_redis.core.RedisChannelLayer',
+            'CONFIG': {
+                "hosts": [(REDIS_SERVER, 6379)],
             },
         },
     }
@@ -73,17 +80,31 @@ class Common(Configuration):
         ('Author', 'finitesingularityttv@gmail.com'),
     )
 
+    DB_TYPE = os.environ.get('DJANGO_DB_TYPE', 'postgres')
+
     # Postgres
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': os.getenv('DJANGO_DB'),
-            'USER': os.getenv('DJANGO_DB_USER'),
-            'PASSWORD': os.getenv('DJANGO_DB_PW'),
-            'HOST': os.getenv('DJANGO_DB_URL'),
-            'PORT': '',
+    if DB_TYPE == 'postgres':
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql_psycopg2',
+                'NAME': os.getenv('DJANGO_DB'),
+                'USER': os.getenv('DJANGO_DB_USER'),
+                'PASSWORD': os.getenv('DJANGO_DB_PW'),
+                'HOST': os.getenv('DJANGO_DB_URL'),
+                'PORT': '',
+            }
         }
-    }
+    else:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': 'db/data/db.sqlite3',
+                'USER': '',
+                'PASSWORD': '',
+                'HOST': '',
+                'PORT': '',
+            }
+        }
 
     # General
     APPEND_SLASH = False

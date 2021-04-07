@@ -3,6 +3,7 @@ import os
 
 import requests
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 
 from constance import config
@@ -21,24 +22,25 @@ class Command(BaseCommand):
                 time.sleep(0.5)
 
             # Wait for server process to fire up.
-            print('---- Waiting for WebHooks to come online ----')
+            print('---- Waiting for WebHook endpoints to come online ----')
             while 1:
                 try:
-                    port = os.environ.get("TAU_PORT", 8000)
-                    r = requests.get(f'http://localhost:{port}/api/v1/heartbeat/')
+                    r = requests.get(f'{settings.BASE_URL}/api/v1/heartbeat/')
                     if r.status_code < 500:
                         break
                 except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
                     pass
                 time.sleep(0.5)
-            print('     [WebHooks now available]\n')
+            print('     [WebHook endpoints now available]\n')
 
             # Setup ngrok
-            public_url = CoreConfig.setup_ngrok()
-
+            if(settings.USE_NGROK):
+                public_url = CoreConfig.setup_ngrok()
+            else:
+                public_url = settings.BASE_URL
             # Setup Webhooks
+            print(f'Setting webhooks with base url: {public_url}.')
             CoreConfig.setup_webhooks(public_url)
-
             # Establish Websocket Connection
             client = WebSocketClient()
             client.run()

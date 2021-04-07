@@ -43,9 +43,10 @@ class WebSocketClient():
         loop.run_until_complete(self.connect())
         tasks = [
             asyncio.ensure_future(self.twitch_heartbeat()),
-            asyncio.ensure_future(self.ngrok_heartbeat()),
             asyncio.ensure_future(self.recieve()),
         ]
+        if settings.USE_NGROK:
+            tasks.append(asyncio.ensure_future(self.ngrok_heartbeat()))
         loop.run_until_complete(asyncio.wait(tasks))
 
     async def connect(self):

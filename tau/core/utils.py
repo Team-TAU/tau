@@ -12,7 +12,7 @@ def check_access_token():
     headers = {"Authorization": f"OAuth {access_token}"}
     req = requests.get(url, headers=headers)
     data = req.json()
-    if "status" in data and data["status"] == 401:
+    if "status" in data and int(data["status"]) == 401:
         return False
     else:
         return True
@@ -59,9 +59,9 @@ def setup_ngrok():
     # last arg when calling `runserver`)
     # addrport = urlparse("https://{}".format(sys.argv[-1]))
     # port = addrport.port if addrport.netloc and addrport.port else 8000
-    port = os.environ.get("TAU_PORT", 8000)
+    port = int(os.environ.get("PORT", 8000))
 
-    if os.environ.get("USE_NGROK_TOKEN", False):
+    if os.environ.get("USE_NGROK_TOKEN", 'false').lower() == 'true':
         token = os.environ.get("NGROK_TOKEN", None)
         ngrok.set_auth_token(token)
 

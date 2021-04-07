@@ -4,6 +4,7 @@ import requests
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.template import loader
 from django.contrib.auth import login
+from django.conf import settings
 
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
@@ -99,7 +100,7 @@ def get_channel_name_view(request):
             client_id = os.environ.get('TWITCH_APP_ID', None)
             url = f'https://id.twitch.tv/oauth2/authorize?' \
                   f'client_id={client_id}&' \
-                  f'redirect_uri=http://localhost:{port}/twitch-callback/&' \
+                  f'redirect_uri={settings.BASE_URL}/twitch-callback/&' \
                   f'response_type=code&' \
                   f'scope=bits:read channel:read:redemptions channel:' \
                         f'read:hype_train channel_subscriptions'
@@ -130,7 +131,7 @@ def process_twitch_callback_view(request):
         'client_secret': client_secret,
         'code': auth_code,
         'grant_type': 'authorization_code',
-        'redirect_uri': f'http://localhost:{port}/twitch-callback/'
+        'redirect_uri': f'{settings.BASE_URL}/twitch-callback/'
     })
     response_data = auth_r.json()
     config.TWITCH_ACCESS_TOKEN = response_data['access_token']

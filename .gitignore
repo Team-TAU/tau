@@ -107,3 +107,7 @@ venv.bak/
 .mypy_cache/
 
 .vscode/
+
+/db/data/db.sqlite3
+
+supervisord.pid
