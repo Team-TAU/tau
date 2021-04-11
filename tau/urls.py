@@ -11,6 +11,11 @@ from .twitchevents.views import (
     TwitchEventViewSet,
     TwitchEventModelViewSet,
 )
+
+from .streamers.views import (
+    StreamerViewSet
+)
+
 from .core.views import (
     first_run_view,
     get_channel_name_view,
@@ -26,6 +31,7 @@ router = DefaultRouter()
 router.register(r'twitch-events', TwitchEventViewSet, basename='twitch-events')
 router.register(r'twitch-events', TwitchEventModelViewSet)
 router.register(r'heartbeat', HeartbeatViewSet, basename='heartbeat')
+router.register(r'streamers', StreamerViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

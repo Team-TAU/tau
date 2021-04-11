@@ -9,6 +9,7 @@ from constance import config
 import tau.twitchevents.webhook_payloads as webhook_payloads
 from .utils import refresh_access_token, setup_ngrok
 
+
 class CoreConfig(AppConfig):
     name = 'tau.core'
     verbose_name = 'Core'
@@ -35,6 +36,7 @@ class CoreConfig(AppConfig):
 
     @staticmethod
     def init_webhooks(base_url):
+        from tau.streamers.models import Streamer
         CoreConfig.init_webhook(webhook_payloads.channel_update(base_url), 'STATUS_CHANNEL_UPDATE')
         CoreConfig.init_webhook(webhook_payloads.channel_follow(base_url), 'STATUS_CHANNEL_FOLLOW')
         CoreConfig.init_webhook(
@@ -55,6 +57,16 @@ class CoreConfig(AppConfig):
             webhook_payloads.channel_hype_train_end(base_url),
             'STATUS_CHANNEL_HYPE_TRAIN_END'
         )
+        streamers = Streamer.objects.filter(disabled=False)
+        for streamer in streamers:
+            CoreConfig.init_webhook(
+                webhook_payloads.stream_online(base_url, streamer.twitch_id),
+                None
+            )
+            CoreConfig.init_webhook(
+                webhook_payloads.stream_offline(base_url, streamer.twitch_id),
+                None
+            )
 
     @staticmethod
     def init_webhook(payload, config_key):
@@ -62,13 +74,15 @@ class CoreConfig(AppConfig):
             'Client-ID': os.environ.get('TWITCH_APP_ID', None),
             'Authorization': 'Bearer {}'.format(config.TWITCH_APP_ACCESS_TOKEN),
         }
-        setattr(config, config_key, 'CONNECTING')
+        if(config_key is not None):
+            setattr(config, config_key, 'CONNECTING')
+        
         requests.post(
             'https://api.twitch.tv/helix/eventsub/subscriptions',
             json=payload,
             headers=webhook_headers
         )
-        # TODO Add code to handle bad response from initial sub handshake
+        #TODO Add code to handle bad response from initial sub handshake
 
     @staticmethod
     def teardown_webhooks():

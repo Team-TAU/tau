@@ -56,8 +56,9 @@ class TwitchEventViewSet(viewsets.ViewSet):
         status = data['subscription']['status']
         if status == 'webhook_callback_verification_pending':
             if valid_webhook_request(headers, body):
-                status_key = f'STATUS_CHANNEL_{pk.upper().replace("-", "_")}'
-                setattr(config, status_key, 'CONNECTED')
+                if pk not in ['stream-offline', 'stream-online']:
+                    status_key = f'STATUS_CHANNEL_{pk.upper().replace("-", "_")}'
+                    setattr(config, status_key, 'CONNECTED')
                 return HttpResponse(data['challenge'])
             else:
                 return HttpResponseForbidden()

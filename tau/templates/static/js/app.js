@@ -84,6 +84,7 @@ const handleStatusMessage = (message) => {
 }
 
 const handleEventMessage = (message) => {
+    console.log(message);
     switch (message.event_type) {
         case 'update':
             appendUpdate(message);
@@ -102,6 +103,12 @@ const handleEventMessage = (message) => {
             break;
         case 'subscribe':
             appendSubscribe(message);
+            break;
+        case 'stream-offline':
+            appendStreamOffline(message);
+            break;
+        case 'stream-online':
+            appendStreamOnline(message);
             break;
     }
 }
