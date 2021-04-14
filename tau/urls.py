@@ -13,6 +13,7 @@ from .twitchevents.views import (
 )
 
 from .streamers.views import (
+    streamer_page_view,
     StreamerViewSet
 )
 
@@ -45,6 +46,7 @@ urlpatterns = [
     path('set-channel/', get_channel_name_view),
     path('twitch-callback/', process_twitch_callback_view),
     path('first-run/', first_run_view),
+    path('streamers/', streamer_page_view),
     path('', home_view),
 
     # the 'api-root' from django rest-frameworks default router

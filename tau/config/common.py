@@ -131,7 +131,6 @@ class Common(Configuration):  # pylint: disable=no-init
         'django.contrib.staticfiles.finders.FileSystemFinder',
         'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     )
-    print(STATIC_ROOT)
     # Media files
     MEDIA_ROOT = join(os.path.dirname(BASE_DIR), 'media')
     MEDIA_URL = '/media/'

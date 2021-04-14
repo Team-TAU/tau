@@ -37,38 +37,41 @@
     </div>
   </div>
 </section>
-{% include 'modal-forms/auth-token.html' %}
 {% include 'modal-forms/update-modal.html' %}
 {% include 'modal-forms/cheers-modal.html' %}
 {% include 'modal-forms/follow-modal.html' %}
 {% include 'modal-forms/points-redemption-modal.html' %}
 {% include 'modal-forms/raid-modal.html' %}
 {% include 'modal-forms/subs-modal.html' %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/rxjs/6.6.2/rxjs.umd.min.js"
-  integrity="sha512-kN8bAZFoIra6Z7dDPNMD3efoGLn7QpOZgBcNpLwKIoBM5rXLVxt9nPHNo+4WrIsT0RBc/h2sXtN08n1ALxn4yw=="
-  crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/js-cookie@rc/dist/js.cookie.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/prism.min.js"
-  integrity="sha512-YBk7HhgDZvBxmtOfUdvX0z8IH2d10Hp3aEygaMNhtF8fSOvBZ16D/1bXZTJV6ndk/L/DlXxYStP8jrF77v2MIg=="
-  crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/components/prism-json.min.js"
-  integrity="sha512-IC7rV8RslChgByOdUFC6ePqOGn+OwJhnKC3S5AezM8DAiOdGhJMwgsIvBChsa2yuxxoPbH2+W/kjNUM1cc+jUQ=="
-  crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.23.0/plugins/autoloader/prism-autoloader.min.js"
-  integrity="sha512-zc7WDnCM3aom2EziyDIRAtQg1mVXLdILE09Bo+aE1xk0AM2c2cVLfSW9NrxE5tKTX44WBY0Z2HClZ05ur9vB6A=="
-  crossorigin="anonymous"></script>
-<script src="{% static 'js/app.js' %}"></script>
-<script src="{% static 'js/update.js' %}"></script>
-<script src="{% static 'js/cheers.js' %}"></script>
-<script src="{% static 'js/follow.js' %}"></script>
-<script src="{% static 'js/points-redemption.js' %}"></script>
-<script src="{% static 'js/raid.js' %}"></script>
-<script src="{% static 'js/subscribe.js' %}"></script>
-<script src="{% static 'js/stream-online.js' %}"></script>
-<script src="{% static 'js/stream-offline.js' %}"></script>
+
 {% else %}
   <p>You are not logged in</p>
   <a href="{% url 'login' %}">Log In</a>
 {% endif %}
 
+{% endblock %}
+
+{% block js %}
+<script>
+window.onload = (event) => {
+    setupJsonWebsocket(`${socketProtocol}//${host}:${port}/ws/tau-status/`, handleStatusMessage)
+    const prModal = document.getElementById('testPointsRedemptionModal');
+    prModal.addEventListener('shown.bs.modal', function () {
+        ajaxGet(`${protocol}//${host}:${port}/api/v1/channel-point-rewards/`).subscribe(resp => {
+            const data = resp.data;
+            rewards = data;
+            const select = document.getElementById('reward');
+            select.innerHTML = '';
+            options = '';
+            let i = 0;
+            data.forEach(row => {
+                options += `<option value="${i}">${row.title}</option>`;
+                console.log(row.title);
+                i += 1;
+            });
+            select.innerHTML = options;
+        });
+    });
+}
+</script>
 {% endblock %}

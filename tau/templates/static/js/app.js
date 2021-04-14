@@ -6,25 +6,8 @@ const socketProtocol = protocol === 'https:' ? 'wss:' : 'ws:';
 
 // Once the window/scripts/etc. have all been loaded, set up our json and text websockets.
 window.onload = (event) => {
-    setupJsonWebsocket(`${socketProtocol}//${host}:${port}/ws/tau-status/`, handleStatusMessage)
     setupJsonWebsocket(`${socketProtocol}//${host}:${port}/ws/twitch-events/`, handleEventMessage);
-    const prModal = document.getElementById('testPointsRedemptionModal');
-    prModal.addEventListener('shown.bs.modal', function () {
-        ajaxGet(`${protocol}//${host}:${port}/api/v1/channel-point-rewards/`).subscribe(resp => {
-            const data = resp.data;
-            rewards = data;
-            const select = document.getElementById('reward');
-            select.innerHTML = '';
-            options = '';
-            let i = 0;
-            data.forEach(row => {
-                options += `<option value="${i}">${row.title}</option>`;
-                console.log(row.title);
-                i += 1;
-            });
-            select.innerHTML = options;
-        });
-    });
+
     const tokenModal = document.getElementById('tokenModal');
     tokenModal.addEventListener('shown.bs.modal', function () {
         ajaxGet(`${protocol}//${host}:${port}/api/v1/tau-user-token/`).subscribe(resp => {

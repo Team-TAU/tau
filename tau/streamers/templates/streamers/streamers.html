@@ -1,0 +1,27 @@
+<!-- templates/streamers/streamers.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Streamers{% endblock %}
+
+{% block content %}
+<section class="py-3 text-center container">
+  <div class="row py-lg-3">
+    <div class="col-lg-6 col-md-8 mx-auto">
+      <h1 class="fw-light">Streamers</h1>
+    </div>
+  </div>
+</section>
+<section class="container">
+  <div class="row mb-2">
+    <div class="col-md-6">
+      {% include 'streamers/streamers-card.html' %}
+    </div>
+    <div class="col-md-6">
+      {% include 'websocket-stream.html' %}
+    </div>
+  </div>
+</section>
+{% endblock %}
+{% block js %}
+<script src="{% static 'js/streamers.js' %}"></script>
+{% endblock %}
