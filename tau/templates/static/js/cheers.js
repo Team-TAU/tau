@@ -16,7 +16,7 @@ const channelCheerTest = () => {
         bits: eles.namedItem('bits').value,
         message: eles.namedItem('message').value
     }
-    const sub = ajaxPost(`${protocol}//${host}:${port}/api/v1/twitch-events/cheer/test/`, payload).subscribe(resp => {
+    const sub = ajaxPost(`${protocol}//${host}${port}/api/v1/twitch-events/cheer/test/`, payload).subscribe(resp => {
         console.log(resp);
     });
     return false;

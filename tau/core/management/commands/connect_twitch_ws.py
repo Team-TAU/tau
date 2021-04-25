@@ -33,11 +33,6 @@ class Command(BaseCommand):
                 time.sleep(0.5)
             print('     [WebHook endpoints now available]\n')
 
-            # Update active streamers
-            print('---- Updating streaming status of all streamers in DB ----')
-            update_all_streamers()
-            print('     [Done]\n')
-
             # Setup ngrok
             if settings.USE_NGROK:
                 public_url = CoreConfig.setup_ngrok()
@@ -47,6 +42,12 @@ class Command(BaseCommand):
             print(f'Setting webhooks with base url: {public_url}.')
             CoreConfig.setup_webhooks(public_url)
             # Establish Websocket Connection
+
+            # Update active streamers
+            print('---- Updating streaming status of all streamers in DB ----')
+            update_all_streamers()
+            print('     [Done]\n')
+
             client = WebSocketClient()
             client.run()
         except:  # pylint: disable=bare-except

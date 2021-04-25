@@ -1,12 +1,12 @@
 let streamers = [];
 
 window.onload = (event) => {
-    ajaxGet(`${protocol}//${host}:${port}/api/v1/streamers/`).subscribe(resp => {
+    ajaxGet(`${protocol}//${host}${port}/api/v1/streamers/`).subscribe(resp => {
         streamers = resp;
         updateStreamerList();
     });
     twitchEventsWebsocket();
-    setupJsonWebsocket(`${socketProtocol}//${host}:${port}/ws/twitch-events/`, handleStreamerNotification);
+    setupJsonWebsocket(`${socketProtocol}//${host}${port}/ws/twitch-events/`, handleStreamerNotification);
 }
 
 const handleStreamerNotification = (message) => {
@@ -40,7 +40,7 @@ function submitAddStreamer() {
     const payload = {
         twitch_username
     }
-    const sub = ajaxPost(`${protocol}//${host}:${port}/api/v1/streamers/`, payload).subscribe(resp => {
+    const sub = ajaxPost(`${protocol}//${host}${port}/api/v1/streamers/`, payload).subscribe(resp => {
         streamers.push(resp);
         console.log(streamers);
     });
