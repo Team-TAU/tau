@@ -20,6 +20,7 @@ from .streamers.views import (
 from .core.views import (
     first_run_view,
     get_channel_name_view,
+    get_streams,
     process_twitch_callback_view,
     home_view,
     channel_point_rewards,
@@ -40,6 +41,7 @@ urlpatterns = [
     path('api/v1/channel-point-rewards/', channel_point_rewards),
     path('api/v1/twitch-user/', get_twitch_user),
     path('api/v1/tau-user-token/', get_tau_token),
+    path('api/v1/helix/streams/', get_streams),
     path('api/v1/', include(router.urls)),
     path('api-token-auth/', views.obtain_auth_token),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),

@@ -13,6 +13,8 @@ from asgiref.sync import async_to_sync
 
 from constance import config
 
+from tau.streamers.models import Streamer
+
 from .models import (
     TwitchEvent
 )
@@ -74,6 +76,17 @@ class TwitchEventViewSet(viewsets.ViewSet):
                 event_source=TwitchEvent.EVENTSUB,
                 event_data=event
             )
+            if pk == 'stream-online':
+                streamer_username = event['broadcaster_user_login']
+                streamer = Streamer.objects.get(twitch_username=streamer_username)
+                streamer.streaming = True
+                streamer.save()
+            elif pk == 'stream-offline':
+                streamer_username = event['broadcaster_user_login']
+                streamer = Streamer.objects.get(twitch_username=streamer_username)
+                streamer.streaming = False
+                streamer.save()
+
             return HttpResponse('')
 
 

@@ -5,7 +5,8 @@ const protocol = window.location.protocol;
 const socketProtocol = protocol === 'https:' ? 'wss:' : 'ws:';
 
 // Once the window/scripts/etc. have all been loaded, set up our json and text websockets.
-window.onload = (event) => {
+function twitchEventsWebsocket() {
+    console.log('Setup twitch events!');
     setupJsonWebsocket(`${socketProtocol}//${host}:${port}/ws/twitch-events/`, handleEventMessage);
 
     const tokenModal = document.getElementById('tokenModal');
@@ -14,7 +15,7 @@ window.onload = (event) => {
             const token = resp.token;
             document.getElementById('token').value = token;
         });
-    })
+    });
 }
 
 /**

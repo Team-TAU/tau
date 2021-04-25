@@ -3,7 +3,7 @@
       <h4 class="my-0 fw-normal">Streamer Status</h4>
     </div>
     <div class="card-body">
-        <a href="#" class="btn btn-primary float-end">Add Streamer</a>
+        <a href="#" data-bs-toggle="modal" data-bs-target="#addStreamerModal" class="btn btn-primary float-end">Add Streamer</a>
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -12,30 +12,7 @@
                 <th scope="col" class="text-end pe-2">Active</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td class='text-center'>
-                        <i class="bi bi-camera-video-fill" style="color: red"></i>
-                    </td>
-                    <td>FiniteSingularity</td>
-                    <td class="text-end pe-2">
-                        <div class="form-check form-switch float-end">
-                            <input class="form-check-input" type="checkbox">
-                        </div>
-                    </td>
-                </tr>
-                <tr>
-                    <td class='text-center'>
-                        <i class="bi bi-camera-video-off-fill" style="color: grey"></i>
-                    </td>
-                    <td>ToeFrog</td>
-                    <td class="text-end pe-2">
-                        <div class="form-check form-switch float-end">
-                            <input class="form-check-input" type="checkbox">
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
+            <tbody id="streamer-list-body"></tbody>
         </table>
     </div>
 </div>
