@@ -1,0 +1,43 @@
+from django.http import HttpResponse
+from django.template import loader
+
+from rest_framework import viewsets
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
+from rest_framework.pagination import LimitOffsetPagination
+
+from .models import Streamer, Stream
+from .serializers import StreamerSerializer, StreamSerializer
+# Create your views here.
+
+def streamer_page_view(request):
+    template = loader.get_template('streamers/streamers.html')
+    return HttpResponse(template.render({}, request))
+
+
+class StreamerViewSet(viewsets.ModelViewSet):
+    queryset = Streamer.objects.all()
+    serializer_class = StreamerSerializer
+    pagination_class = None
+    permission_classes = (IsAuthenticated, )
+
+    @action(detail=True, methods=['get'])
+    def streams(self, request, pk=None):
+        streamer = self.get_object()
+        streams = streamer.streams.all()
+        paginator = LimitOffsetPagination()
+        paginator.paginate_queryset(streams, request)
+        serializer = StreamSerializer(streams, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+    @action(detail=True, methods=['get'], url_path='streams/latest')
+    def latest_stream(self, request, pk=None):
+        streamer = self.get_object()
+        try:
+            stream = streamer.streams.all().latest('started_at')
+            serializer = StreamSerializer(stream, many=False)
+            return Response(serializer.data)
+        except Stream.DoesNotExist:
+            return Response({})
+        

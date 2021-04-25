@@ -1,0 +1,43 @@
+<div class="modal fade" id="addStreamerModal" tabindex="-1" aria-labelledby="addStreamerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="addStreamerModalLabel">Add Streamer</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form id="add-streamer">
+                <div class="col-12">
+                  <label for="title" class="form-label">Channel Name</label>
+                  <div class="input-group">
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="add-streamer-channel_name"
+                        placeholder="Stream Title..."
+                        required
+                        onblur="getUserId('add-streamer-channel_name', 'add-streamer-channel_id')"
+                    >
+                    <div class="invalid-feedback">
+                      Channel name is required.
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <label for="title" class="form-label">Channel ID</label>
+                  <div class="input-group">
+                    <input type="text" class="form-control" id="add-streamer-channel_id" placeholder="Load from Twitch..." required>
+                    <div class="invalid-feedback">
+                      Channel with valid twitch ID is required.
+                    </div>
+                  </div>
+                </div>
+              </form>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" onclick="submitAddStreamer()">Add Streamer</button>
+        </div>
+        </div>
+    </div>
+</div>

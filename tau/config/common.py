@@ -42,6 +42,7 @@ class Common(Configuration):  # pylint: disable=no-init
         'tau.users',
         'tau.core.apps.CoreConfig',
         'tau.twitchevents.apps.TwitcheventsConfig',
+        'tau.streamers.apps.StreamersConfig',
     )
 
     # https://docs.djangoproject.com/en/2.0/topics/http/middleware/
@@ -130,7 +131,6 @@ class Common(Configuration):  # pylint: disable=no-init
         'django.contrib.staticfiles.finders.FileSystemFinder',
         'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     )
-
     # Media files
     MEDIA_ROOT = join(os.path.dirname(BASE_DIR), 'media')
     MEDIA_URL = '/media/'
@@ -275,5 +275,5 @@ class Common(Configuration):  # pylint: disable=no-init
         'STATUS_CHANNEL_HYPE_TRAIN_PROGRESS': (
             'INACTIVE', 'Hype Train Progress Connection Status', str
         ),
-        'STATUS_CHANNEL_HYPE_TRAIN_END': ('INACTIVE', 'Hype Train End Connection Status', str)
+        'STATUS_CHANNEL_HYPE_TRAIN_END': ('INACTIVE', 'Hype Train End Connection Status', str),
     }

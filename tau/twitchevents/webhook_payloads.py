@@ -17,6 +17,20 @@ def base_data(type_value, callback_url, version="1"):
     }
     return data
 
+def stream_online(base_url, streamer_id):
+    type_value = 'stream.online'
+    url = '{}/api/v1/twitch-events/stream-online/webhook/'.format(base_url)
+    data = base_data(type_value, url)
+    data['condition']['broadcaster_user_id'] = streamer_id
+    return data
+
+def stream_offline(base_url, streamer_id):
+    type_value = 'stream.offline'
+    url = '{}/api/v1/twitch-events/stream-offline/webhook/'.format(base_url)
+    data = base_data(type_value, url)
+    data['condition']['broadcaster_user_id'] = streamer_id
+    return data
+
 def channel_update(base_url):
     type_value = 'channel.update'
     url = '{}/api/v1/twitch-events/update/webhook/'.format(base_url)

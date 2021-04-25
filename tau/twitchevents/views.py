@@ -13,6 +13,8 @@ from asgiref.sync import async_to_sync
 
 from constance import config
 
+from tau.streamers.models import Streamer
+
 from .models import (
     TwitchEvent
 )
@@ -56,8 +58,9 @@ class TwitchEventViewSet(viewsets.ViewSet):
         status = data['subscription']['status']
         if status == 'webhook_callback_verification_pending':
             if valid_webhook_request(headers, body):
-                status_key = f'STATUS_CHANNEL_{pk.upper().replace("-", "_")}'
-                setattr(config, status_key, 'CONNECTED')
+                if pk not in ['stream-offline', 'stream-online']:
+                    status_key = f'STATUS_CHANNEL_{pk.upper().replace("-", "_")}'
+                    setattr(config, status_key, 'CONNECTED')
                 return HttpResponse(data['challenge'])
             else:
                 return HttpResponseForbidden()
@@ -73,6 +76,17 @@ class TwitchEventViewSet(viewsets.ViewSet):
                 event_source=TwitchEvent.EVENTSUB,
                 event_data=event
             )
+            if pk == 'stream-online':
+                streamer_username = event['broadcaster_user_login']
+                streamer = Streamer.objects.get(twitch_username=streamer_username)
+                streamer.streaming = True
+                streamer.save()
+            elif pk == 'stream-offline':
+                streamer_username = event['broadcaster_user_login']
+                streamer = Streamer.objects.get(twitch_username=streamer_username)
+                streamer.streaming = False
+                streamer.save()
+
             return HttpResponse('')
 
 

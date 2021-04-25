@@ -90,6 +90,24 @@ def get_twitch_user(request):
     user_data = user_r.json()
     return JsonResponse(user_data)
 
+def get_streams(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'You must be logged into access this endpoint.'})
+    client_id = os.environ.get('TWITCH_APP_ID', None)
+    headers = {
+        'Authorization': 'Bearer {}'.format(config.TWITCH_ACCESS_TOKEN),
+        'Client-Id': client_id
+    }
+    user_login = request.GET['user_login']
+    url = f'https://api.twitch.tv/helix/' \
+          f'streams?user_login={user_login}'
+    data = requests.get(
+        url,
+        headers=headers
+    )
+    stream_data = data.json()
+    return JsonResponse(stream_data)
+
 def get_channel_name_view(request):
     if request.method == 'POST':
         port = os.environ.get('PORT', 8000)

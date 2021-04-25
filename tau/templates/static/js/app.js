@@ -5,33 +5,17 @@ const protocol = window.location.protocol;
 const socketProtocol = protocol === 'https:' ? 'wss:' : 'ws:';
 
 // Once the window/scripts/etc. have all been loaded, set up our json and text websockets.
-window.onload = (event) => {
-    setupJsonWebsocket(`${socketProtocol}//${host}:${port}/ws/tau-status/`, handleStatusMessage)
+function twitchEventsWebsocket() {
+    console.log('Setup twitch events!');
     setupJsonWebsocket(`${socketProtocol}//${host}:${port}/ws/twitch-events/`, handleEventMessage);
-    const prModal = document.getElementById('testPointsRedemptionModal');
-    prModal.addEventListener('shown.bs.modal', function () {
-        ajaxGet(`${protocol}//${host}:${port}/api/v1/channel-point-rewards/`).subscribe(resp => {
-            const data = resp.data;
-            rewards = data;
-            const select = document.getElementById('reward');
-            select.innerHTML = '';
-            options = '';
-            let i = 0;
-            data.forEach(row => {
-                options += `<option value="${i}">${row.title}</option>`;
-                console.log(row.title);
-                i += 1;
-            });
-            select.innerHTML = options;
-        });
-    });
+
     const tokenModal = document.getElementById('tokenModal');
     tokenModal.addEventListener('shown.bs.modal', function () {
         ajaxGet(`${protocol}//${host}:${port}/api/v1/tau-user-token/`).subscribe(resp => {
             const token = resp.token;
             document.getElementById('token').value = token;
         });
-    })
+    });
 }
 
 /**
@@ -84,6 +68,7 @@ const handleStatusMessage = (message) => {
 }
 
 const handleEventMessage = (message) => {
+    console.log(message);
     switch (message.event_type) {
         case 'update':
             appendUpdate(message);
@@ -102,6 +87,12 @@ const handleEventMessage = (message) => {
             break;
         case 'subscribe':
             appendSubscribe(message);
+            break;
+        case 'stream-offline':
+            appendStreamOffline(message);
+            break;
+        case 'stream-online':
+            appendStreamOnline(message);
             break;
     }
 }
