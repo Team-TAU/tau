@@ -9,7 +9,7 @@
             <form id="channel-sub-test">
                 <div class="col-12">
                   <label for="sub-username" class="form-label">Username</label>
-                  <div class="input-group">
+                  <div class="input-group mb-3">
                     <input
                       type="text"
                       class="form-control"
@@ -17,23 +17,18 @@
                       placeholder="Username"
                       required
                       onblur="getUserId('sub-username', 'sub-user-id')">
-                    <div class="invalid-feedback">
-                      A username is required.
-                    </div>
                   </div>
                 </div>
                 <div class="col-12">
                   <label for="sub-user-id" class="form-label">User ID</label>
-                  <div class="input-group">
-                    <input type="text" class="form-control" id="sub-user-id" placeholder="User ID" required>
-                  <div class="invalid-feedback">
-                      A User ID is required.
-                    </div>
+                  <div class="input-group mb-3">
+                    <input type="password" class="form-control" id="sub-user-id" placeholder="User ID" required>
+                    <button class="btn btn-secondary" type="button" onclick="toggleVisibility(this)"><i class="bi bi-eye"></i></button>
                   </div>
                 </div>
                 <div class="col-12">
                   <label for="tier" class="form-label">Tier</label>
-                  <div class="input-group">
+                  <div class="input-group mb-3">
                     <select class="form-control" id="tier" required>
                       <option value="1000">Tier 1</option>
                       <option value="2000">Tier 2</option>
@@ -41,35 +36,23 @@
                       <option value="prime">Prime</option>
                     </select>
                   </div>
-                  <div class="invalid-feedback">
-                    A tier is required.
-                  </div>
                 </div>
                 <div class="col-12">
                   <label for="message" class="form-label">Message</label>
-                  <div class="input-group">
+                  <div class="input-group mb-3">
                     <input type="text" class="form-control" id="message" placeholder="Message..." required>
-                  <div class="invalid-feedback">
-                      Message is required.
-                    </div>
                   </div>
                 </div>
                 <div class="col-12">
                   <label for="cumulative_months" class="form-label">Cumulative Months</label>
-                  <div class="input-group">
+                  <div class="input-group mb-3">
                     <input type="number" class="form-control" id="cumulative_months" placeholder="Cumulative Months" required>
-                  <div class="invalid-feedback">
-                      Cumulative Months is required.
-                    </div>
                   </div>
                 </div>
                 <div class="col-12">
                   <label for="streak_months" class="form-label">Streak Months</label>
-                  <div class="input-group">
+                  <div class="input-group mb-3">
                     <input type="number" class="form-control" id="streak_months" placeholder="Streak Months" required>
-                  <div class="invalid-feedback">
-                      Streak Months is required.
-                    </div>
                   </div>
                 </div>
               </form>

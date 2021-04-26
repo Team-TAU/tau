@@ -9,7 +9,7 @@
             <form id="channel-raid-test">
                 <div class="col-12">
                   <label for="raid-from_broadcaster_user_name" class="form-label">Raider</label>
-                  <div class="input-group">
+                  <div class="input-group mb-3">
                     <input
                       type="text"
                       class="form-control"
@@ -18,27 +18,19 @@
                       required
                       onblur="getUserId('raid-from_broadcaster_user_name', 'raid-from_broadcaster_user_id')"
                     >
-                  <div class="invalid-feedback">
-                      A raider is required.
-                    </div>
                   </div>
                 </div>
                 <div class="col-12">
                   <label for="raid-from_broadcaster_user_id" class="form-label">Raider ID</label>
-                  <div class="input-group">
-                    <input type="text" class="form-control" id="raid-from_broadcaster_user_id" placeholder="Raider ID" required>
-                  <div class="invalid-feedback">
-                      A raider ID is required.
-                    </div>
+                  <div class="input-group mb-3">
+                    <input type="password" class="form-control" id="raid-from_broadcaster_user_id" placeholder="Raider ID" required>
+                    <button class="btn btn-secondary" type="button" onclick="toggleVisibility(this)"><i class="bi bi-eye"></i></button>
                   </div>
                 </div>
                 <div class="col-12">
                   <label for="viewers" class="form-label">Viewers</label>
-                  <div class="input-group">
+                  <div class="input-group mb-3">
                     <input type="number" class="form-control" id="viewers" placeholder="Viewers" required>
-                  <div class="invalid-feedback">
-                      Viewers is required.
-                    </div>
                   </div>
                 </div>
               </form>

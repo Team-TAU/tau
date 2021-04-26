@@ -190,3 +190,14 @@ const getUserId = (username_id, userid_id) => {
         }
     });
 }
+
+
+const toggleVisibility = (ele) => {
+    ele = $(ele);
+    const i = $(ele.children()[0]);
+    i.toggleClass('bi-eye');
+    i.toggleClass('bi-eye-slash');
+    const input = $(ele.siblings()[0]);
+    const inputType = input.prop('type') === 'password' ? 'text' : 'password';
+    input.prop('type', inputType);
+}
