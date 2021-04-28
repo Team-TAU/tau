@@ -11,6 +11,7 @@ from channels.db import database_sync_to_async
 from constance import config
 
 from tau.core.apps import CoreConfig
+from tau.core.utils import check_access_token, refresh_access_token
 from .models import TwitchEvent
 
 
@@ -44,6 +45,7 @@ class WebSocketClient():
         tasks = [
             asyncio.ensure_future(self.twitch_heartbeat()),
             asyncio.ensure_future(self.recieve()),
+            asyncio.ensure_future(self.token_check()),
         ]
         if settings.USE_NGROK:
             tasks.append(asyncio.ensure_future(self.ngrok_heartbeat()))
@@ -75,6 +77,14 @@ class WebSocketClient():
             except websockets.exceptions.ConnectionClosed:
                 # Wait 10s to see if connection is re-established
                 await asyncio.sleep(10)
+
+    async def token_check(self):
+        while True:
+            token_valid = await database_sync_to_async(check_access_token)()
+            if not token_valid:
+                await database_sync_to_async(refresh_access_token)()
+            delay = 60 + randrange(20)
+            await asyncio.sleep(delay)
 
     async def ngrok_heartbeat(self):
         while True:
