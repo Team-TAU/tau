@@ -39,8 +39,7 @@ const channelSubscribeTest = () => {
 }
 
 const appendSubscribe = (message) => {
-    console.log('appendSubscribe', message);
-    if (message.event_data.data.message.is_gift) {
+    if (message.event_data.message.is_gift) {
         appendGiftSub(message);
     } else {
         appendSub(message);
@@ -49,7 +48,7 @@ const appendSubscribe = (message) => {
 
 const appendGiftSub = (message) => {
     const origin = message.origin;
-    const data = message.event_data.data.message;
+    const data = message.event_data.message;
     const username = data.display_name;
     const recipient = data.recipient_display_name;
     const prefix = origin === 'test' ? '[Test] ' :
@@ -67,7 +66,7 @@ const appendGiftSub = (message) => {
 
 const appendSub = (message) => {
     const origin = message.origin;
-    const data = message.event_data.data.message;
+    const data = message.event_data.message;
     const username = data.display_name;
     const prefix = origin === 'test' ? '[Test] ' :
         origin === 'replay' ? '[Replay] ' :

@@ -118,6 +118,7 @@ class WebSocketClient():
             event_type = 'subscribe'
         else:
             event_type = data["topic"]
+        data["message"] = json.loads(data["message"])
         payload = {
             'event_type': event_type,
             'event_source': TwitchEvent.PUBSUB,
