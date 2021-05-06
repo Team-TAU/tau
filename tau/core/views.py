@@ -25,6 +25,8 @@ def home_view(request):
         return HttpResponseRedirect('/accounts/login/')
     elif config.CHANNEL == '':
         return HttpResponseRedirect('/set-channel/')
+    elif config.SCOPE_UPDATED_NEEDED:
+        return HttpResponseRedirect('/refresh-token-scope/')
     else:
         template = loader.get_template('home.html')
         return HttpResponse(template.render({}, request))
@@ -115,13 +117,13 @@ def get_channel_name_view(request):
         if form.is_valid():
             # Process the data
             config.CHANNEL = form.cleaned_data['channel_name']
+            scope=' '.join(settings.TOKEN_SCOPES)
             client_id = os.environ.get('TWITCH_APP_ID', None)
             url = f'https://id.twitch.tv/oauth2/authorize?' \
                   f'client_id={client_id}&' \
                   f'redirect_uri={settings.BASE_URL}/twitch-callback/&' \
                   f'response_type=code&' \
-                  f'scope=bits:read channel:read:redemptions channel:' \
-                        f'read:hype_train channel_subscriptions'
+                  f'scope={scope}'
             return HttpResponseRedirect(url)
         else:
             # Show some error page
@@ -129,6 +131,16 @@ def get_channel_name_view(request):
     else:
         template = loader.get_template('registration/twitch-channel-setup.html')
         return HttpResponse(template.render({}, request))
+
+def refresh_token_scope(request):
+    client_id = os.environ.get('TWITCH_APP_ID', None)
+    scope=' '.join(settings.TOKEN_SCOPES)
+    url = f'https://id.twitch.tv/oauth2/authorize?' \
+        f'client_id={client_id}&' \
+        f'redirect_uri={settings.BASE_URL}/twitch-callback/&' \
+        f'response_type=code&' \
+        f'scope={scope}'
+    return HttpResponseRedirect(url)
 
 @api_view()
 def get_tau_token(request):
@@ -155,15 +167,16 @@ def process_twitch_callback_view(request):
     config.TWITCH_ACCESS_TOKEN = response_data['access_token']
     config.TWITCH_REFRESH_TOKEN = response_data['refresh_token']
 
+    scope=' '.join(settings.TOKEN_SCOPES)
     app_auth_r = requests.post('https://id.twitch.tv/oauth2/token', data = {
         'client_id': client_id,
         'client_secret': client_secret,
         'grant_type': 'client_credentials',
-        'scope': 'bits:read channel:read:redemptions channel:read:hype_train channel_subscriptions'
+        'scope': scope
     })
     app_auth_data = app_auth_r.json()
     config.TWITCH_APP_ACCESS_TOKEN = app_auth_data['access_token']
-
+    config.SCOPE_UPDATED_NEEDED = False
     headers = {
         'Authorization': 'Bearer {}'.format(config.TWITCH_ACCESS_TOKEN),
         'Client-Id': client_id
