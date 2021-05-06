@@ -281,10 +281,7 @@ class Common(Configuration):  # pylint: disable=no-init
 
     TOKEN_SCOPES = [
         'bits:read',
-        'chat:read',
         'channel:read:redemptions',
         'channel:read:hype_train',
         'channel_subscriptions',
-        'channel:read:polls',
-        'channel:read:predictions',
     ]
