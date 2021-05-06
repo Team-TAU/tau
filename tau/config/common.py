@@ -259,6 +259,7 @@ class Common(Configuration):  # pylint: disable=no-init
         'FIRST_RUN': (True, 'First Run', bool),
         'CHANNEL': ('', 'Channel name', str),
         'CHANNEL_ID': ('', 'Channel ID', str),
+        'SCOPE_UPDATED_NEEDED': (False, 'Need to update Twitch Scopes', str),
         'TWITCH_ACCESS_TOKEN': ('', 'Twitch API Access Token', str),
         'TWITCH_REFRESH_TOKEN': ('', 'Twitch API Refresh Token', str),
         'TWITCH_APP_ACCESS_TOKEN': ('', 'Twitch API App Access Token', str),
@@ -277,3 +278,10 @@ class Common(Configuration):  # pylint: disable=no-init
         ),
         'STATUS_CHANNEL_HYPE_TRAIN_END': ('INACTIVE', 'Hype Train End Connection Status', str),
     }
+
+    TOKEN_SCOPES = [
+        'bits:read',
+        'channel:read:redemptions',
+        'channel:read:hype_train',
+        'channel_subscriptions',
+    ]
