@@ -32,8 +32,12 @@ class TwitchEventViewSet(viewsets.ViewSet):
     @action(detail=True, methods=['post'])
     def test(self, request, pk=None):
         event_data = request.data
-        id_ = str(uuid.uuid4())
-        event_id = str(uuid.uuid4())
+        id_ = None
+        if pk != 'subscribe':
+            event_id = str(uuid.uuid4())
+        else:
+            event_id = None
+        
         ws_payload = {
             'id': id_,
             'event_id': event_id,
@@ -95,7 +99,7 @@ class TwitchEventModelViewSet(viewsets.ModelViewSet):
     serializer_class = TwitchEventSerializer
     permission_classes = (IsAuthenticated, )
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post', 'get'])
     def replay(self, request, pk=None):
         instance = self.get_object()
         serializer = TwitchEventSerializer(instance, many=False)
