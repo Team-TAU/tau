@@ -106,7 +106,7 @@ class WebSocketClient():
                 message = await self.connection.recv()
                 message_dict = json.loads(message)
                 if message_dict['type'] == 'MESSAGE':
-                    await self.handle_data(message_dict['data'])
+                    await self.handle_data(message_dict)
                 elif message_dict['type'] == 'RECONNECT':
                     await self.handle_reconnect()
             except websockets.exceptions.ConnectionClosed:
@@ -114,11 +114,11 @@ class WebSocketClient():
                 await self.connect()
 
     async def handle_data(self, data):
-        if data["topic"].startswith('channel-subscribe-events'):
+        if data["data"]["topic"].startswith('channel-subscribe-events'):
             event_type = 'subscribe'
         else:
-            event_type = data["topic"]
-        data["message"] = json.loads(data["message"])
+            event_type = data["data"]["topic"]
+        data["data"]["message"] = json.loads(data["data"]["message"])
         payload = {
             'event_type': event_type,
             'event_source': TwitchEvent.PUBSUB,
