@@ -59,18 +59,12 @@ window.onload = (event) => {
     const prModal = document.getElementById('testPointsRedemptionModal');
     prModal.addEventListener('shown.bs.modal', function () {
         ajaxGet(`${protocol}//${host}${port}/api/v1/channel-point-rewards/`).subscribe(resp => {
-            const data = resp.data;
-            rewards = data;
-            const select = document.getElementById('reward');
-            select.innerHTML = '';
-            options = '';
-            let i = 0;
-            data.forEach(row => {
-                options += `<option value="${i}">${row.title}</option>`;
-                console.log(row.title);
-                i += 1;
-            });
-            select.innerHTML = options;
+            if(resp.error && !resp.data){
+              rewardErrorMsg.error = resp.error;
+              rewardSelect.fetchedOptions = ["other item 1", "other item 2"];
+              return;
+            }
+            rewardSelect.fetchedOptions = [...resp.data];
         });
     });
 }

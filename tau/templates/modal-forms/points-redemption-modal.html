@@ -15,11 +15,12 @@
                 </div>
                 <div class="col-12">
                   <label for="reward" class="form-label">Reward</label>
+                  <span id="reward-error" class="alert-danger">[[ error ]]</span>
                   <div class="input-group mb-3">
                     <select class="form-select" id="reward" required>
-                        <option value="">Choose...</option>
-                        <option value="575c2991-cbc2-402c-837f-86bd40009379">Test</option>
-                      </select>
+                      <option v-for="option in alwaysOptions" :key="option.id" :value="option.id">[[ option.label ]]</option>
+                      <option v-for="(option,i) in fetchedOptions" :value="i">[[ option ]]</option>
+                    </select>
                   </div>
                 </div>
                 <div class="col-12">
