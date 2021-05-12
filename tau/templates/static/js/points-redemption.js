@@ -51,3 +51,20 @@ const appendPointsRedemption = (message) => {
     ele.innerHTML = payload + ele.innerHTML;
     Prism.highlightAll();
 }
+
+const buildRedemptionSelect = () => {
+    const select = document.getElementById('reward');
+    const showDisabledBox = document.getElementById('show-disabled');
+    const showDisabled = showDisabledBox.checked;
+    select.innerHTML = '';
+    options = '';
+    let i = 0;
+    rewards.filter((row) => {
+        return showDisabled || row.is_enabled
+    }).forEach(row => {
+        options += `<option value="${i}">${row.title}</option>`;
+        console.log(row.title);
+        i += 1;
+    });
+    select.innerHTML = options;
+}
