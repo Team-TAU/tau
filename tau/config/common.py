@@ -65,12 +65,19 @@ class Common(Configuration):  # pylint: disable=no-init
     ASGI_APPLICATION = 'tau.asgi.application'
 
     REDIS_SERVER = os.environ.get('REDIS_SERVER', 'tau-redis')
-
+    REDIS_ENDPOINT = os.environ.get('REDIS_ENDPOINT','')
+    REDIS_PW = os.environ.get('REDIS_PW','')
+    if REDIS_ENDPOINT != '':
+        if REDIS_PW != '':
+            REDIS_ENDPOINT = REDIS_PW + '@' + REDIS_ENDPOINT
+        REDIS_SERVER = 'redis://:' + REDIS_ENDPOINT
+    else:
+        REDIS_SERVER = 'redis://' + REDIS_SERVER + ':6379'
     CHANNEL_LAYERS = {
         'default': {
             'BACKEND': 'channels_redis.core.RedisChannelLayer',
             'CONFIG': {
-                "hosts": [(REDIS_SERVER, 6379)],
+                "hosts": [REDIS_SERVER],
             },
         },
     }
