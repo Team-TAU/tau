@@ -61,16 +61,7 @@ window.onload = (event) => {
         ajaxGet(`${protocol}//${host}${port}/api/v1/channel-point-rewards/`).subscribe(resp => {
             const data = resp.data;
             rewards = data;
-            const select = document.getElementById('reward');
-            select.innerHTML = '';
-            options = '';
-            let i = 0;
-            data.forEach(row => {
-                options += `<option value="${i}">${row.title}</option>`;
-                console.log(row.title);
-                i += 1;
-            });
-            select.innerHTML = options;
+            buildRedemptionSelect(false);
         });
     });
 }
