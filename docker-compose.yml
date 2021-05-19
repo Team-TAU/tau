@@ -3,38 +3,29 @@ version: '3'
 services:
   app:
     restart: unless-stopped
-    container_name: tau-app
+    env_file: .env
     depends_on:
       - db
       - redis
     build:
       context: .
-      dockerfile: Dockerfile
     volumes:
       - ./:/code:cached
     ports:
-      - ${PORT}:${PORT}
+      - ${PORT:-8000}:${PORT:-8000}
 
-    command: >
-      bash -c "source ./scripts/loadenv.sh 
-      && ./manage.py migrate
-      && ./manage.py collectstatic --noinput
-      && /usr/bin/supervisord -n -c /etc/supervisord.conf"
-    # Runs app on the same network as the database container, allows "forwardPorts" in devcontainer.json function.
-    # network_mode: service:db
   
   db:
     image: postgres:latest
     restart: unless-stopped
-    container_name: tau-db
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./db/scripts/init-user-db.sh:/docker-entrypoint-initdb.d/init-user-db.sh
     environment:
-      - POSTGRES_PASSWORD=${POSTGRES_PW}
-      - DJANGO_DB=${DJANGO_DB}
-      - DJANGO_DB_USER=${DJANGO_DB_USER}
-      - DJANGO_DB_PW=${DJANGO_DB_PW}
+      POSTGRES_PASSWORD: ${POSTGRES_PW}
+      DJANGO_DB: ${DJANGO_DB:-tau_db}
+      DJANGO_DB_USER: ${DJANGO_DB_USER:-tau_db}
+      DJANGO_DB_PW: ${DJANGO_DB_PW}
 
     # Add "forwardPorts": ["5432"] to **devcontainer.json** to forward PostgreSQL locally.
     # (Adding the "ports" property to this file will not forward from a Codespace.)
@@ -42,7 +33,6 @@ services:
   redis:
     image: redis:alpine
     restart: unless-stopped
-    container_name: tau-redis
 
 volumes:
   postgres-data:
