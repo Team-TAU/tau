@@ -11,7 +11,7 @@ const channelRaidTest = () => {
         to_broadcaster_user_id: broadcaster_user_id,
         to_broadcaster_user_login: broadcaster_user_name.toLowerCase(),
         to_broadcaster_user_name: broadcaster_user_name,
-        viewers: eles.namedItem('viewers').value
+        viewers: Number(eles.namedItem('viewers').value)
     }
     const sub = ajaxPost(`${protocol}//${host}${port}/api/v1/twitch-events/raid/test/`, payload).subscribe(resp => {
         console.log(resp);

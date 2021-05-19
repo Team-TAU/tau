@@ -13,7 +13,7 @@ const channelCheerTest = () => {
         broadcaster_user_id,
         broadcaster_user_name,
         broadcaster_user_login: broadcaster_user_name.toLowerCase(),
-        bits: eles.namedItem('bits').value,
+        bits: Number(eles.namedItem('bits').value),
         message: eles.namedItem('cheer-message').value
     }
     const sub = ajaxPost(`${protocol}//${host}${port}/api/v1/twitch-events/cheer/test/`, payload).subscribe(resp => {
