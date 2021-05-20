@@ -28,11 +28,13 @@ from .core.views import (
     get_twitch_user,
     get_tau_token,
     HeartbeatViewSet,
+    ServiceStatusViewSet,
 )
 
 router = DefaultRouter()
 router.register(r'twitch-events', TwitchEventViewSet, basename='twitch-events')
 router.register(r'twitch-events', TwitchEventModelViewSet)
+router.register(r'service-status', ServiceStatusViewSet, basename='service-status')
 router.register(r'heartbeat', HeartbeatViewSet, basename='heartbeat')
 router.register(r'streamers', StreamerViewSet)
 

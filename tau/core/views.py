@@ -1,7 +1,7 @@
 import os
 import requests
 
-from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse, Http404
 from django.template import loader
 from django.contrib.auth import login
 from django.conf import settings
@@ -9,7 +9,7 @@ from django.conf import settings
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework import viewsets
 
 from constance import config
@@ -187,9 +187,25 @@ def process_twitch_callback_view(request):
     config.CHANNEL_ID = channel_id
     return HttpResponseRedirect('/')
 
+
 class HeartbeatViewSet(viewsets.ViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly, )
 
     def list(self, request, *args, **kwargs):
         response = {'message': 'pong'}
         return Response(response)
+
+
+class ServiceStatusViewSet(viewsets.ViewSet):
+    permission_classes = (AllowAny, )
+
+    def update(self, request, pk=None):
+        if pk.startswith('STATUS_') and hasattr(config, pk):
+            data = request.data
+            new_status = data['status']
+            setattr(config, pk, new_status)
+            return Response({
+                pk: new_status
+            })
+        else:
+            raise Http404("Config does not exist")
