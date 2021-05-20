@@ -117,11 +117,6 @@ class CoreConfig(AppConfig):
                 headers=headers
             )
 
-        # webhook_status_keys = filter(
-        #     lambda x: x.startswith('STATUS_') and x != 'STATUS_WEBSOCKET',
-        #     settings.CONFIG.keys()
-        # )
-
         headers = {'Authorization': f'Token {worker_token}'}
 
         requests.put(
@@ -130,9 +125,3 @@ class CoreConfig(AppConfig):
                 headers=headers
             )
 
-        # for key in webhook_status_keys:
-        #     requests.put(
-        #         f'{public_url}/api/v1/service-status/{key}/',
-        #         {'status': 'DISCONNECTED'},
-        #         headers=headers
-        #     )
