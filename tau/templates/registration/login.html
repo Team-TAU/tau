@@ -7,7 +7,7 @@
 <form method="POST">
   <img src="{% static 'img/logo-grey.png' %}" style="width: 150px; height: 150px; margin-bottom: 15px;">
   <h1 class="h3 mb-3 fw-normal text-secondary">Log In</h1>{% csrf_token %}
-  <label for="id_username" class="visually-hidden">Username</label>
+  <label for="id_username" class="visually-hidden">*Username</label>
   <input 
     type="text"
     name="username"
@@ -17,7 +17,7 @@
     required
     autofocus
   >
-  <label for="password" class="visually-hidden">Password</label>
+  <label for="password" class="visually-hidden">*Password</label>
   <input
     type="password"
     name="password"
