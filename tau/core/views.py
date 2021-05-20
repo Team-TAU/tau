@@ -32,7 +32,7 @@ def home_view(request):
         return HttpResponse(template.render({}, request))
 
 def first_run_view(request):
-    user_count = User.objects.all().count()
+    user_count = User.objects.all().exclude(username='worker_process').count()
     if user_count > 0:                      # If users already exist, it is not first run
         return HttpResponseRedirect('/')    # reject creating a new super-user
     if request.method == 'POST':
