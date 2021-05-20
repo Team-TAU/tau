@@ -37,7 +37,7 @@ django-storages==1.11.1
 boto3==1.16.63
 
 # ngrok
-pyngrok==5.0.1
+pyngrok==5.0.5
 
 # Channels (Websockets)
 channels==3.0.3

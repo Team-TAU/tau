@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework import viewsets
 
-from constance import config
+from constance import config, settings
 
 from tau.users.models import User
 from .forms import ChannelNameForm, FirstRunForm
@@ -197,7 +197,7 @@ class HeartbeatViewSet(viewsets.ViewSet):
 
 
 class ServiceStatusViewSet(viewsets.ViewSet):
-    permission_classes = (AllowAny, )
+    permission_classes = (IsAuthenticated, )
 
     def update(self, request, pk=None):
         if pk.startswith('STATUS_') and hasattr(config, pk):
@@ -206,6 +206,18 @@ class ServiceStatusViewSet(viewsets.ViewSet):
             setattr(config, pk, new_status)
             return Response({
                 pk: new_status
+            })
+        elif pk == 'SET_ALL':
+            status_keys = filter(
+                lambda x: x.startswith('STATUS_'),
+                settings.CONFIG.keys()
+            )
+            data = request.data
+            new_status = data['status']
+            for key in status_keys:
+                setattr(config, key, new_status)
+            return Response({
+                'reset': 'complete'
             })
         else:
             raise Http404("Config does not exist")

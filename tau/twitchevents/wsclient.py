@@ -19,10 +19,13 @@ class WebSocketClient():
     url = 'wss://pubsub-edge.twitch.tv'
     connection = None
 
-    def __init__(self):
+    def __init__(self, token):
+        self.token = token
+        headers = {'Authorization': f'Token {self.token}'}
         requests.put(
             f'{settings.BASE_URL}/api/v1/service-status/STATUS_WEBSOCKET/',
-            {'status': 'DISCONNECTED'}
+            {'status': 'DISCONNECTED'},
+            headers=headers
         )
         channel_id = config.CHANNEL_ID
         auth_token = config.TWITCH_ACCESS_TOKEN
@@ -56,9 +59,11 @@ class WebSocketClient():
 
     async def set_status(self, status):
         try:
+            headers = {'Authorization': f'Token {self.token}'}
             r = requests.put(
                 f'{settings.BASE_URL}/api/v1/service-status/STATUS_WEBSOCKET/',
-                {'status': status}
+                {'status': status},
+                headers=headers
             )
         except:
             print('Error connecting back to server for status updates...')
