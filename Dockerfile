@@ -22,7 +22,7 @@ RUN pip install -r requirements.txt
 COPY . /code
 
 # configure for redis
-RUN if [ "${REDIS}" != "external" ]; then cp supervisord-redis.conf /etc/supervisord.conf; else cp supervsiord.conf /etc/supervisord.conf; fi
+RUN if [ "${REDIS}" != "external" ]; then cp supervisord-redis.conf /etc/supervisord.conf; else cp supervisord.conf /etc/supervisord.conf; fi
 
 CMD bash -c "./manage.py migrate && \
     ./manage.py collectstatic --noinput && \
