@@ -18,7 +18,7 @@ from tau.users.models import User
 from .forms import ChannelNameForm, FirstRunForm
 
 def home_view(request):
-    user_count = User.objects.all().count()
+    user_count = User.objects.all().exclude(username='worker_process').count()
     if user_count == 0:
         return HttpResponseRedirect('/first-run/')
     elif not request.user.is_authenticated:

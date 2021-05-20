@@ -1,7 +1,9 @@
+from tau.core.forms import CustomAuthenticationForm
 from django.conf import settings
 from django.urls import path, re_path, include, reverse_lazy
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.auth import views as auth_views
 from django.views.generic.base import RedirectView
 
 from rest_framework.routers import DefaultRouter
@@ -40,7 +42,14 @@ router.register(r'streamers', StreamerViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/', include('django.contrib.auth.urls')),
+    path('accounts/login/', 
+        auth_views.LoginView.as_view(
+            template_name='registration/login.html',
+            authentication_form=CustomAuthenticationForm
+        ),
+        name='login'
+    ),
+    path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('api/v1/channel-point-rewards/', channel_point_rewards),
     path('api/v1/twitch-user/', get_twitch_user),
     path('api/v1/tau-user-token/', get_tau_token),
