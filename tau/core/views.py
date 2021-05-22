@@ -12,7 +12,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework import viewsets
 
-from constance import config, settings
+from constance import config
+import constance.settings
 
 from tau.users.models import User
 from .forms import ChannelNameForm, FirstRunForm
@@ -210,7 +211,7 @@ class ServiceStatusViewSet(viewsets.ViewSet):
         elif pk == 'SET_ALL':
             status_keys = filter(
                 lambda x: x.startswith('STATUS_'),
-                settings.CONFIG.keys()
+                constance.settings.CONFIG.keys()
             )
             data = request.data
             new_status = data['status']
