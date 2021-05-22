@@ -7,7 +7,7 @@ const channelUpdateTest = () => {
 
     const data = {
         title: eles.namedItem('title').value,
-        languate: 'en',
+        language: 'en',
         is_mature: eles.namedItem('is_mature').checked,
         category_id: 12345,
         category_name: eles.namedItem('category_name').value,
