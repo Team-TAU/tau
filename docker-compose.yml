@@ -17,6 +17,7 @@ services:
 
     command: >
       bash -c "source ./scripts/loadenv.sh 
+      && ./tau/config/validate.py
       && ./manage.py migrate
       && ./manage.py collectstatic --noinput
       && /usr/bin/supervisord -n -c /etc/supervisord.conf"
