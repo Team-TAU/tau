@@ -4,7 +4,7 @@ import requests
 
 from django.apps import AppConfig
 
-from constance import config, settings
+from constance import config
 
 import tau.twitchevents.webhook_payloads as webhook_payloads
 from .utils import refresh_access_token, setup_ngrok

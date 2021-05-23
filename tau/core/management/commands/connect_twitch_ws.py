@@ -44,8 +44,8 @@ class Command(BaseCommand):
                 public_url = settings.BASE_URL
 
             user = User.objects.get(username='worker_process')
-            token = str(user.auth_token)
-
+            token, created = Token.objects.get_or_create(user=user)
+            token = str(token)
             # Setup Webhooks
             print(f'Setting webhooks with base url: {public_url}.')
             CoreConfig.setup_webhooks(public_url, token)
