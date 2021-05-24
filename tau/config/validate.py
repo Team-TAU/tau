@@ -25,7 +25,8 @@ def main():
         if "" == os.environ.get("DJANGO_DB_URL",""):
             errors.append("Missing environment setting DJANGO_DB_URL (Django Database URL)")
     if DB_TYPE != "postgres" and DB_TYPE != "sqlite3":
-        errors.append("Invalid environment setting DJANGO_DB_TYPE (Django Database Type). Must be equal to \"postgres\" or \"sqlite3\"")
+        errors.append("Invalid environment setting DJANGO_DB_TYPE (Django Database Type). "
+        +"Must be equal to \"postgres\" or \"sqlite3\" and is currently set to \""+DB_TYPE+"\"")
 
     if "" == os.environ.get("TWITCH_APP_ID",""):
         errors.append("Missing environment setting TWITCH_APP_ID (Twitch App ID)")
