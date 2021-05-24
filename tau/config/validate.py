@@ -13,7 +13,6 @@ import logging
 def main():
     errors = []
     warnings = []
-
     DB_TYPE = os.environ.get("DJANGO_DB_TYPE","postgres")
     if DB_TYPE == "postgres":
         if "" == os.environ.get("DJANGO_DB",""):
@@ -43,7 +42,8 @@ def main():
 
     if "" != os.environ.get("REDIS_ENDPOINT") and "" == os.environ.get("REDIS_PW"):
         errors.append("When environment setting REDIS_ENDPOINT is in use, the setting REDIS_PW must also be set.")
-
+    if "" != os.environ.get("REDIS_SERVER") and "" != os.environ.get("REDIS_ENDPOINT"):
+        warnings.append("When environment setting REDIS_ENDPOINT is in use, it will supercede environment setting REDIS_SERVER.")
     if len(warnings) > 0:
         [logging.warning(warning) for warning in warnings]
     if len(errors) > 0:
