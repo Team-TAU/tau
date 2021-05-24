@@ -36,11 +36,14 @@ coverage==5.4
 whitenoise==5.2.0
 
 # ngrok
-pyngrok==5.0.1
+pyngrok==5.0.5
 
 # Channels (Websockets)
 channels==3.0.3
-channels-redis==3.2.0
+#channels-redis==3.2.0
+# using specific working release of channels-redis that fixes lag seen in 3.2.0
+#   will be replaced once channels-redis is updated.
+-e git+https://git@github.com/django/channels_redis.git@3656d87813d643bee28fe1960124063268c850a2#egg=channels_redis
 
 # Requests (http requests)
 requests==2.25.1

@@ -9,20 +9,19 @@ from constance import config
 import tau.twitchevents.webhook_payloads as webhook_payloads
 from .utils import refresh_access_token, setup_ngrok
 
-
 class CoreConfig(AppConfig):
     name = 'tau.core'
     verbose_name = 'Core'
 
     @staticmethod
-    def setup_webhooks(public_url):
+    def setup_webhooks(public_url, worker_token):
         if config.TWITCH_APP_ACCESS_TOKEN != '':
             print('---- Setting up WebHooks for Twitch ----')
             refresh_access_token()                  # refresh the access token
             print('     [Access tokens refreshed]')
-            CoreConfig.teardown_webhooks()          # clear all old webhooks
+            CoreConfig.teardown_webhooks(public_url, worker_token)          # clear all old webhooks
             print('     [Old WebHooks torn down]')
-            CoreConfig.init_webhooks(public_url)    # init new webhooks
+            CoreConfig.init_webhooks(public_url, worker_token)    # init new webhooks
             print('     [New WebHooks Initialized]\n')
         else:
             print(
@@ -35,47 +34,64 @@ class CoreConfig(AppConfig):
         return setup_ngrok()
 
     @staticmethod
-    def init_webhooks(base_url):
+    def init_webhooks(base_url, worker_token):
         from tau.streamers.models import Streamer
-        CoreConfig.init_webhook(webhook_payloads.channel_update(base_url), 'STATUS_CHANNEL_UPDATE')
-        CoreConfig.init_webhook(webhook_payloads.channel_follow(base_url), 'STATUS_CHANNEL_FOLLOW')
+        CoreConfig.init_webhook(webhook_payloads.channel_update(base_url), 'STATUS_CHANNEL_UPDATE', base_url, worker_token)
+        CoreConfig.init_webhook(webhook_payloads.channel_follow(base_url), 'STATUS_CHANNEL_FOLLOW', base_url, worker_token)
         CoreConfig.init_webhook(
             webhook_payloads.channel_points_redemption(base_url),
-            'STATUS_CHANNEL_POINT_REDEMPTION'
+            'STATUS_CHANNEL_POINT_REDEMPTION',
+            base_url,
+            worker_token
         )
-        CoreConfig.init_webhook(webhook_payloads.channel_cheer(base_url), 'STATUS_CHANNEL_CHEER')
-        CoreConfig.init_webhook(webhook_payloads.channel_raid(base_url), 'STATUS_CHANNEL_RAID')
+        CoreConfig.init_webhook(webhook_payloads.channel_cheer(base_url), 'STATUS_CHANNEL_CHEER', base_url, worker_token)
+        CoreConfig.init_webhook(webhook_payloads.channel_raid(base_url), 'STATUS_CHANNEL_RAID', base_url, worker_token)
         CoreConfig.init_webhook(
             webhook_payloads.channel_hype_train_begin(base_url),
-            'STATUS_CHANNEL_HYPE_TRAIN_BEGIN'
+            'STATUS_CHANNEL_HYPE_TRAIN_BEGIN',
+            base_url,
+            worker_token
         )
         CoreConfig.init_webhook(
             webhook_payloads.channel_hype_train_progress(base_url),
-            'STATUS_CHANNEL_HYPE_TRAIN_PROGRESS'
+            'STATUS_CHANNEL_HYPE_TRAIN_PROGRESS',
+            base_url,
+            worker_token
         )
         CoreConfig.init_webhook(
             webhook_payloads.channel_hype_train_end(base_url),
-            'STATUS_CHANNEL_HYPE_TRAIN_END'
+            'STATUS_CHANNEL_HYPE_TRAIN_END',
+            base_url,
+            worker_token
         )
         streamers = Streamer.objects.filter(disabled=False)
         for streamer in streamers:
             CoreConfig.init_webhook(
                 webhook_payloads.stream_online(base_url, streamer.twitch_id),
-                None
+                None,
+                base_url,
+                worker_token
             )
             CoreConfig.init_webhook(
                 webhook_payloads.stream_offline(base_url, streamer.twitch_id),
-                None
+                None,
+                base_url,
+                worker_token
             )
 
     @staticmethod
-    def init_webhook(payload, config_key):
+    def init_webhook(payload, config_key, public_url, worker_token):
         webhook_headers = {
             'Client-ID': os.environ.get('TWITCH_APP_ID', None),
             'Authorization': 'Bearer {}'.format(config.TWITCH_APP_ACCESS_TOKEN),
         }
         if(config_key is not None):
-            setattr(config, config_key, 'CONNECTING')
+            headers = {'Authorization': f'Token {worker_token}'}
+            requests.put(
+                f'{public_url}/api/v1/service-status/{config_key}/',
+                {'status': 'CONNECTING'},
+                headers=headers
+            )
         
         requests.post(
             'https://api.twitch.tv/helix/eventsub/subscriptions',
@@ -85,7 +101,7 @@ class CoreConfig(AppConfig):
         #TODO Add code to handle bad response from initial sub handshake
 
     @staticmethod
-    def teardown_webhooks():
+    def teardown_webhooks(public_url, worker_token):
         # Get subscriptions
         headers = {
             'Client-ID': os.environ.get('TWITCH_APP_ID', None),
@@ -101,11 +117,11 @@ class CoreConfig(AppConfig):
                 headers=headers
             )
 
-        config.STATUS_CHANNEL_UPDATE = 'DISCONNECTED'
-        config.STATUS_CHANNEL_FOLLOW = 'DISCONNECTED'
-        config.STATUS_CHANNEL_CHEER = 'DISCONNECTED'
-        config.STATUS_CHANNEL_POINT_REDEMPTION = 'DISCONNECTED'
-        config.STATUS_CHANNEL_RAID = 'DISCONNECTED'
-        config.STATUS_CHANNEL_HYPE_TRAIN_BEGIN = 'DISCONNECTED'
-        config.STATUS_CHANNEL_HYPE_TRAIN_PROGRESS = 'DISCONNECTED'
-        config.STATUS_CHANNEL_HYPE_TRAIN_END = 'DISCONNECTED'
+        headers = {'Authorization': f'Token {worker_token}'}
+
+        requests.put(
+                f'{public_url}/api/v1/service-status/SET_ALL/',
+                {'status': 'DISCONNECTED'},
+                headers=headers
+            )
+
