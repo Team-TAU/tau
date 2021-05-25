@@ -7,8 +7,11 @@
         </div>
         <div class="modal-body">
             <form id="channel-cheer-test">
+                <div class="col-12 text-center">
+                  * Required fields
+                </div>
                 <div class="col-12">
-                  <label for="cheer-username" class="form-label">Username</label>
+                  <label for="cheer-username" class="form-label">*Username</label>
                   <div class="input-group mb-3">
                     <input
                       type="text"
@@ -23,12 +26,12 @@
                 <div class="col-12">
                   <label for="cheer-user-id" class="form-label">User ID</label>
                   <div class="input-group mb-3">
-                    <input type="password" class="form-control" id="cheer-user-id" placeholder="User ID" required>
+                    <input type="password" class="form-control" id="cheer-user-id" placeholder="User ID" required readonly>
                     <button class="btn btn-secondary" type="button" onclick="toggleVisibility(this)"><i class="bi bi-eye"></i></button>
                   </div>
                 </div>
                 <div class="col-12">
-                  <label for="bits" class="form-label">Bits</label>
+                  <label for="bits" class="form-label">*Bits</label>
                   <div class="input-group">
                     <input type="number" class="form-control" id="bits" placeholder="Bits" required>
                   <div class="invalid-feedback">

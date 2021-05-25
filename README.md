@@ -74,6 +74,8 @@ To connect your bot or overlay code to TAU, you will need a TAU auth token.  Thi
 
 Then simply point your bot's websocket client at `ws://localhost:PORT/ws/twitch-events/` .  After it connects, send a websocket message from the client with the following JSON payload: `{"token": "YOUR_TOKEN HERE"}`.  After providing your token, TAU will begin to stream all twitch events to your websocket connection.  Fin.
 
+Note: If you wish to run TAU using a cloud service rather than locally, you will need to provide your own Redis server.  This can either be another container running in the cloud, or a Redis provider such as Redislabs.  Since Redis is used as a simple message broker, something like Redislab's free tier will be more than sufficient for most users.  Then, simply provide the `REDIS_ENDPOINT` and `REDIS_PW` environment variables.  Additionally, you will need to either provide a working postgres installation, or change the `DJANGO_DB_TYPE` environment variable to `sqlite3` to use django's local sqlite3 library.  See the .env_single_container_sample file.
+
 # Updating
 
 After pulling the latest code from github, you will need to rebuild the app container before re-launching TAU.  You can do so as follows:
