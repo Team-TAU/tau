@@ -11,6 +11,7 @@ class Common(Configuration):  # pylint: disable=no-init
     PROTOCOL = os.environ.get("PROTOCOL", "http:")
     BASE_PORT = int(os.environ.get("PORT", 8000))
     BASE_URL = f"{PROTOCOL}//{PUBLIC_URL}"
+    
 
     if BASE_PORT not in [80, 443]:
         BASE_URL = BASE_URL + f":{BASE_PORT}"
@@ -20,6 +21,11 @@ class Common(Configuration):  # pylint: disable=no-init
 
     USE_NGROK = (os.environ.get("USE_NGROK", "False") == "True" and
                     os.environ.get("RUN_MAIN", None) != "true")
+
+    if USE_NGROK:
+        LOCAL_URL = f"http://localhost:{BASE_PORT}"
+    else:
+        LOCAL_URL = BASE_URL
 
     INSTALLED_APPS = (
         'django.contrib.admin',
