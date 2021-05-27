@@ -11,6 +11,7 @@ class Common(Configuration):  # pylint: disable=no-init
     PROTOCOL = os.environ.get("PROTOCOL", "http:")
     BASE_PORT = int(os.environ.get("PORT", 8000))
     BASE_URL = f"{PROTOCOL}//{PUBLIC_URL}"
+    
 
     if BASE_PORT not in [80, 443]:
         BASE_URL = BASE_URL + f":{BASE_PORT}"
@@ -20,6 +21,11 @@ class Common(Configuration):  # pylint: disable=no-init
 
     USE_NGROK = (os.environ.get("USE_NGROK", "False") == "True" and
                     os.environ.get("RUN_MAIN", None) != "true")
+
+    if USE_NGROK:
+        LOCAL_URL = f"http://localhost:{BASE_PORT}"
+    else:
+        LOCAL_URL = BASE_URL
 
     INSTALLED_APPS = (
         'django.contrib.admin',
@@ -64,15 +70,14 @@ class Common(Configuration):  # pylint: disable=no-init
     WSGI_APPLICATION = 'tau.wsgi.application'
     ASGI_APPLICATION = 'tau.asgi.application'
 
-    REDIS_SERVER = os.environ.get('REDIS_SERVER', 'tau-redis')
-    REDIS_ENDPOINT = os.environ.get('REDIS_ENDPOINT','')
+    REDIS_ENDPOINT = os.environ.get('REDIS_ENDPOINT','redis:6379')
     REDIS_PW = os.environ.get('REDIS_PW','')
-    if REDIS_ENDPOINT != '':
-        if REDIS_PW != '':
-            REDIS_ENDPOINT = REDIS_PW + '@' + REDIS_ENDPOINT
-        REDIS_SERVER = 'redis://:' + REDIS_ENDPOINT
+
+    if REDIS_PW != '':
+        REDIS_SERVER = f'redis://:{REDIS_PW}@{REDIS_ENDPOINT}'
     else:
-        REDIS_SERVER = 'redis://' + REDIS_SERVER + ':6379'
+        REDIS_SERVER = f'redis://{REDIS_ENDPOINT}'
+
     CHANNEL_LAYERS = {
         'default': {
             'BACKEND': 'channels_redis.core.RedisChannelLayer',
@@ -99,7 +104,7 @@ class Common(Configuration):  # pylint: disable=no-init
                 'NAME': os.getenv('DJANGO_DB'),
                 'USER': os.getenv('DJANGO_DB_USER'),
                 'PASSWORD': os.getenv('DJANGO_DB_PW'),
-                'HOST': os.getenv('DJANGO_DB_URL'),
+                'HOST': os.getenv('DJANGO_DB_HOST'),
                 'PORT': '',
             }
         }

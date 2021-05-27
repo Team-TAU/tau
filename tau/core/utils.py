@@ -61,8 +61,8 @@ def setup_ngrok():
     # port = addrport.port if addrport.netloc and addrport.port else 8000
     port = int(os.environ.get("PORT", 8000))
 
-    if os.environ.get("USE_NGROK_TOKEN", 'false').lower() == 'true':
-        token = os.environ.get("NGROK_TOKEN", None)
+    token = os.environ.get("NGROK_TOKEN", None)
+    if token is not None:
         ngrok.set_auth_token(token)
 
     # Open an ngrok tunnel to the dev server

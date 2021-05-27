@@ -23,7 +23,7 @@ class WebSocketClient():
         self.token = token
         headers = {'Authorization': f'Token {self.token}'}
         requests.put(
-            f'{settings.BASE_URL}/api/v1/service-status/STATUS_WEBSOCKET/',
+            f'{settings.LOCAL_URL}/api/v1/service-status/STATUS_WEBSOCKET/',
             {'status': 'DISCONNECTED'},
             headers=headers
         )
@@ -61,7 +61,7 @@ class WebSocketClient():
         try:
             headers = {'Authorization': f'Token {self.token}'}
             r = requests.put(
-                f'{settings.BASE_URL}/api/v1/service-status/STATUS_WEBSOCKET/',
+                f'{settings.LOCAL_URL}/api/v1/service-status/STATUS_WEBSOCKET/',
                 {'status': status},
                 headers=headers
             )
@@ -104,18 +104,24 @@ class WebSocketClient():
             await asyncio.sleep(delay)
 
     async def ngrok_heartbeat(self):
+        first = True
         while True:
+            if first:
+                delay = 120
+                first = False
+            else:
+                delay = 15
+            await asyncio.sleep(delay)
             try:
-                r = requests.get(f'{settings.BASE_URL}/api/v1/heartbeat/')
+                headers = {'Authorization': f'Token {self.token}'}
+                r = requests.get(f'{settings.BASE_URL}/api/v1/heartbeat/', headers=headers)
                 r.raise_for_status()
             except:  # pylint: disable=bare-except
                 ngrok.kill() # need to kill ngrok process to start new one.
                 print('---- WARNING ngrok tunnel down!  Re-establishing. ----')
                 public_url = CoreConfig.setup_ngrok()
-                await database_sync_to_async(CoreConfig.setup_webhooks)(public_url)
+                await database_sync_to_async(CoreConfig.setup_webhooks)(public_url, self.token)
 
-            delay = 5
-            await asyncio.sleep(delay)
 
     async def recieve(self):
         while True:
