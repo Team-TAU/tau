@@ -19,8 +19,14 @@ class WebSocketClient():
     url = 'wss://pubsub-edge.twitch.tv'
     connection = None
 
-    def __init__(self):
-        config.STATUS_WEBSOCKET = 'DISCONNECTED'
+    def __init__(self, token):
+        self.token = token
+        headers = {'Authorization': f'Token {self.token}'}
+        requests.put(
+            f'{settings.LOCAL_URL}/api/v1/service-status/STATUS_WEBSOCKET/',
+            {'status': 'DISCONNECTED'},
+            headers=headers
+        )
         channel_id = config.CHANNEL_ID
         auth_token = config.TWITCH_ACCESS_TOKEN
         self.points_topic = f"channel-points-channel-v1.{channel_id}"
@@ -51,19 +57,30 @@ class WebSocketClient():
             tasks.append(asyncio.ensure_future(self.ngrok_heartbeat()))
         loop.run_until_complete(asyncio.wait(tasks))
 
+    async def set_status(self, status):
+        try:
+            headers = {'Authorization': f'Token {self.token}'}
+            r = requests.put(
+                f'{settings.LOCAL_URL}/api/v1/service-status/STATUS_WEBSOCKET/',
+                {'status': status},
+                headers=headers
+            )
+        except:
+            print('Error connecting back to server for status updates...')
+
     async def connect(self):
         delay = 1
-        await self.set_config('STATUS_WEBSOCKET', 'CONNECTING')
+        await self.set_status('CONNECTING')
         while True:
             self.connection = await websockets.client.connect(self.url)
             if self.connection.open:
                 print('---- Connected to twitch ws server ----')
                 await self.connection.send(json.dumps(self.listen_message))
-                await self.set_config('STATUS_WEBSOCKET', 'CONNECTED')
+                await self.set_status('CONNECTED')
                 break
             else:
                 print(f'---- Could not connect, waiting {delay}s to reconnect ----')
-                await self.set_config('STATUS_WEBSOCKET', 'RECONNECTING')
+                await self.set_status('RECONNECTING')
                 await asyncio.sleep(delay)
                 if delay < 120:
                     delay = max(delay*2, 120)
@@ -87,18 +104,24 @@ class WebSocketClient():
             await asyncio.sleep(delay)
 
     async def ngrok_heartbeat(self):
+        first = True
         while True:
+            if first:
+                delay = 120
+                first = False
+            else:
+                delay = 15
+            await asyncio.sleep(delay)
             try:
-                r = requests.get(f'{settings.BASE_URL}/api/v1/heartbeat/')
+                headers = {'Authorization': f'Token {self.token}'}
+                r = requests.get(f'{settings.BASE_URL}/api/v1/heartbeat/', headers=headers)
                 r.raise_for_status()
             except:  # pylint: disable=bare-except
                 ngrok.kill() # need to kill ngrok process to start new one.
                 print('---- WARNING ngrok tunnel down!  Re-establishing. ----')
                 public_url = CoreConfig.setup_ngrok()
-                await database_sync_to_async(CoreConfig.setup_webhooks)(public_url)
+                await database_sync_to_async(CoreConfig.setup_webhooks)(public_url, self.token)
 
-            delay = 5
-            await asyncio.sleep(delay)
 
     async def recieve(self):
         while True:
@@ -127,15 +150,12 @@ class WebSocketClient():
         await database_sync_to_async(self.create_twitch_event)(payload)
 
     async def disconnect(self):
-        await self.set_config('STATUS_WEBSOCKET', 'DISCONNECTED')
+        await self.set_status('DISCONNECTED')
         await self.connection.close()
 
     async def handle_reconnect(self):
         await self.disconnect()
         await self.connect()
-
-    async def set_config(self, key, value):
-        await database_sync_to_async(setattr)(config, key, value)
 
     def create_twitch_event(self, payload):
         return TwitchEvent.objects.create(**payload)

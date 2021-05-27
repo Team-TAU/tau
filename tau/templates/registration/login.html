@@ -1,13 +1,26 @@
-<!-- templates/registration/login.html -->
-{% extends 'base-no-header.html' %}
+{% extends "base-no-header.html" %}
+
 {% load static %}
 {% block title %}Login{% endblock %}
 
-{% block content %}    
-<form method="POST">
-  <img src="{% static 'img/logo-grey.png' %}" style="width: 150px; height: 150px; margin-bottom: 15px;">
-  <h1 class="h3 mb-3 fw-normal text-secondary">Log In</h1>{% csrf_token %}
-  <label for="id_username" class="visually-hidden">*Username</label>
+{% block content %}
+<img src="{% static 'img/logo-grey.png' %}" style="width: 150px; height: 150px; margin-bottom: 15px;">
+<h1 class="h3 mb-3 fw-normal text-secondary">Log In</h1>
+{% if form.errors %}
+<p>Your username and password didn't match. Please try again.</p>
+{% endif %}
+
+{% if next %}
+    {% if user.is_authenticated %}
+    <p>Your account doesn't have access to this page. To proceed,
+    please login with an account that has access.</p>
+    {% else %}
+    <p>Please login to see this page.</p>
+    {% endif %}
+{% endif %}
+<form method="post" action="{% url 'login' %}">
+{% csrf_token %}
+  <label for="id_username" class="visually-hidden">Username</label>
   <input 
     type="text"
     name="username"
@@ -27,5 +40,6 @@
     required
   >
   <button class="w-100 btn btn-lg btn-secondary" type="submit">Sign in</button>
+  <input type="hidden" name="next" value="{{ next }}">
 </form>
 {% endblock %}

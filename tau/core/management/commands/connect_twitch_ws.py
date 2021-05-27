@@ -1,15 +1,19 @@
 import time
+import sys
 
 import requests
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
 
+from rest_framework.authtoken.models import Token
+
 from constance import config
 
 from tau.twitchevents.wsclient import WebSocketClient  # pylint: disable=import-error
 from tau.core.apps import CoreConfig                   # pylint: disable=import-error
 from tau.streamers.utils import update_all_streamers   # pylint: disable=import-error
+from tau.users.models import User                      # pylint: disable=import-error
 
 class Command(BaseCommand):
     help = 'Connects server to twitch websocket API.'
@@ -38,17 +42,22 @@ class Command(BaseCommand):
                 public_url = CoreConfig.setup_ngrok()
             else:
                 public_url = settings.BASE_URL
+
+            user = User.objects.get(username='worker_process')
+            token, created = Token.objects.get_or_create(user=user)
+            token = str(token)
             # Setup Webhooks
             print(f'Setting webhooks with base url: {public_url}.')
-            CoreConfig.setup_webhooks(public_url)
+            CoreConfig.setup_webhooks(public_url, token)
             # Establish Websocket Connection
 
             # Update active streamers
             print('---- Updating streaming status of all streamers in DB ----')
             update_all_streamers()
             print('     [Done]\n')
-
-            client = WebSocketClient()
+            client = WebSocketClient(token=token)
             client.run()
         except:  # pylint: disable=bare-except
+            e = sys.exc_info()[0]
+            print(e)
             print('---- Exiting ----')
