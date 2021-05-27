@@ -1,15 +1,25 @@
-# TAU - Twitch API Unifier.
+# TAU - Twitch API Unifier
+
+Making integrations with Twitch API easier than ever!
+
+# Table of Contents
+- [Introduction](#Introduction)
+- [Features](#Features)
+- [Prerequisites](#Prerequisites)
+- [Getting Started](#Getting-Started)
+- [Updating](#Updating)
+- [Todo/Issues](#Todo/Issues)
+
+# :microphone: Introduction
 
 TAU provides a single, locally-managed websocket connection for
-all of Twitch's realtime APIs. Currently the Twitch realtime
-APIs are broken up into EventSub's WebHooks and PubSub's WebSockets.
-In order to obtain all of the realtime events a typical Twitch bot or
-overlay would use requires setting up multiple protocal, both server-side
-(WebHooks) and client-side (WebSocket) messaging. It also requires
-keeping track of multiple Twitch access tokens. TAU takes care of all
-this for you, and adds the ability to replay past events and generate
-test events of your own. Additionally, all events are stored in a
-database.
+all of Twitch's realtime APIs. Currently, Twitch's realtime
+APIs are broken up into [EventSub WebHooks](https://dev.twitch.tv/docs/eventsub) and [PubSub WebSockets](https://dev.twitch.tv/docs/pubsub).
+
+In order for a Twitch bot or overlay to be interractive, it needs to tap into the realtime events sent over the Twitch APIs. This typically requires setting up multiple protocols: a webhook on the server-side and websockets on the client-side. It also requires you to keep track of multiple Twitch access tokens. This is where TAU comes in! TAU takes care of all
+this for you and also adds the ability to replay past events and generate
+test events of your own from a user friendly UI. Additionally, all events are stored in a
+database. (Why is this part important?)
 
 Setting up TAU only takes a few minutes, and provides you with that
 one true source of Twitch realtime API goodness. Please see the
@@ -22,12 +32,24 @@ will help TAU become more stable and secure. Use at your own risk._
 _Note 2- TAU is written using django/python, however, acting as an
 API proxy, you can connect any codebase to its websockets._
 
-# Prerequisites
+ # :star: Features
+
+- Easy to use UI to manage Twitch events
+  - Enable or Disable events
+  - Test events
+  - Replay Events
+- Containerized setup for ease of spinning up and teardown
+- Manages multiple Twitch Event APIs without needing to register multiple Applications
+- Exposes 1 websocket for all Twitch Events
+
+# :white_check_mark: Prerequisites
 
 - [docker-compose](https://docs.docker.com/compose/install/)
-- A Twitch App Token and Secret (see getting started below)
+- [Twitch Account](https://twitch.tv)
 
-# Getting Started
+# :gear: Getting Started
+
+_**SOMETHING HERE ABOUT GETTING CODE FROM GITHUB**_ 
 
 Before running TAU, it is necessary to obtain a Twitch App ID and
 secret. In order to do so:
@@ -76,7 +98,7 @@ Then simply point your bot's websocket client at `ws://localhost:PORT/ws/twitch-
 
 Note: If you wish to run TAU using a cloud service rather than locally, you will need to provide your own Redis server.  This can either be another container running in the cloud, or a Redis provider such as Redislabs.  Since Redis is used as a simple message broker, something like Redislab's free tier will be more than sufficient for most users.  Then, simply provide the `REDIS_ENDPOINT` and `REDIS_PW` environment variables.  Additionally, you will need to either provide a working postgres installation, or change the `DJANGO_DB_TYPE` environment variable to `sqlite3` to use django's local sqlite3 library.  See the .env_single_container_sample file.
 
-# Updating
+# :hourglass_flowing_sand: Updating
 
 After pulling the latest code from github, you will need to rebuild the app container before re-launching TAU.  You can do so as follows:
 
@@ -84,6 +106,6 @@ After pulling the latest code from github, you will need to rebuild the app cont
 2. Rebuild the app container: `docker-compose build app`
 3. Fire TAU back up: `docker-compose up`
 
-# Todo/Issues
+# :thought_balloon: Todo/Issues
 
 Currently, while hypetrain events are forwarded on to any local clients connected to the TAU websocket connection, they are not shown in the TAU dashboard, nor do they have test events available.
