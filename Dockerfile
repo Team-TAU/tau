@@ -17,4 +17,4 @@ COPY supervisord.conf /etc/supervisord.conf
 # Adds our application code to the image
 COPY . /code
 
-CMD bash -c "./scripts/start_django.sh"
+CMD bash -c "./scripts/start.sh"
