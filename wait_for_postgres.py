@@ -40,12 +40,16 @@ def pg_isready(host, user, password, dbname):
                 logger.info(f"Creating user {db_user}")
                 add_user_query = f"CREATE USER {db_user} WITH ENCRYPTED PASSWORD '{db_pw}';"
                 cur.execute(add_user_query)
+                grant_query = f"GRANT ALL PRIVILEGES ON DATABASE {db_name} TO {db_user};"
+                cur.execute(grant_query)
+            else:
+                logger.info(f"Found a user {db_user}, updating password to current DJANGO_DB_PW value.")
+                update_user_query = f"ALTER USER {db_user} WITH ENCRYPTED PASSWORD '{db_pw}'"
+                cur.execute(update_user_query)
             if db_count == 0:
                 logger.info(f"Creating database {db_name}")
                 add_db_query = f"CREATE DATABASE {db_name};"
                 cur.execute(add_db_query)
-                grant_query = f"GRANT ALL PRIVILEGES ON DATABASE {db_name} TO {db_user};"
-                cur.execute(grant_query)
             logger.info("Postgres is ready!")
             conn.close()
             return True
