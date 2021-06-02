@@ -17,7 +17,4 @@ COPY supervisord.conf /etc/supervisord.conf
 # Adds our application code to the image
 COPY . /code
 
-CMD bash -c "./wait_for_postgres.py && \
-    ./manage.py migrate && \
-    ./manage.py collectstatic --noinput && \
-    /usr/local/bin/supervisord -n -c /etc/supervisord.conf"
+CMD bash -c "./scripts/start_django.sh"
