@@ -80,9 +80,8 @@ Note: If you wish to run TAU using a cloud service rather than locally, you will
 
 After pulling the latest code from github, you will need to rebuild the app container before re-launching TAU.  You can do so as follows:
 
-1. If TAU is running, stop it using `docker-compose down`
-2. Rebuild the app container: `docker-compose build app`
-3. Fire TAU back up: `docker-compose up`
+1. If TAU is running, stop it using `docker compose down`
+2. Fire TAU back up, building where necessary: `docker compose up --build`
 
 # Todo/Issues
 
