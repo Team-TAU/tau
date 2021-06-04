@@ -18,6 +18,29 @@ import constance.settings
 from tau.users.models import User
 from .forms import ChannelNameForm, FirstRunForm
 
+@api_view()
+def helix_view(request, helix_path=None):
+    client_id = os.environ.get('TWITCH_APP_ID', None)
+    headers = {
+        'Authorization': 'Bearer {}'.format(config.TWITCH_ACCESS_TOKEN),
+        'Client-Id': client_id
+    }
+    
+    url = f'https://api.twitch.tv/helix/' \
+          f'{helix_path}'
+    url_params_dict = request.GET
+    url_params = '&'.join(f'{key}={url_params_dict[key]}' for key in url_params_dict)
+    if url_params != '':
+        url += f'?{url_params}'
+    
+    data = requests.get(
+        url,
+        headers=headers
+    )
+    stream_data = data.json()
+
+    return Response(stream_data)
+
 def home_view(request):
     user_count = User.objects.all().exclude(username='worker_process').count()
     if user_count == 0:

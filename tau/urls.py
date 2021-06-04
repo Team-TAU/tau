@@ -31,6 +31,7 @@ from .core.views import (
     get_tau_token,
     HeartbeatViewSet,
     ServiceStatusViewSet,
+    helix_view
 )
 
 router = DefaultRouter()
@@ -55,6 +56,7 @@ urlpatterns = [
     path('api/v1/tau-user-token/', get_tau_token),
     path('api/v1/helix/streams/', get_streams),
     path('api/v1/', include(router.urls)),
+    path('api/helix/<path:helix_path>/', helix_view),
     path('api-token-auth/', views.obtain_auth_token),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('set-channel/', get_channel_name_view),
