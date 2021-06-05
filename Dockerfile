@@ -17,6 +17,4 @@ COPY supervisord.conf /etc/supervisord.conf
 # Adds our application code to the image
 COPY . /code
 
-CMD bash -c "./manage.py migrate && \
-    ./manage.py collectstatic --noinput && \
-    /usr/local/bin/supervisord -n -c /etc/supervisord.conf"
+CMD bash -c "./scripts/start.sh"
