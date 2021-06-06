@@ -184,7 +184,7 @@ const replayEvent = (id) => {
 
 const getUserId = (username_id, userid_id) => {
     const username = document.getElementById(username_id).value;
-    const sub = ajaxGet(`${protocol}//${host}${port}/api/v1/helix/users?login=${username}`).subscribe(resp => {
+    const sub = ajaxGet(`${protocol}//${host}${port}/api/twitch/helix/users?login=${username}`).subscribe(resp => {
         if (resp.data.length > 0) {
             document.getElementById(userid_id).value = resp.data[0].id
         }

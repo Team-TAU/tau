@@ -39,7 +39,7 @@ def helix_view(request, helix_path=None):
     )
     stream_data = data.json()
 
-    return Response(stream_data)
+    return Response(stream_data, status=data.status_code)
 
 def home_view(request):
     user_count = User.objects.all().exclude(username='worker_process').count()
