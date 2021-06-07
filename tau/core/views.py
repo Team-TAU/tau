@@ -28,11 +28,13 @@ def helix_view(request, helix_path=None):
     
     url = f'https://api.twitch.tv/helix/' \
           f'{helix_path}'
-    url_params_dict = request.GET
-    url_params = '&'.join(f'{key}={url_params_dict[key]}' for key in url_params_dict)
+    uri = request.build_absolute_uri()
+    url_params = ''
+    if uri.count('?') > 0:
+        url_params = uri.split('?', 1)[1]
     if url_params != '':
         url += f'?{url_params}'
-    
+
     data = requests.get(
         url,
         headers=headers
