@@ -9,6 +9,12 @@ from django.views.generic.base import RedirectView
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken import views
 
+from .twitch.views import (
+    twitch_token_page_view,
+    TwitchAPIScopeViewSet,
+    TwitchHelixEndpointViewSet
+)
+
 from .twitchevents.views import (
     TwitchEventViewSet,
     TwitchEventModelViewSet,
@@ -37,6 +43,8 @@ router.register(r'twitch-events', TwitchEventModelViewSet)
 router.register(r'service-status', ServiceStatusViewSet, basename='service-status')
 router.register(r'heartbeat', HeartbeatViewSet, basename='heartbeat')
 router.register(r'streamers', StreamerViewSet)
+router.register(r'twitch/scopes', TwitchAPIScopeViewSet)
+router.register(r'twitch/helix-endpoints', TwitchHelixEndpointViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -58,6 +66,7 @@ urlpatterns = [
     path('twitch-callback/', process_twitch_callback_view),
     path('first-run/', first_run_view),
     path('streamers/', streamer_page_view),
+    path('twitch/token-scopes/', twitch_token_page_view),
     path('', home_view),
 
     # the 'api-root' from django rest-frameworks default router

@@ -1,0 +1,22 @@
+<!-- templates/twitch/twitch_token_scopes.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Twitch Helix Tokens{% endblock %}
+
+{% block content %}
+<section class="py-3 text-center container">
+    <div class="row py-lg-3">
+        <div class="col-lg-6 col-md-8 mx-auto">
+            <h1 class="fw-light">Twitch Helix API Scopes</h1>
+        </div>
+    </div>
+</section>
+<section class="container">
+    <form id="scope-form" onsubmit="return onFormSubmit()">
+    </form>
+</section>
+
+{% endblock %}
+{% block js %}
+<script src="{% static 'js/twitch-api-scopes.js' %}"></script>
+{% endblock %}

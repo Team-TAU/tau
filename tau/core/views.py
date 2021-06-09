@@ -15,14 +15,28 @@ from rest_framework import viewsets
 from constance import config
 import constance.settings
 
+from tau.twitch.models import TwitchAPIScope
 from tau.users.models import User
 from .forms import ChannelNameForm, FirstRunForm
+from tau.twitch.models import TwitchHelixEndpoint
 
-@api_view()
+@api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
 def helix_view(request, helix_path=None):
+    try:
+        endpoint_instance = TwitchHelixEndpoint.objects.get(
+            endpoint=helix_path,
+            method=request.method
+        )
+        if endpoint_instance.token_type == 'OA':
+            token = config.TWITCH_ACCESS_TOKEN
+        else:
+            token = config.TWITCH_APP_ACCESS_TOKEN
+    except TwitchHelixEndpoint.DoesNotExist:
+        token = config.TWITCH_ACCESS_TOKEN
+    body = request.data
     client_id = os.environ.get('TWITCH_APP_ID', None)
     headers = {
-        'Authorization': 'Bearer {}'.format(config.TWITCH_ACCESS_TOKEN),
+        'Authorization': 'Bearer {}'.format(token),
         'Client-Id': client_id
     }
     
@@ -34,12 +48,40 @@ def helix_view(request, helix_path=None):
         url_params = uri.split('?', 1)[1]
     if url_params != '':
         url += f'?{url_params}'
-
-    data = requests.get(
-        url,
-        headers=headers
-    )
-    stream_data = data.json()
+    
+    if request.method == 'GET':
+        data = requests.get(
+            url,
+            headers=headers
+        )
+    elif request.method == 'POST':
+        data = requests.post(
+            url,
+            data=body,
+            headers=headers
+        )
+    elif request.method == 'PUT':
+        data = requests.put(
+            url,
+            data=body,
+            headers=headers
+        )
+        print(data)
+    elif request.method == 'PATCH':
+        data = requests.patch(
+            url,
+            data=body,
+            headers=headers
+        )
+    elif request.method == 'DELETE':
+        data = requests.delete(
+            url,
+            headers=headers
+        )
+    try:
+        stream_data = data.json()
+    except ValueError:
+        stream_data = None
 
     return Response(stream_data, status=data.status_code)
 
@@ -104,12 +146,18 @@ def get_channel_name_view(request):
 
 def refresh_token_scope(request):
     client_id = os.environ.get('TWITCH_APP_ID', None)
-    scope=' '.join(settings.TOKEN_SCOPES)
+
+    extra_scopes = list(TwitchAPIScope.objects.filter(required=True).values_list('scope', flat=True))
+    scopes = list(set(settings.TOKEN_SCOPES + extra_scopes))
+
+    scope=' '.join(scopes)
+
     url = f'https://id.twitch.tv/oauth2/authorize?' \
         f'client_id={client_id}&' \
         f'redirect_uri={settings.BASE_URL}/twitch-callback/&' \
         f'response_type=code&' \
-        f'scope={scope}'
+        f'scope={scope}&'
+    print(url)
     return HttpResponseRedirect(url)
 
 @api_view()

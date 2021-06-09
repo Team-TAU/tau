@@ -47,6 +47,7 @@ class Common(Configuration):  # pylint: disable=no-init
         # Your apps
         'tau.users',
         'tau.core.apps.CoreConfig',
+        'tau.twitch.apps.TwitchConfig',
         'tau.twitchevents.apps.TwitcheventsConfig',
         'tau.streamers.apps.StreamersConfig',
     )
