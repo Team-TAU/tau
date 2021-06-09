@@ -33,6 +33,8 @@ function updateScopesForm() {
     form.appendChild(table);
     const submit = document.createElement('input');
     submit.setAttribute("type", "submit");
+    submit.setAttribute("class", "btn btn-primary");
+    submit.setAttribute("value", "Update Token")
     form.appendChild(submit);
 }
 

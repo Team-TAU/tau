@@ -9,6 +9,8 @@ class TwitchAPIScope(models.Model):
     scope = models.CharField(max_length=255)
     required = models.BooleanField(default=False)
 
+    class Meta:
+        ordering = ['scope']
 
 class TwitchHelixEndpoint(models.Model):
     class TokenTypes(models.TextChoices):

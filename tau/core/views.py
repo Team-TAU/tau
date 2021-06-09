@@ -135,7 +135,8 @@ def get_channel_name_view(request):
                   f'client_id={client_id}&' \
                   f'redirect_uri={settings.BASE_URL}/twitch-callback/&' \
                   f'response_type=code&' \
-                  f'scope={scope}'
+                  f'scope={scope}&' \
+                  f'force_verify=true'
             return HttpResponseRedirect(url)
         else:
             # Show some error page
@@ -156,8 +157,8 @@ def refresh_token_scope(request):
         f'client_id={client_id}&' \
         f'redirect_uri={settings.BASE_URL}/twitch-callback/&' \
         f'response_type=code&' \
-        f'scope={scope}&'
-    print(url)
+        f'scope={scope}&' \
+        f'force_verify=true'
     return HttpResponseRedirect(url)
 
 @api_view()

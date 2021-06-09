@@ -11,9 +11,16 @@
         </div>
     </div>
 </section>
-<section class="container">
-    <form id="scope-form" onsubmit="return onFormSubmit()">
-    </form>
+<section class="container pb-4">
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-secondary text-white">
+            <h4 class="my-0 fw-normal">Token Scopes</h4>
+        </div>
+        <div class="card-body">
+            <p><em>Check the scopes you would like to use, then click "Update Token" at the bottom of the list.</em></p>
+            <form id="scope-form" onsubmit="return onFormSubmit()"></form>
+        </div>
+    </div>
 </section>
 
 {% endblock %}
