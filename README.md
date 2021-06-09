@@ -19,7 +19,7 @@ APIs are broken up into [EventSub WebHooks](https://dev.twitch.tv/docs/eventsub)
 In order for a Twitch bot or overlay to be interractive, it needs to tap into the realtime events sent over the Twitch APIs. This typically requires setting up multiple protocols: a webhook on the server-side and websockets on the client-side. It also requires you to keep track of multiple Twitch access tokens. This is where TAU comes in! TAU takes care of all
 this for you and also adds the ability to replay past events and generate
 test events of your own from a user friendly UI. Additionally, all events are stored in a
-database. (Why is this part important?)
+database.
 
 Setting up TAU only takes a few minutes, and provides you with that
 one true source of Twitch realtime API goodness. Please see the
