@@ -1,0 +1,29 @@
+<!-- templates/twitch/twitch_token_scopes.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Twitch Helix Tokens{% endblock %}
+
+{% block content %}
+<section class="py-3 text-center container">
+    <div class="row py-lg-3">
+        <div class="col-lg-6 col-md-8 mx-auto">
+            <h1 class="fw-light">Twitch Helix API Scopes</h1>
+        </div>
+    </div>
+</section>
+<section class="container pb-4">
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-secondary text-white">
+            <h4 class="my-0 fw-normal">Token Scopes</h4>
+        </div>
+        <div class="card-body">
+            <p><em>Check the scopes you would like to use, then click "Update Token" at the bottom of the list.</em></p>
+            <form id="scope-form" onsubmit="return onFormSubmit()"></form>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+{% block js %}
+<script src="{% static 'js/twitch-api-scopes.js' %}"></script>
+{% endblock %}

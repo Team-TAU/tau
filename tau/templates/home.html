@@ -58,7 +58,7 @@ window.onload = (event) => {
     twitchEventsWebsocket();
     const prModal = document.getElementById('testPointsRedemptionModal');
     prModal.addEventListener('shown.bs.modal', function () {
-        ajaxGet(`${protocol}//${host}${port}/api/v1/channel-point-rewards/`).subscribe(resp => {
+        ajaxGet(`${protocol}//${host}${port}/api/twitch/helix/channel_points/custom_rewards?broadcaster_id={{ config.CHANNEL_ID }}`).subscribe(resp => {
             const data = resp.data;
             rewards = data;
             buildRedemptionSelect(false);
