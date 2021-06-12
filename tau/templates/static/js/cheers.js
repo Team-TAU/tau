@@ -26,7 +26,7 @@ const appendCheer = (message) => {
     const username = message.event_data.is_anonymous ? 'Anonymous' : message.event_data.user_name;
     title = message.origin === 'test' ?
         `[Test] ${username} Cheered ${message.event_data.bits} bits` :
-        message.event.origin === 'replay' ?
+        message.origin === 'replay' ?
             `[replay] ${username} Cheered ${message.event_data.bits} bits` :
             `${username} Cheered ${message.event_data.bits} bits`;
     replay = message.origin !== 'test' ?
