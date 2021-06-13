@@ -111,6 +111,29 @@ const setStatus = (id, value) => {
     }
 }
 
+const ajaxPut = (url, body) => {
+    const ajax = rxjs.ajax.ajax;
+    const of = rxjs.of;
+    const map = rxjs.operators.map;
+    const catchError = rxjs.operators.catchError;
+    const csrftoken = Cookies.get('csrftoken');
+    return ajax({
+        url: url,
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+        },
+        body
+    }).pipe(
+        map(res => res.response),
+        catchError(error => {
+            console.log('error: ', error);
+            return of(error);
+        })
+    );
+}
+
 const ajaxPost = (url, body) => {
     const ajax = rxjs.ajax.ajax;
     const of = rxjs.of;
@@ -184,7 +207,7 @@ const replayEvent = (id) => {
 
 const getUserId = (username_id, userid_id) => {
     const username = document.getElementById(username_id).value;
-    const sub = ajaxGet(`${protocol}//${host}${port}/api/v1/twitch-user/?login=${username}`).subscribe(resp => {
+    const sub = ajaxGet(`${protocol}//${host}${port}/api/twitch/helix/users?login=${username}`).subscribe(resp => {
         if (resp.data.length > 0) {
             document.getElementById(userid_id).value = resp.data[0].id
         }

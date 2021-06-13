@@ -11,9 +11,9 @@ class Common(Configuration):  # pylint: disable=no-init
     PROTOCOL = os.environ.get("PROTOCOL", "http:")
     BASE_PORT = int(os.environ.get("PORT", 8000))
     BASE_URL = f"{PROTOCOL}//{PUBLIC_URL}"
-    
+    BEHIND_PROXY = (os.environ.get("BEHIND_PROXY", "false").lower() == "true")
 
-    if BASE_PORT not in [80, 443]:
+    if BASE_PORT not in [80, 443] and not BEHIND_PROXY:
         BASE_URL = BASE_URL + f":{BASE_PORT}"
 
     IS_SERVER = len(sys.argv) > 1 and "shell" not in sys.argv
@@ -47,6 +47,7 @@ class Common(Configuration):  # pylint: disable=no-init
         # Your apps
         'tau.users',
         'tau.core.apps.CoreConfig',
+        'tau.twitch.apps.TwitchConfig',
         'tau.twitchevents.apps.TwitcheventsConfig',
         'tau.streamers.apps.StreamersConfig',
     )
