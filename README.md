@@ -77,11 +77,10 @@ Fill in values for:
 - POSTGRES_PW Root Password
 - DJANGO_DB_PW (a random string)
 - DJANGO_SECRET_KEY (a random string)
-- ~~TAU Database Password~~ 
-  You probably will never need to use the Postgres ~~and TAU database~~ password but you do need to set them to something (preferably a strong PW) in order to build the containers. 
 - PORT - If you want to change the port TAU runs on, set `PORT` to this value.
-- ~~The internal address is set to `0.0.0.0`, in order to allow incoming connections on the host machine to properly point to the server.~~
-- If you want to use an existing ngrok account, set ~~`USE_NGROK_TOKEN=True`, and~~ `NGROK_TOKEN=<YOUR NGROK TOKEN>`
+- If you want to use an existing ngrok account, set `NGROK_TOKEN=<YOUR NGROK TOKEN>`
+
+Note- You probably will never need to use the Postgres password but you do need to set them to something (preferably a strong PW) in order to build the containers. 
 
 Please leave any other values alone, unless you know what you're doing. 😊
 
