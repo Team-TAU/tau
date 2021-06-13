@@ -1,4 +1,6 @@
 #!/bin/bash
+source ./scripts/loadenv.sh
+./tau/config/validate.py && \
 ./wait_for_postgres.py && \
 ./manage.py migrate && \
 ./manage.py collectstatic --noinput && \
