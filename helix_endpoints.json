@@ -120,6 +120,30 @@
         "scope": "channel:manage:redemptions"
     },
     {
+        "description": "Get Channel Emotes",
+        "endpoint": "chat/emotes",
+        "method": "GET",
+        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-channel-emotes",
+        "token_type": "OAuth",
+        "scope": null
+    },
+    {
+        "description": "Get Global Emotes",
+        "endpoint": "chat/emotes/global",
+        "method": "GET",
+        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-global-emotes",
+        "token_type": "OAuth",
+        "scope": null
+    },
+    {
+        "description": "Get Emote Sets",
+        "endpoint": "chat/emotes/set",
+        "method": "GET",
+        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-emote-sets",
+        "token_type": "OAuth",
+        "scope": null
+    },
+    {
         "description": "Get Channel Chat Badges",
         "endpoint": "chat/badges",
         "method": "GET",
@@ -294,6 +318,54 @@
         "reference_url": "https://dev.twitch.tv/docs/api/reference#end-prediction",
         "token_type": "OAuth",
         "scope": "channel:manage:predictions"
+    },
+    {
+        "description": "Get Channel Stream Schedule",
+        "endpoint": "schedule",
+        "method": "GET",
+        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-channel-stream-schedule",
+        "token_type": "OAuth",
+        "scope": null
+    },
+    {
+        "description": "Get Channel iCalendar",
+        "endpoint": "schedule/icalendar",
+        "method": "GET",
+        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-channel-icalendar",
+        "token_type": "OAuth",
+        "scope": null
+    },
+    {
+        "description": "Update Channel Stream Schedule",
+        "endpoint": "schedule/settings",
+        "method": "PATCH",
+        "reference_url": "https://dev.twitch.tv/docs/api/reference#update-channel-stream-schedule",
+        "token_type": "OAuth",
+        "scope": "channel:manage:schedule"
+    },
+    {
+        "description": "Create Channel Stream Schedule Segment",
+        "endpoint": "schedule/segment",
+        "method": "POST",
+        "reference_url": "https://dev.twitch.tv/docs/api/reference#create-channel-stream-schedule-segment",
+        "token_type": "OAuth",
+        "scope": "channel:manage:schedule"
+    },
+    {
+        "description": "Update Channel Stream Schedule Segment",
+        "endpoint": "schedule/segment",
+        "method": "PATCH",
+        "reference_url": "https://dev.twitch.tv/docs/api/reference#update-channel-stream-schedule-segment",
+        "token_type": "OAuth",
+        "scope": "channel:manage:schedule"
+    },
+    {
+        "description": "Delete Channel Stream Schedule Segment",
+        "endpoint": "schedule/segment",
+        "method": "DELETE",
+        "reference_url": "https://dev.twitch.tv/docs/api/reference#delete-channel-stream-schedule-segment",
+        "token_type": "OAuth",
+        "scope": "channel:manage:schedule"
     },
     {
         "description": "Search Categories",
