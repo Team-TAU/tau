@@ -2,11 +2,14 @@ site_name: tau
 site_description: Twith API Unifier
 repo_url: https://github.com/finitesingularity/tau
 site_dir: site
-copyright: Copyright &copy; 2020, <a href="https://github.com/finitesingularity">finitesingularity</a>.
-dev_addr: 0.0.0.0:8001
+copyright: Copyright &copy; 2021, <a href="https://github.com/finitesingularity">finitesingularity</a>.
+dev_addr: 0.0.0.0:8007
 
 nav:
   - Home: 'index.md'
+  - Deployment:
+    - Local: 'deployment/local.md'
+    - Cloud: 'deployment/cloud.md'
   - API:
     - Authentication: 'api/authentication.md'
     - Users: 'api/users.md'
