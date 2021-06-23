@@ -9,6 +9,8 @@ from django.views.generic.base import RedirectView
 from rest_framework.routers import DefaultRouter
 from rest_framework.authtoken import views
 
+from .core.routers import OptionalSlashRouter
+
 from .twitch.views import (
     twitch_token_page_view,
     TwitchAPIScopeViewSet,
@@ -37,7 +39,7 @@ from .core.views import (
     helix_view
 )
 
-router = DefaultRouter()
+router = OptionalSlashRouter()
 router.register(r'twitch-events', TwitchEventViewSet, basename='twitch-events')
 router.register(r'twitch-events', TwitchEventModelViewSet)
 router.register(r'service-status', ServiceStatusViewSet, basename='service-status')
