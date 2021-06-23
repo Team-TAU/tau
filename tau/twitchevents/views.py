@@ -7,6 +7,8 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import action
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
 
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
@@ -14,6 +16,8 @@ from asgiref.sync import async_to_sync
 from constance import config
 
 from tau.streamers.models import Streamer
+
+from .filters import TwitchEventFilter
 
 from .models import (
     TwitchEvent
@@ -98,6 +102,8 @@ class TwitchEventModelViewSet(viewsets.ModelViewSet):
     queryset = TwitchEvent.objects.all()
     serializer_class = TwitchEventSerializer
     permission_classes = (IsAuthenticated, )
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = TwitchEventFilter
 
     @action(detail=True, methods=['post', 'get'])
     def replay(self, request, pk=None):
