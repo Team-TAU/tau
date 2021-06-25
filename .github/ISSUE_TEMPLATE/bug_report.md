@@ -26,7 +26,7 @@ If applicable, add screenshots to help explain your problem.
 **Deployment:**
 <!--- To get the versions via command line `docker version` and `docker-compose version` -->
 * Docker Version:
-* Docker Compose Version:
+* Docker Compose Version (if applicable):
 * Deployment Type: Local, Cloud Service (e.g. Render.com), Other Server Deploy
 * Deployment Details: If not local deploy, detailed description of deployment setup.
 
