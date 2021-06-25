@@ -5,6 +5,8 @@ from .common import Common
 class Production(Common):
     INSTALLED_APPS = Common.INSTALLED_APPS
 
+    DEBUG = os.environ.get('DEBUG', "False").lower() == "true"
+
     ins = list(Common.MIDDLEWARE).index('django.middleware.security.SecurityMiddleware')
     if ins:
         MIDDLEWARE=list(Common.MIDDLEWARE)

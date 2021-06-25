@@ -4,7 +4,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class Local(Common):
-    DEBUG = os.environ.get('DEBUG', True)
+    DEBUG = os.environ.get('DEBUG', "True").lower == "true"
 
     # Testing
     INSTALLED_APPS = Common.INSTALLED_APPS

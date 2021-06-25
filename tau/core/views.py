@@ -79,6 +79,8 @@ def helix_view(request, helix_path=None):
             headers=headers
         )
     try:
+        if(settings.DEBUG_TWITCH_CALLS):
+            log_request(data)
         stream_data = data.json()
     except ValueError:
         stream_data = None
@@ -183,6 +185,8 @@ def process_twitch_callback_view(request):
         'redirect_uri': f'{settings.BASE_URL}/twitch-callback/'
     })
     response_data = auth_r.json()
+    if(settings.DEBUG_TWITCH_CALLS):
+        log_request(auth_r)
     config.TWITCH_ACCESS_TOKEN = response_data['access_token']
     config.TWITCH_REFRESH_TOKEN = response_data['refresh_token']
 
@@ -193,6 +197,8 @@ def process_twitch_callback_view(request):
         'grant_type': 'client_credentials',
         'scope': scope
     })
+    if(settings.DEBUG_TWITCH_CALLS):
+        log_request(app_auth_r)
     app_auth_data = app_auth_r.json()
     config.TWITCH_APP_ACCESS_TOKEN = app_auth_data['access_token']
     config.SCOPE_UPDATED_NEEDED = False
@@ -201,6 +207,8 @@ def process_twitch_callback_view(request):
         'Client-Id': client_id
     }
     user_r = requests.get('https://api.twitch.tv/helix/users', headers=headers)
+    if(settings.DEBUG_TWITCH_CALLS):
+        log_request(user_r)
     user_data = user_r.json()
     channel_id = user_data['data'][0]['id']
     config.CHANNEL_ID = channel_id
