@@ -18,6 +18,7 @@ import constance.settings
 from tau.twitch.models import TwitchAPIScope
 from tau.users.models import User
 from .forms import ChannelNameForm, FirstRunForm
+from  .utils import log_request
 from tau.twitch.models import TwitchHelixEndpoint
 
 @api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
