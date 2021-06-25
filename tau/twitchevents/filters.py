@@ -9,8 +9,6 @@ class TwitchEventFilter(filters.FilterSet):
     recipient_user_id = filters.CharFilter(method='recipient_user_id_filter', label='Recipient User Id')
     recipient_user_name = filters.CharFilter(method='recipient_user_name_filter', label='Recipient User Name')
     reward_id = filters.CharFilter(method='reward_id_filter', label='Reward Id')
-    raid_broadcaster_id = filters.CharFilter(method='raid_broadcaster_id_filter', label='Raid Broadcaster Id')
-    raid_broadcaster_name = filters.CharFilter(method='raid_broadcaster_name_filter', label='Raid Broadcaster Name')
 
     def user_id_filter(self, queryset, name, value):
         return queryset.filter(
