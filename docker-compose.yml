@@ -18,6 +18,7 @@ services:
       USE_NGROK: ${USE_NGROK:-True}
       PORT: ${PORT:-8000}
       TWITCH_WEBHOOK_SECRET: ${TWITCH_WEBHOOK_SECRET}
+      DEBUG_TWITCH_CALLS: ${DEBUG_TWITCH_CALLS:-False}
     depends_on:
       - db
       - redis

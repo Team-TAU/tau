@@ -27,6 +27,8 @@ class Common(Configuration):  # pylint: disable=no-init
     else:
         LOCAL_URL = BASE_URL
 
+    DEBUG_TWITCH_CALLS = os.environ.get("DEBUG_TWITCH_CALLS", "False").lower() == "true"
+
     INSTALLED_APPS = (
         'django.contrib.admin',
         'django.contrib.auth',
