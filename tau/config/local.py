@@ -4,8 +4,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class Local(Common):
-    DEBUG = os.environ.get('DEBUG', "True").lower == "true"
-
+    DEBUG = os.environ.get('DEBUG', "True").lower() == "true"
+    print(DEBUG)
     # Testing
     INSTALLED_APPS = Common.INSTALLED_APPS
     INSTALLED_APPS += ('django_nose',)
