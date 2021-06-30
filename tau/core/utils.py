@@ -1,5 +1,6 @@
 import os
-
+import json
+from textwrap import indent
 import requests
 
 from django.conf import settings
@@ -11,6 +12,8 @@ def check_access_token():
     access_token = config.TWITCH_ACCESS_TOKEN
     headers = {"Authorization": f"OAuth {access_token}"}
     req = requests.get(url, headers=headers)
+    if(settings.DEBUG_TWITCH_CALLS):
+        log_request(req)
     data = req.json()
     if "status" in data and int(data["status"]) == 401:
         return False
@@ -27,6 +30,8 @@ def refresh_access_token():
         'grant_type': 'refresh_token',
         'refresh_token': refresh_token
     })
+    if(settings.DEBUG_TWITCH_CALLS):
+        log_request(req)
     data = req.json()
     if 'access_token' in data:
         config.TWITCH_REFRESH_TOKEN = data['refresh_token']
@@ -72,3 +77,13 @@ def setup_ngrok():
     # Update any base URLs or webhooks to use the public ngrok URL
     settings.BASE_URL = public_url
     return public_url
+
+def log_request(req):
+    print('[REQUEST]')
+    print(f'  url: {req.url}')
+    print(f'  status: {req.status_code}')
+    print(f'  response:')
+    if req.text != '':
+        print(indent(json.dumps(req.json(), indent=2), '    '))
+    else:
+        print(f'    NO RESPONSE DATA')
