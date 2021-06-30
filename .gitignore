@@ -108,6 +108,7 @@ venv.bak/
 .mypy_cache/
 
 .vscode/
+.idea/
 
 /db/data/db.sqlite3
 
