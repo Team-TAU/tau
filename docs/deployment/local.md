@@ -1,5 +1,5 @@
 # TAU Local Deployment
-Paragraph that says what we're doing..
+The simplest way to deploy TAU is locally, using Docker.  Setting TAU up locally will use `docker-compose` to orchestrate the TAU, Redis, and Postgress containers, and will use ngrok to open a tunnel to your TUA instance for Twitch's webhooks.
 
 1. [Get a Twitch Client ID and Client Secret](./twitch_dev.md)
 1. Copy `.env_sample` to `.env`
