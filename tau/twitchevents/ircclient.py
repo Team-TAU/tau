@@ -1,13 +1,29 @@
 import pprint
 
+import time
+import datetime
+import json
+
+import requests
+
 import websockets
 import asyncio
 
-from constance import config
+from django.utils import timezone
+from django.conf import settings
 
-class IrcClient():
+from constance import config
+from channels.db import database_sync_to_async
+
+from .models import TwitchEvent
+from .serializers import TwitchEventSerializer
+
+class IRCClient():
     url = 'wss://irc-ws.chat.twitch.tv'
     connection = None
+
+    def __init__(self, token):
+        self.tau_token = token
 
     async def connect(self):
         delay = 1
@@ -41,16 +57,43 @@ class IrcClient():
         await self.connection.send(f'JOIN #{self.username.lower()}')
 
     async def recieve(self):
-        print('Recieve!!')
         pp = pprint.PrettyPrinter(indent=2)
         while True:
             try:
                 message = await self.connection.recv()
                 data = self.parse_message(message)
-                pp.pprint(data)
+                #pp.pprint(data)
+                if 'custom-reward-id' in data['tags']:
+                    await database_sync_to_async(self.handle_channel_points)(data)
+                
             except websockets.exceptions.ConnectionClosed:
                 print('Websocket to twitch closed... reconnecting')
                 await self.connect()
+
+    def handle_channel_points(self, data):
+        start_time = timezone.now() - datetime.timedelta(seconds=2)
+
+        time.sleep(1)
+        redemption = TwitchEvent.objects.filter(
+            event_type='point-redemption',
+            created__gte=start_time,
+            event_data__user_login=data['tags']['display-name'].lower()
+        )
+        if redemption.exists():
+            redemption = redemption.first()
+            redemption.event_data['user_input_emotes'] = data['tags']['emotes']
+            serializer = TwitchEventSerializer(redemption, many=False)
+            headers = {
+                'Authorization': f'Token {self.tau_token}',
+                'Content-type': 'application/json'
+            }
+            requests.put(
+                f'{settings.LOCAL_URL}/api/v1/twitch-events/{redemption.id}/',
+                data=json.dumps(serializer.data),
+                headers=headers
+            )
+
+        return
 
     def parse_message(self, data):
         message = {
@@ -58,7 +101,8 @@ class IrcClient():
             'tags': {},
             'prefix': None,
             'command': None,
-            'params': []
+            'params': [],
+            'message-text': None
         }
 
         position = 0
@@ -127,7 +171,25 @@ class IrcClient():
             if nextspace == -1:
                 message['params'].append(data[position:])
                 break
-            
+        
+        if message['command'] == 'PRIVMSG':
+            message['message-text'] = message['params'][2][1:].replace("\n", "").replace("\r", "")
+
+        if 'emotes' in message['tags']:
+            emotes = message['tags']['emotes']
+            emote_list = []
+            if emotes != '':
+                for emote_txt in emotes.split('/'):
+                    emote_data=emote_txt.split(':')
+                    emote_list.append({
+                        'id': emote_data[0],
+                        'positions': [
+                            [int(val) for val in position.split('-')]
+                            for position in emote_data[1].split(',')
+                        ]
+                    })
+            message['tags']['emotes'] = emote_list
+
         return message
 
 
