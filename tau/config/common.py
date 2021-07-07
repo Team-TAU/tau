@@ -72,6 +72,7 @@ class Common(Configuration):  # pylint: disable=no-init
     SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
     WSGI_APPLICATION = 'tau.wsgi.application'
     ASGI_APPLICATION = 'tau.asgi.application'
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
     REDIS_ENDPOINT = os.environ.get('REDIS_ENDPOINT','redis:6379')
     REDIS_PW = os.environ.get('REDIS_PW','')
@@ -252,7 +253,7 @@ class Common(Configuration):  # pylint: disable=no-init
 
     # Django Rest Framework
     REST_FRAMEWORK = {
-        'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+        'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.CursorPagination',
         'PAGE_SIZE': int(os.getenv('DJANGO_PAGINATION_LIMIT', '10')),
         'DATETIME_FORMAT': '%Y-%m-%dT%H:%M:%S%z',
         'DEFAULT_RENDERER_CLASSES': (

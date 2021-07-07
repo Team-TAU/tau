@@ -1,12 +1,26 @@
 site_name: tau
 site_description: Twith API Unifier
-repo_url: https://github.com/finitesingularity/tau
+repo_url: https://github.com/Team-TAU/tau
 site_dir: site
-copyright: Copyright &copy; 2020, <a href="https://github.com/finitesingularity">finitesingularity</a>.
-dev_addr: 0.0.0.0:8001
+copyright: Copyright &copy; 2021, <a href="https://github.com/finitesingularity">finitesingularity</a>.
+dev_addr: 0.0.0.0:8007
+
+theme:
+    name: readthedocs
+    highlightjs: true
+    hljs_languages:
+        - yaml
+        - json
+        - bash
 
 nav:
   - Home: 'index.md'
+  - Deployment:
+    - Local: 'deployment/local.md'
+    - Cloud: 'deployment/cloud.md'
+    - Enviromental Options: 'env_options.md'
   - API:
     - Authentication: 'api/authentication.md'
-    - Users: 'api/users.md'
+    - Connecting: 'api/connecting.md'
+    - V1: 'api/v1.md'
+    

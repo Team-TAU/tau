@@ -53,7 +53,7 @@ def channel_cheer(base_url):
 
 def channel_raid(base_url):
     type_value = 'channel.raid'
-    version = 'beta'
+    version = '1'
     url = '{}/api/v1/twitch-events/raid/webhook/'.format(base_url)
     data = base_data(type_value, url, version)
 
