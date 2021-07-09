@@ -64,6 +64,13 @@ window.onload = (event) => {
             buildRedemptionSelect(false);
         });
     });
+    // Populate Websocket Stream with last 10 events
+    ajaxGet(`${protocol}//${host}${port}/api/v1/twitch-events`).subscribe(resp => {
+      const events = resp.results;
+      events.reverse().forEach(event => {
+        handleEventMessage(event);
+      })
+    })
 }
 </script>
 {% endblock %}
