@@ -36,10 +36,12 @@ from .core.views import (
     get_tau_token,
     HeartbeatViewSet,
     ServiceStatusViewSet,
-    helix_view
+    helix_view,
+    TAUSettingsViewSet
 )
 
 router = OptionalSlashRouter()
+router.register(r'settings', TAUSettingsViewSet, basename='tau-settings')
 router.register(r'twitch-events', TwitchEventViewSet, basename='twitch-events')
 router.register(r'twitch-events', TwitchEventModelViewSet)
 router.register(r'service-status', ServiceStatusViewSet, basename='service-status')
@@ -68,7 +70,7 @@ urlpatterns = [
     path('twitch-callback/', process_twitch_callback_view),
     path('first-run/', first_run_view),
     path('streamers/', streamer_page_view),
-    path('twitch/token-scopes/', twitch_token_page_view),
+    path('tau-settings/', twitch_token_page_view),
     path('', home_view),
 
     # the 'api-root' from django rest-frameworks default router

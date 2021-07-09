@@ -21,6 +21,8 @@ from .serializers import TwitchEventSerializer
 class IRCClient():
     url = 'wss://irc-ws.chat.twitch.tv'
     connection = None
+    loop = None
+    tasks = []
 
     def __init__(self, token):
         self.tau_token = token
@@ -39,15 +41,36 @@ class IRCClient():
                 if delay < 120:
                     delay = max(delay*2, 120)
 
+    def create_event_loop(self):
+        self.loop = asyncio.get_event_loop()
+        self.loop.run_until_complete(self.connect())
+        self.tasks = [
+            asyncio.ensure_future(self.recieve()),
+            asyncio.ensure_future(self.check_irc_settings())
+        ]
+        self.loop.run_until_complete(asyncio.wait(self.tasks))
+
+    def clear_event_loop(self):
+        for t in self.tasks:
+            t.cancel()
+            t = None
+        self.tasks = []
+
     def run(self):
         self.token = config.TWITCH_ACCESS_TOKEN
         self.username = config.CHANNEL
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(self.connect())
-        tasks = [
-            asyncio.ensure_future(self.recieve()),
-        ]
-        loop.run_until_complete(asyncio.wait(tasks))
+        while True:
+            if config.USE_IRC:
+                try:
+                    self.create_event_loop()
+                except RuntimeError:
+                    pass
+            else:
+                self.clear_event_loop()
+                while True:
+                    time.sleep(5)
+                    if config.USE_IRC:
+                        break
 
     async def initial_connect(self):
         caps = 'twitch.tv/tags twitch.tv/commands twitch.tv/membership'
@@ -67,8 +90,22 @@ class IRCClient():
                     await database_sync_to_async(self.handle_channel_points)(data)
                 
             except websockets.exceptions.ConnectionClosed:
-                print('Websocket to twitch closed... reconnecting')
-                await self.connect()
+                use_irc = await database_sync_to_async(self.lookup_setting)('USE_IRC')
+                if use_irc:
+                    print('Websocket to twitch irc unexpectedly closed... reconnecting')
+                    await self.connect()
+
+    async def check_irc_settings(self): 
+        while True:
+            await asyncio.sleep(5)
+            use_irc = await database_sync_to_async(self.lookup_setting)('USE_IRC')
+            if not use_irc and self.loop.is_running():
+                await self.connection.close()
+                print('---- Disconnected from twitch irc ws server ----')
+                self.loop.stop()
+
+    def lookup_setting(self, setting):
+        return getattr(config, setting)
 
     def handle_channel_points(self, data):
         start_time = timezone.now() - datetime.timedelta(seconds=2)
@@ -88,7 +125,7 @@ class IRCClient():
                 'Content-type': 'application/json'
             }
             requests.put(
-                f'{settings.LOCAL_URL}/api/v1/twitch-events/{redemption.id}/',
+                f'{settings.LOCAL_URL}/api/v1/twitch-events/{redemption.id}',
                 data=json.dumps(serializer.data),
                 headers=headers
             )
