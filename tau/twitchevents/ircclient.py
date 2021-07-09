@@ -64,13 +64,13 @@ class IRCClient():
                 try:
                     self.create_event_loop()
                 except RuntimeError:
+                    # RuntimeError can occur when we interrupt the event_loop, if the
+                    # config.USE_IRC value is set to False by the user
                     pass
             else:
                 self.clear_event_loop()
-                while True:
+                while not config.USE_IRC:
                     time.sleep(5)
-                    if config.USE_IRC:
-                        break
 
     async def initial_connect(self):
         caps = 'twitch.tv/tags twitch.tv/commands twitch.tv/membership'
@@ -80,14 +80,16 @@ class IRCClient():
         await self.connection.send(f'JOIN #{self.username.lower()}')
 
     async def recieve(self):
-        pp = pprint.PrettyPrinter(indent=2)
+        # pp = pprint.PrettyPrinter(indent=2)
         while True:
             try:
                 message = await self.connection.recv()
                 data = self.parse_message(message)
-                #pp.pprint(data)
+                # pp.pprint(data)
                 if 'custom-reward-id' in data['tags']:
                     await database_sync_to_async(self.handle_channel_points)(data)
+                elif data['prefix'] is None and data['command'] == 'PING':
+                    await self.connection.send('PONG')
                 
             except websockets.exceptions.ConnectionClosed:
                 use_irc = await database_sync_to_async(self.lookup_setting)('USE_IRC')
