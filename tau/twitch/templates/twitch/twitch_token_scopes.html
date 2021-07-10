@@ -7,14 +7,40 @@
 <section class="py-3 text-center container">
     <div class="row py-lg-3">
         <div class="col-lg-6 col-md-8 mx-auto">
-            <h1 class="fw-light">Twitch Helix API Scopes</h1>
+            <h1 class="fw-light">TAU Settings</h1>
         </div>
     </div>
 </section>
+
 <section class="container pb-4">
     <div class="card mb-4 shadow-sm">
         <div class="card-header bg-secondary text-white">
-            <h4 class="my-0 fw-normal">Token Scopes</h4>
+            <h4 class="my-0 fw-normal">General TAU Settings</h4>
+        </div>
+        <div class="card-body">
+            <form id="tau-form" onsubmit="return onTauFormSubmit()">
+                <table class="table table-striped">
+                    <thead>
+                        <tr><th></th><th>Setting</th><th>Description</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="checkbox" id="use-irc"></td>
+                            <td>Use IRC</td>
+                            <td>Use IRC for grabbing emote data for Channel Point Redemptions</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <input type="submit" class="btn btn-primary" value="Update Settings">
+            </form>
+        </div>
+    </div>
+</section>
+
+<section class="container pb-4">
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-secondary text-white">
+            <h4 class="my-0 fw-normal">Twitch Helix API Token Scopes</h4>
         </div>
         <div class="card-body">
             <p><em>Check the scopes you would like to use, then click "Update Token" at the bottom of the list.</em></p>
