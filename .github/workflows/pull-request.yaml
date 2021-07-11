@@ -12,30 +12,8 @@ env:
   PYTHON_VERSION: '3.8'
 
 jobs:
-  install-deps:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/cache@v2
-        id: cache
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-      # Next two steps pull the dependencies if there isn't a cache hit
-      - name: Set up Python 3
-        if: steps.cache.outputs.cache-hit != 'true'
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-      - name: Pull dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          pip install -r requirements.txt
-
   lint:
     runs-on: ubuntu-latest
-    needs:
-      - install-deps
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
@@ -48,14 +26,11 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Run pylint
         run: |
-          pip list
-          pip install -U pylint
+          pip install -r requirements.txt
           pylint **/*.py
 
   license-check:
     runs-on: ubuntu-latest
-    needs:
-      - install-deps
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
@@ -68,14 +43,12 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: License check
         run: |
-          pip list
+          pip install -r requirements.txt
           pip install -U pip-licenses
           pip-licenses --order=license
 
   run-tests:
     runs-on: ubuntu-latest
-    needs:
-      - install-deps
     steps:
       - uses: actions/checkout@v2
       - uses: actions/cache@v2
