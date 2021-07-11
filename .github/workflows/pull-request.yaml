@@ -4,7 +4,10 @@ on:
   pull_request:
     branches:
       - main
-  workflow_dispatch:
+  # TODO: Remove before merging
+  push:
+    branches:
+      - feat/71
 env:
   PYTHON_VERSION: '3.8'
 
