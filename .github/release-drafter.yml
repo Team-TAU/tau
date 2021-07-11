@@ -1,5 +1,7 @@
 tag-template: 'v$RESOLVED_VERSION'
 categories:
+  - title: '⚠️ Breaking Changes'
+    label: 'breaking'
   - title: '🚀 Features'
     labels:
       - 'feature'
