@@ -48,6 +48,7 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
       - name: Run pylint
         run: |
+          pip install -U pylint
           pylint **/*.py
 
   license-check:
