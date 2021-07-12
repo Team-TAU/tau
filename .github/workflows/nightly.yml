@@ -25,12 +25,8 @@ jobs:
         id: update_endpoints
         run: |
           python3 scripts/scrape_helix_docs.py
-          git diff --exit-code helix_endpoints.json
-          echo "::set-output name=diffs::$?"
 
-      # output will be 1 if there has been a change to helix_endpoints.json
       - name: Create PR if applicable
-        if: steps.update_endpoints.outputs.diffs == 1
         uses: peter-evans/create-pull-request@v3
         with:
           commit-message: [Automated] Update to helix_endpoints.json
