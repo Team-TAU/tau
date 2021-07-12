@@ -9,10 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
       - name: Set up Python 3
         uses: actions/setup-python@v2
         with:
@@ -26,10 +22,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
       - name: Set up Python 3
         uses: actions/setup-python@v2
         with:
@@ -44,10 +36,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
       - name: Set up Python 3
         uses: actions/setup-python@v2
         with:
@@ -55,4 +43,3 @@ jobs:
       - name: Run tests
         run: |
           echo "TODO: Implement"
-
