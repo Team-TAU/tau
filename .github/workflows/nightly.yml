@@ -28,8 +28,8 @@ jobs:
           git diff --exit-code helix_endpoints.json
           echo "::set-output name=diffs::$?"
 
+      # output will be 1 if there has been a change to helix_endpoints.json
       - name: Create PR if applicable
-        # output will be 1 if there has been a change to helix_endpoints.json
         if: steps.update_endpoints.outputs.diffs == 1
         uses: peter-evans/create-pull-request@v3
         with:
