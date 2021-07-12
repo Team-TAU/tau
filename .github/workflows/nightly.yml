@@ -1,3 +1,5 @@
+name: nightly
+
 on:
   schedule:
     - cron: 7 3 * * *
@@ -28,7 +30,7 @@ jobs:
 
       - name: Create PR if applicable
         # output will be 1 if there has been a change to helix_endpoints.json
-        if: steps.update_endpoints.outputs.diff == 1
+        if: steps.update_endpoints.outputs.diffs == 1
         uses: peter-evans/create-pull-request@v3
         with:
           commit-message: [Automated] Update to helix_endpoints.json
