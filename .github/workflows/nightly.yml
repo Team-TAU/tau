@@ -30,6 +30,6 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         with:
           commit-message: [Automated] Update to helix_endpoints.json
-          branch: helix-endpoint-update
+          branch: automation/helix-endpoint-update
           delete-branch: true
           title: Updated helix endpoint data
