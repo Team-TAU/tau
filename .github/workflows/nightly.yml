@@ -24,6 +24,7 @@ jobs:
       - name: Generate Helix Endpoints
         id: update_endpoints
         run: |
+          pip install -r requirements.txt
           python3 scripts/scrape_helix_docs.py
 
       - name: Create PR if applicable
