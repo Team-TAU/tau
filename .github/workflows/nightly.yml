@@ -34,3 +34,4 @@ jobs:
           branch: automation/helix-endpoint-update
           delete-branch: true
           title: Updated helix endpoint data
+          body: A change was detected in twitches documentation regarding helix endpoints.
