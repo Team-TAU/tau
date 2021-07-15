@@ -5,6 +5,8 @@ from django.http import HttpResponseRedirect, HttpResponse, JsonResponse, Http40
 from django.template import loader
 from django.contrib.auth import login
 from django.conf import settings
+from django.http import Http404
+import rest_framework
 
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
@@ -222,6 +224,30 @@ class HeartbeatViewSet(viewsets.ViewSet):
     def list(self, request, *args, **kwargs):
         response = {'message': 'pong'}
         return Response(response)
+
+
+class TAUSettingsViewSet(viewsets.ViewSet):
+    permission_classes = (IsAuthenticated, )
+
+    valid_keys = ['USE_IRC']
+
+    def list(self, request, *args, **kwargs):
+        response = {key.lower(): getattr(config, key) for key in self.valid_keys}
+        return Response(response)
+
+    def retrieve(self, request, pk=None):
+        if pk.upper() in self.valid_keys:
+            return Response({pk: getattr(config, pk.upper())})
+        else:
+            raise Http404
+
+    def update(self, request, pk=None):
+        if pk.upper() in self.valid_keys:
+            data = request.data
+            setattr(config, pk.upper(), data['value'])
+            return Response({pk: data['value']})
+        else:
+            raise Http404
 
 
 class ServiceStatusViewSet(viewsets.ViewSet):
