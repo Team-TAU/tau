@@ -1,6 +1,8 @@
 let scopes = [];
 let helixEndpoints = [];
 let endpointsByScope = {};
+let useIrc = false;
+
 
 window.onload = (event) => {
     ajaxGet(`${protocol}//${host}${port}/api/v1/twitch/scopes/`).subscribe(resp => {
@@ -10,7 +12,27 @@ window.onload = (event) => {
             updateScopesForm();
         });
     });
-    
+    ajaxGet(`${protocol}//${host}${port}/api/v1/settings/use_irc`).subscribe(resp => {
+        useIrc = resp.use_irc;
+        updateSettingsForm();
+    })
+}
+
+function updateSettingsForm() {
+    document.getElementById("use-irc").checked=useIrc;
+}
+
+function onTauFormSubmit() {
+    useIrc = document.getElementById("use-irc").checked
+    const payload = {
+        value: useIrc
+    };
+
+    const sub = ajaxPut(`${protocol}//${host}${port}/api/v1/settings/use_irc`, payload).subscribe(resp => {
+        
+    });
+
+    return false;
 }
 
 function updateScopesForm() {
