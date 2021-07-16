@@ -14,7 +14,8 @@ from .core.routers import OptionalSlashRouter
 from .twitch.views import (
     twitch_token_page_view,
     TwitchAPIScopeViewSet,
-    TwitchHelixEndpointViewSet
+    TwitchHelixEndpointViewSet,
+    TwitchEventSubSubcriptionsViewSet
 )
 
 from .twitchevents.views import (
@@ -49,6 +50,7 @@ router.register(r'heartbeat', HeartbeatViewSet, basename='heartbeat')
 router.register(r'streamers', StreamerViewSet)
 router.register(r'twitch/scopes', TwitchAPIScopeViewSet)
 router.register(r'twitch/helix-endpoints', TwitchHelixEndpointViewSet)
+router.register(r'twitch/eventsub-subscriptions', TwitchEventSubSubcriptionsViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),

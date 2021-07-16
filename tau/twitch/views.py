@@ -7,13 +7,29 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 
-from .models import TwitchAPIScope, TwitchHelixEndpoint
-from .serializers import TwitchAPIScopeSerializer, TwitchEndpointSerializer
+from .models import (
+    TwitchAPIScope,
+    TwitchHelixEndpoint,
+    TwitchEventSubSubscription
+)
+
+from .serializers import (
+    TwitchAPIScopeSerializer,
+    TwitchEndpointSerializer,
+    TwitchEventSubSubscriptionSerializer
+)
 
 # Create your views here.
 def twitch_token_page_view(request):
     template = loader.get_template('twitch/twitch_token_scopes.html')
     return HttpResponse(template.render({}, request))
+
+class TwitchEventSubSubcriptionsViewSet(viewsets.ModelViewSet):
+    queryset = TwitchEventSubSubscription.objects.all()
+    serializer_class = TwitchEventSubSubscriptionSerializer
+    permission_classes = (IsAuthenticated, )
+    pagination_class = None
+    lookup_field = 'lookup_name'
 
 class TwitchHelixEndpointViewSet(viewsets.ModelViewSet):
     queryset = TwitchHelixEndpoint.objects.all()

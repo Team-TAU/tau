@@ -25,13 +25,15 @@ class Command(BaseCommand):
                 TwitchEventSubSubscription.objects.filter(
                     pk=existing_subs[sub['name']]
                 ).update(
-                    **sub
+                    **sub,
+                    lookup_name=sub['name'].replace('.', '-')
                 )
                 counts['updated'] += 1
             else:
                 # Create a new entry
                 TwitchEventSubSubscription.objects.create(
-                    **sub
+                    **sub,
+                    lookup_name=sub['name'].replace('.', '-')
                 )
                 counts['created'] += 1
 

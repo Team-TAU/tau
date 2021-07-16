@@ -40,6 +40,7 @@ class TwitchEventSubSubscription(models.Model):
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=255)
+    lookup_name = models.CharField(max_length=255, blank=True, null=True)
     subscription_type = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     active = models.BooleanField(default=False)

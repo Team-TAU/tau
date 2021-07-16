@@ -24,7 +24,8 @@ def get_type_dict(soup, id):
         cols = row.find_all('td')
         if cols[1].find('a') and "array" in cols[2].text.strip().lower():
             next_id = cols[1].find('a')['href'][1:]
-            event_type = {
+            data[cols[0].text.strip()] = {
+                'description': cols[2].text.strip(),
                 'type': 'array',
                 'items': {
                     'type': 'object',
@@ -34,17 +35,18 @@ def get_type_dict(soup, id):
             }
         elif cols[1].find('a'):
             next_id = cols[1].find('a')['href'][1:]
-            event_type = {
+            data[cols[0].text.strip()] = {
+                'description': cols[2].text.strip(),
                 'type': 'object',
                 'properties': get_type_dict(soup, next_id),
                 'required': get_type_required(soup, next_id)
             }
         else:
-            event_type = cols[1].text.strip()
-        data[cols[0].text.strip()] = {
-            'description': cols[2].text.strip(),
-            'type': event_type,
-        }
+            data[cols[0].text.strip()] = {
+                'description': cols[2].text.strip(),
+                'type': cols[1].text.strip(),
+            }
+        
     return data
 
 
@@ -171,6 +173,3 @@ json_object = json.dumps(event_api_data, indent = 4)
 
 with open("eventsub_subscriptions.json", "w") as outfile:
     outfile.write(json_object)
-
-# pp.pprint(event_api_data)
-

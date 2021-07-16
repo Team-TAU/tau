@@ -417,47 +417,43 @@
                 },
                 "message": {
                     "description": "An object that contains the resubscription message and emote information needed to recreate the message.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "text": {
-                                "description": "The text of the resubscription chat message.",
-                                "type": "string"
-                            },
-                            "emotes": {
-                                "description": "An array that includes the emote ID and start and end positions for where the emote appears in the text.",
-                                "type": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "object",
-                                        "properties": {
-                                            "begin": {
-                                                "description": "The index of where the Emote starts in the text.",
-                                                "type": "int"
-                                            },
-                                            "end": {
-                                                "description": "The index of where the Emote ends in the text.",
-                                                "type": "int"
-                                            },
-                                            "id": {
-                                                "description": "The emote ID.",
-                                                "type": "string"
-                                            }
-                                        },
-                                        "required": [
-                                            "begin",
-                                            "end",
-                                            "id"
-                                        ]
-                                    }
-                                }
-                            }
+                    "type": "object",
+                    "properties": {
+                        "text": {
+                            "description": "The text of the resubscription chat message.",
+                            "type": "string"
                         },
-                        "required": [
-                            "text",
-                            "emotes"
-                        ]
-                    }
+                        "emotes": {
+                            "description": "An array that includes the emote ID and start and end positions for where the emote appears in the text.",
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "begin": {
+                                        "description": "The index of where the Emote starts in the text.",
+                                        "type": "int"
+                                    },
+                                    "end": {
+                                        "description": "The index of where the Emote ends in the text.",
+                                        "type": "int"
+                                    },
+                                    "id": {
+                                        "description": "The emote ID.",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "begin",
+                                    "end",
+                                    "id"
+                                ]
+                            }
+                        }
+                    },
+                    "required": [
+                        "text",
+                        "emotes"
+                    ]
                 },
                 "cumulative_total": {
                     "description": "The total number of months the user has been subscribed to the channel.",
@@ -1017,43 +1013,39 @@
                 },
                 "max_per_stream": {
                     "description": "Whether a maximum per stream is enabled and what the maximum is.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "is_enabled": {
-                                "description": "Is the setting enabled.",
-                                "type": "boolean"
-                            },
-                            "value": {
-                                "description": "The max per stream limit.",
-                                "type": "integer"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "is_enabled": {
+                            "description": "Is the setting enabled.",
+                            "type": "boolean"
                         },
-                        "required": [
-                            "is_enabled",
-                            "value"
-                        ]
-                    }
+                        "value": {
+                            "description": "The max per stream limit.",
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "is_enabled",
+                        "value"
+                    ]
                 },
                 "max_per_user_per_stream": {
                     "description": "Whether a maximum per user per stream is enabled and what the maximum is.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "is_enabled": {
-                                "description": "Is the setting enabled.",
-                                "type": "boolean"
-                            },
-                            "value": {
-                                "description": "The max per user per stream limit.",
-                                "type": "integer"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "is_enabled": {
+                            "description": "Is the setting enabled.",
+                            "type": "boolean"
                         },
-                        "required": [
-                            "is_enabled",
-                            "value"
-                        ]
-                    }
+                        "value": {
+                            "description": "The max per user per stream limit.",
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "is_enabled",
+                        "value"
+                    ]
                 },
                 "background_color": {
                     "description": "Custom background color for the reward. Format: Hex with # prefix. Example:#FA1ED2.",
@@ -1061,73 +1053,67 @@
                 },
                 "image": {
                     "description": "Set of custom images of 1x, 2x and 4x sizes for the reward. Can benullif no images have been uploaded.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "url_1x": {
-                                "description": "URL for the image at 1x size.",
-                                "type": "string"
-                            },
-                            "url_2x": {
-                                "description": "URL for the image at 2x size.",
-                                "type": "string"
-                            },
-                            "url_4x": {
-                                "description": "URL for the image at 4x size.",
-                                "type": "string"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "url_1x": {
+                            "description": "URL for the image at 1x size.",
+                            "type": "string"
                         },
-                        "required": [
-                            "url_1x",
-                            "url_2x",
-                            "url_4x"
-                        ]
-                    }
+                        "url_2x": {
+                            "description": "URL for the image at 2x size.",
+                            "type": "string"
+                        },
+                        "url_4x": {
+                            "description": "URL for the image at 4x size.",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "url_1x",
+                        "url_2x",
+                        "url_4x"
+                    ]
                 },
                 "default_image": {
                     "description": "Set of default images of 1x, 2x and 4x sizes for the reward.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "url_1x": {
-                                "description": "URL for the image at 1x size.",
-                                "type": "string"
-                            },
-                            "url_2x": {
-                                "description": "URL for the image at 2x size.",
-                                "type": "string"
-                            },
-                            "url_4x": {
-                                "description": "URL for the image at 4x size.",
-                                "type": "string"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "url_1x": {
+                            "description": "URL for the image at 1x size.",
+                            "type": "string"
                         },
-                        "required": [
-                            "url_1x",
-                            "url_2x",
-                            "url_4x"
-                        ]
-                    }
+                        "url_2x": {
+                            "description": "URL for the image at 2x size.",
+                            "type": "string"
+                        },
+                        "url_4x": {
+                            "description": "URL for the image at 4x size.",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "url_1x",
+                        "url_2x",
+                        "url_4x"
+                    ]
                 },
                 "global_cooldown": {
                     "description": "Whether a cooldown is enabled and what the cooldown is in seconds.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "is_enabled": {
-                                "description": "Is the setting enabled.",
-                                "type": "boolean"
-                            },
-                            "seconds": {
-                                "description": "The cooldown in seconds.",
-                                "type": "integer"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "is_enabled": {
+                            "description": "Is the setting enabled.",
+                            "type": "boolean"
                         },
-                        "required": [
-                            "is_enabled",
-                            "seconds"
-                        ]
-                    }
+                        "seconds": {
+                            "description": "The cooldown in seconds.",
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "is_enabled",
+                        "seconds"
+                    ]
                 },
                 "cooldown_expires_at": {
                     "description": "Timestamp of the cooldown expiration.nullif the reward isnt on cooldown.",
@@ -1241,43 +1227,39 @@
                 },
                 "max_per_stream": {
                     "description": "Whether a maximum per stream is enabled and what the maximum is.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "is_enabled": {
-                                "description": "Is the setting enabled.",
-                                "type": "boolean"
-                            },
-                            "value": {
-                                "description": "The max per stream limit.",
-                                "type": "integer"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "is_enabled": {
+                            "description": "Is the setting enabled.",
+                            "type": "boolean"
                         },
-                        "required": [
-                            "is_enabled",
-                            "value"
-                        ]
-                    }
+                        "value": {
+                            "description": "The max per stream limit.",
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "is_enabled",
+                        "value"
+                    ]
                 },
                 "max_per_user_per_stream": {
                     "description": "Whether a maximum per user per stream is enabled and what the maximum is.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "is_enabled": {
-                                "description": "Is the setting enabled.",
-                                "type": "boolean"
-                            },
-                            "value": {
-                                "description": "The max per user per stream limit.",
-                                "type": "integer"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "is_enabled": {
+                            "description": "Is the setting enabled.",
+                            "type": "boolean"
                         },
-                        "required": [
-                            "is_enabled",
-                            "value"
-                        ]
-                    }
+                        "value": {
+                            "description": "The max per user per stream limit.",
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "is_enabled",
+                        "value"
+                    ]
                 },
                 "background_color": {
                     "description": "Custom background color for the reward. Format: Hex with # prefix. Example:#FA1ED2.",
@@ -1285,73 +1267,67 @@
                 },
                 "image": {
                     "description": "Set of custom images of 1x, 2x and 4x sizes for the reward. Can benullif no images have been uploaded.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "url_1x": {
-                                "description": "URL for the image at 1x size.",
-                                "type": "string"
-                            },
-                            "url_2x": {
-                                "description": "URL for the image at 2x size.",
-                                "type": "string"
-                            },
-                            "url_4x": {
-                                "description": "URL for the image at 4x size.",
-                                "type": "string"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "url_1x": {
+                            "description": "URL for the image at 1x size.",
+                            "type": "string"
                         },
-                        "required": [
-                            "url_1x",
-                            "url_2x",
-                            "url_4x"
-                        ]
-                    }
+                        "url_2x": {
+                            "description": "URL for the image at 2x size.",
+                            "type": "string"
+                        },
+                        "url_4x": {
+                            "description": "URL for the image at 4x size.",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "url_1x",
+                        "url_2x",
+                        "url_4x"
+                    ]
                 },
                 "default_image": {
                     "description": "Set of default images of 1x, 2x and 4x sizes for the reward.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "url_1x": {
-                                "description": "URL for the image at 1x size.",
-                                "type": "string"
-                            },
-                            "url_2x": {
-                                "description": "URL for the image at 2x size.",
-                                "type": "string"
-                            },
-                            "url_4x": {
-                                "description": "URL for the image at 4x size.",
-                                "type": "string"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "url_1x": {
+                            "description": "URL for the image at 1x size.",
+                            "type": "string"
                         },
-                        "required": [
-                            "url_1x",
-                            "url_2x",
-                            "url_4x"
-                        ]
-                    }
+                        "url_2x": {
+                            "description": "URL for the image at 2x size.",
+                            "type": "string"
+                        },
+                        "url_4x": {
+                            "description": "URL for the image at 4x size.",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "url_1x",
+                        "url_2x",
+                        "url_4x"
+                    ]
                 },
                 "global_cooldown": {
                     "description": "Whether a cooldown is enabled and what the cooldown is in seconds.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "is_enabled": {
-                                "description": "Is the setting enabled.",
-                                "type": "boolean"
-                            },
-                            "seconds": {
-                                "description": "The cooldown in seconds.",
-                                "type": "integer"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "is_enabled": {
+                            "description": "Is the setting enabled.",
+                            "type": "boolean"
                         },
-                        "required": [
-                            "is_enabled",
-                            "seconds"
-                        ]
-                    }
+                        "seconds": {
+                            "description": "The cooldown in seconds.",
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "is_enabled",
+                        "seconds"
+                    ]
                 },
                 "cooldown_expires_at": {
                     "description": "Timestamp of the cooldown expiration.nullif the reward isnt on cooldown.",
@@ -1469,43 +1445,39 @@
                 },
                 "max_per_stream": {
                     "description": "Whether a maximum per stream is enabled and what the maximum is.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "is_enabled": {
-                                "description": "Is the setting enabled.",
-                                "type": "boolean"
-                            },
-                            "value": {
-                                "description": "The max per stream limit.",
-                                "type": "integer"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "is_enabled": {
+                            "description": "Is the setting enabled.",
+                            "type": "boolean"
                         },
-                        "required": [
-                            "is_enabled",
-                            "value"
-                        ]
-                    }
+                        "value": {
+                            "description": "The max per stream limit.",
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "is_enabled",
+                        "value"
+                    ]
                 },
                 "max_per_user_per_stream": {
                     "description": "Whether a maximum per user per stream is enabled and what the maximum is.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "is_enabled": {
-                                "description": "Is the setting enabled.",
-                                "type": "boolean"
-                            },
-                            "value": {
-                                "description": "The max per user per stream limit.",
-                                "type": "integer"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "is_enabled": {
+                            "description": "Is the setting enabled.",
+                            "type": "boolean"
                         },
-                        "required": [
-                            "is_enabled",
-                            "value"
-                        ]
-                    }
+                        "value": {
+                            "description": "The max per user per stream limit.",
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "is_enabled",
+                        "value"
+                    ]
                 },
                 "background_color": {
                     "description": "Custom background color for the reward. Format: Hex with # prefix. Example:#FA1ED2.",
@@ -1513,73 +1485,67 @@
                 },
                 "image": {
                     "description": "Set of custom images of 1x, 2x and 4x sizes for the reward. Can benullif no images have been uploaded.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "url_1x": {
-                                "description": "URL for the image at 1x size.",
-                                "type": "string"
-                            },
-                            "url_2x": {
-                                "description": "URL for the image at 2x size.",
-                                "type": "string"
-                            },
-                            "url_4x": {
-                                "description": "URL for the image at 4x size.",
-                                "type": "string"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "url_1x": {
+                            "description": "URL for the image at 1x size.",
+                            "type": "string"
                         },
-                        "required": [
-                            "url_1x",
-                            "url_2x",
-                            "url_4x"
-                        ]
-                    }
+                        "url_2x": {
+                            "description": "URL for the image at 2x size.",
+                            "type": "string"
+                        },
+                        "url_4x": {
+                            "description": "URL for the image at 4x size.",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "url_1x",
+                        "url_2x",
+                        "url_4x"
+                    ]
                 },
                 "default_image": {
                     "description": "Set of default images of 1x, 2x and 4x sizes for the reward.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "url_1x": {
-                                "description": "URL for the image at 1x size.",
-                                "type": "string"
-                            },
-                            "url_2x": {
-                                "description": "URL for the image at 2x size.",
-                                "type": "string"
-                            },
-                            "url_4x": {
-                                "description": "URL for the image at 4x size.",
-                                "type": "string"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "url_1x": {
+                            "description": "URL for the image at 1x size.",
+                            "type": "string"
                         },
-                        "required": [
-                            "url_1x",
-                            "url_2x",
-                            "url_4x"
-                        ]
-                    }
+                        "url_2x": {
+                            "description": "URL for the image at 2x size.",
+                            "type": "string"
+                        },
+                        "url_4x": {
+                            "description": "URL for the image at 4x size.",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "url_1x",
+                        "url_2x",
+                        "url_4x"
+                    ]
                 },
                 "global_cooldown": {
                     "description": "Whether a cooldown is enabled and what the cooldown is in seconds.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "is_enabled": {
-                                "description": "Is the setting enabled.",
-                                "type": "boolean"
-                            },
-                            "seconds": {
-                                "description": "The cooldown in seconds.",
-                                "type": "integer"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "is_enabled": {
+                            "description": "Is the setting enabled.",
+                            "type": "boolean"
                         },
-                        "required": [
-                            "is_enabled",
-                            "seconds"
-                        ]
-                    }
+                        "seconds": {
+                            "description": "The cooldown in seconds.",
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "is_enabled",
+                        "seconds"
+                    ]
                 },
                 "cooldown_expires_at": {
                     "description": "Timestamp of the cooldown expiration.nullif the reward isnt on cooldown.",
@@ -1685,33 +1651,31 @@
                 },
                 "reward": {
                     "description": "Basic information about the reward that was redeemed, at the time it was redeemed.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "id": {
-                                "description": "The reward identifier.",
-                                "type": "string"
-                            },
-                            "title": {
-                                "description": "The reward name.",
-                                "type": "string"
-                            },
-                            "cost": {
-                                "description": "The reward cost.",
-                                "type": "integer"
-                            },
-                            "prompt": {
-                                "description": "The reward description.",
-                                "type": "string"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "description": "The reward identifier.",
+                            "type": "string"
                         },
-                        "required": [
-                            "id",
-                            "title",
-                            "cost",
-                            "prompt"
-                        ]
-                    }
+                        "title": {
+                            "description": "The reward name.",
+                            "type": "string"
+                        },
+                        "cost": {
+                            "description": "The reward cost.",
+                            "type": "integer"
+                        },
+                        "prompt": {
+                            "description": "The reward description.",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "id",
+                        "title",
+                        "cost",
+                        "prompt"
+                    ]
                 },
                 "redeemed_at": {
                     "description": "RFC3339 timestamp of when the reward was redeemed.",
@@ -1804,33 +1768,31 @@
                 },
                 "reward": {
                     "description": "Basic information about the reward that was redeemed, at the time it was redeemed.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "id": {
-                                "description": "The reward identifier.",
-                                "type": "string"
-                            },
-                            "title": {
-                                "description": "The reward name.",
-                                "type": "string"
-                            },
-                            "cost": {
-                                "description": "The reward cost.",
-                                "type": "integer"
-                            },
-                            "prompt": {
-                                "description": "The reward description.",
-                                "type": "string"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "id": {
+                            "description": "The reward identifier.",
+                            "type": "string"
                         },
-                        "required": [
-                            "id",
-                            "title",
-                            "cost",
-                            "prompt"
-                        ]
-                    }
+                        "title": {
+                            "description": "The reward name.",
+                            "type": "string"
+                        },
+                        "cost": {
+                            "description": "The reward cost.",
+                            "type": "integer"
+                        },
+                        "prompt": {
+                            "description": "The reward description.",
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "id",
+                        "title",
+                        "cost",
+                        "prompt"
+                    ]
                 },
                 "redeemed_at": {
                     "description": "RFC3339 timestamp of when the reward was redeemed.",
@@ -1907,81 +1869,75 @@
                 },
                 "choices": {
                     "description": "An array of choices for the poll.",
-                    "type": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "id": {
-                                    "description": "ID for the choice.",
-                                    "type": "string"
-                                },
-                                "title": {
-                                    "description": "Text displayed for the choice.",
-                                    "type": "string"
-                                },
-                                "bits_votes": {
-                                    "description": "Number of votes received via Bits.",
-                                    "type": "integer"
-                                },
-                                "channel_points_votes": {
-                                    "description": "Number of votes received via Channel Points.",
-                                    "type": "integer"
-                                },
-                                "votes": {
-                                    "description": "Total number of votes received for the choice across all methods of voting.",
-                                    "type": "integer"
-                                }
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "description": "ID for the choice.",
+                                "type": "string"
                             },
-                            "required": [
-                                "id",
-                                "title",
-                                "bits_votes",
-                                "channel_points_votes",
-                                "votes"
-                            ]
-                        }
+                            "title": {
+                                "description": "Text displayed for the choice.",
+                                "type": "string"
+                            },
+                            "bits_votes": {
+                                "description": "Number of votes received via Bits.",
+                                "type": "integer"
+                            },
+                            "channel_points_votes": {
+                                "description": "Number of votes received via Channel Points.",
+                                "type": "integer"
+                            },
+                            "votes": {
+                                "description": "Total number of votes received for the choice across all methods of voting.",
+                                "type": "integer"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "title",
+                            "bits_votes",
+                            "channel_points_votes",
+                            "votes"
+                        ]
                     }
                 },
                 "bits_voting": {
                     "description": "The Bits voting settings for the poll.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "is_enabled": {
-                                "description": "Indicates if Bits can be used for voting.",
-                                "type": "boolean"
-                            },
-                            "amount_per_vote": {
-                                "description": "Number of Bits required to vote once with Bits.",
-                                "type": "integer"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "is_enabled": {
+                            "description": "Indicates if Bits can be used for voting.",
+                            "type": "boolean"
                         },
-                        "required": [
-                            "is_enabled",
-                            "amount_per_vote"
-                        ]
-                    }
+                        "amount_per_vote": {
+                            "description": "Number of Bits required to vote once with Bits.",
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "is_enabled",
+                        "amount_per_vote"
+                    ]
                 },
                 "channel_points_voting": {
                     "description": "The Channel Points voting settings for the poll.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "is_enabled": {
-                                "description": "Indicates if Channel Points can be used for voting.",
-                                "type": "boolean"
-                            },
-                            "amount_per_vote": {
-                                "description": "Number of Channel Points required to vote once with Channel Points.",
-                                "type": "integer"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "is_enabled": {
+                            "description": "Indicates if Channel Points can be used for voting.",
+                            "type": "boolean"
                         },
-                        "required": [
-                            "is_enabled",
-                            "amount_per_vote"
-                        ]
-                    }
+                        "amount_per_vote": {
+                            "description": "Number of Channel Points required to vote once with Channel Points.",
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "is_enabled",
+                        "amount_per_vote"
+                    ]
                 },
                 "started_at": {
                     "description": "The time the poll started.",
@@ -2057,81 +2013,75 @@
                 },
                 "choices": {
                     "description": "An array of choices for the poll. Includes vote counts.",
-                    "type": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "id": {
-                                    "description": "ID for the choice.",
-                                    "type": "string"
-                                },
-                                "title": {
-                                    "description": "Text displayed for the choice.",
-                                    "type": "string"
-                                },
-                                "bits_votes": {
-                                    "description": "Number of votes received via Bits.",
-                                    "type": "integer"
-                                },
-                                "channel_points_votes": {
-                                    "description": "Number of votes received via Channel Points.",
-                                    "type": "integer"
-                                },
-                                "votes": {
-                                    "description": "Total number of votes received for the choice across all methods of voting.",
-                                    "type": "integer"
-                                }
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "description": "ID for the choice.",
+                                "type": "string"
                             },
-                            "required": [
-                                "id",
-                                "title",
-                                "bits_votes",
-                                "channel_points_votes",
-                                "votes"
-                            ]
-                        }
+                            "title": {
+                                "description": "Text displayed for the choice.",
+                                "type": "string"
+                            },
+                            "bits_votes": {
+                                "description": "Number of votes received via Bits.",
+                                "type": "integer"
+                            },
+                            "channel_points_votes": {
+                                "description": "Number of votes received via Channel Points.",
+                                "type": "integer"
+                            },
+                            "votes": {
+                                "description": "Total number of votes received for the choice across all methods of voting.",
+                                "type": "integer"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "title",
+                            "bits_votes",
+                            "channel_points_votes",
+                            "votes"
+                        ]
                     }
                 },
                 "bits_voting": {
                     "description": "The Bits voting settings for the poll.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "is_enabled": {
-                                "description": "Indicates if Bits can be used for voting.",
-                                "type": "boolean"
-                            },
-                            "amount_per_vote": {
-                                "description": "Number of Bits required to vote once with Bits.",
-                                "type": "integer"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "is_enabled": {
+                            "description": "Indicates if Bits can be used for voting.",
+                            "type": "boolean"
                         },
-                        "required": [
-                            "is_enabled",
-                            "amount_per_vote"
-                        ]
-                    }
+                        "amount_per_vote": {
+                            "description": "Number of Bits required to vote once with Bits.",
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "is_enabled",
+                        "amount_per_vote"
+                    ]
                 },
                 "channel_points_voting": {
                     "description": "The Channel Points voting settings for the poll.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "is_enabled": {
-                                "description": "Indicates if Channel Points can be used for voting.",
-                                "type": "boolean"
-                            },
-                            "amount_per_vote": {
-                                "description": "Number of Channel Points required to vote once with Channel Points.",
-                                "type": "integer"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "is_enabled": {
+                            "description": "Indicates if Channel Points can be used for voting.",
+                            "type": "boolean"
                         },
-                        "required": [
-                            "is_enabled",
-                            "amount_per_vote"
-                        ]
-                    }
+                        "amount_per_vote": {
+                            "description": "Number of Channel Points required to vote once with Channel Points.",
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "is_enabled",
+                        "amount_per_vote"
+                    ]
                 },
                 "started_at": {
                     "description": "The time the poll started.",
@@ -2207,81 +2157,75 @@
                 },
                 "choices": {
                     "description": "An array of choices for the poll. Includes vote counts.",
-                    "type": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "id": {
-                                    "description": "ID for the choice.",
-                                    "type": "string"
-                                },
-                                "title": {
-                                    "description": "Text displayed for the choice.",
-                                    "type": "string"
-                                },
-                                "bits_votes": {
-                                    "description": "Number of votes received via Bits.",
-                                    "type": "integer"
-                                },
-                                "channel_points_votes": {
-                                    "description": "Number of votes received via Channel Points.",
-                                    "type": "integer"
-                                },
-                                "votes": {
-                                    "description": "Total number of votes received for the choice across all methods of voting.",
-                                    "type": "integer"
-                                }
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "description": "ID for the choice.",
+                                "type": "string"
                             },
-                            "required": [
-                                "id",
-                                "title",
-                                "bits_votes",
-                                "channel_points_votes",
-                                "votes"
-                            ]
-                        }
+                            "title": {
+                                "description": "Text displayed for the choice.",
+                                "type": "string"
+                            },
+                            "bits_votes": {
+                                "description": "Number of votes received via Bits.",
+                                "type": "integer"
+                            },
+                            "channel_points_votes": {
+                                "description": "Number of votes received via Channel Points.",
+                                "type": "integer"
+                            },
+                            "votes": {
+                                "description": "Total number of votes received for the choice across all methods of voting.",
+                                "type": "integer"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "title",
+                            "bits_votes",
+                            "channel_points_votes",
+                            "votes"
+                        ]
                     }
                 },
                 "bits_voting": {
                     "description": "The Bits voting settings for the poll.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "is_enabled": {
-                                "description": "Indicates if Bits can be used for voting.",
-                                "type": "boolean"
-                            },
-                            "amount_per_vote": {
-                                "description": "Number of Bits required to vote once with Bits.",
-                                "type": "integer"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "is_enabled": {
+                            "description": "Indicates if Bits can be used for voting.",
+                            "type": "boolean"
                         },
-                        "required": [
-                            "is_enabled",
-                            "amount_per_vote"
-                        ]
-                    }
+                        "amount_per_vote": {
+                            "description": "Number of Bits required to vote once with Bits.",
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "is_enabled",
+                        "amount_per_vote"
+                    ]
                 },
                 "channel_points_voting": {
                     "description": "The Channel Points voting settings for the poll.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "is_enabled": {
-                                "description": "Indicates if Channel Points can be used for voting.",
-                                "type": "boolean"
-                            },
-                            "amount_per_vote": {
-                                "description": "Number of Channel Points required to vote once with Channel Points.",
-                                "type": "integer"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "is_enabled": {
+                            "description": "Indicates if Channel Points can be used for voting.",
+                            "type": "boolean"
                         },
-                        "required": [
-                            "is_enabled",
-                            "amount_per_vote"
-                        ]
-                    }
+                        "amount_per_vote": {
+                            "description": "Number of Channel Points required to vote once with Channel Points.",
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "is_enabled",
+                        "amount_per_vote"
+                    ]
                 },
                 "status": {
                     "description": "The status of the poll. Valid values are completed, archived, and terminated.",
@@ -2362,79 +2306,75 @@
                 },
                 "outcomes": {
                     "description": "An array of outcomes for the Channel Points Prediction.",
-                    "type": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "id": {
-                                    "description": "The outcome ID.",
-                                    "type": "string"
-                                },
-                                "title": {
-                                    "description": "The outcome title.",
-                                    "type": "string"
-                                },
-                                "color": {
-                                    "description": "The color for the outcome. Valid values are pink and blue.",
-                                    "type": "string"
-                                },
-                                "users": {
-                                    "description": "The number of users who used Channel Points on this outcome.",
-                                    "type": "integer"
-                                },
-                                "channel_points": {
-                                    "description": "The total number of Channel Points used on this outcome.",
-                                    "type": "int"
-                                },
-                                "top_predictors": {
-                                    "description": "An array of users who used the most Channel Points on this outcome.",
-                                    "type": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "object",
-                                            "properties": {
-                                                "user_id": {
-                                                    "description": "The ID of the user.",
-                                                    "type": "string"
-                                                },
-                                                "user_login": {
-                                                    "description": "The login of the user.",
-                                                    "type": "string"
-                                                },
-                                                "user_name": {
-                                                    "description": "The display name of the user.",
-                                                    "type": "string"
-                                                },
-                                                "channel_points_won": {
-                                                    "description": "The number of Channel Points won. This value is always null in the event payload for Prediction progress and Prediction lock. This value is 0 if the outcome did not win or if the Prediction was canceled and Channel Points were refunded.",
-                                                    "type": "integer"
-                                                },
-                                                "channel_points_used": {
-                                                    "description": "The number of Channel Points used to participate in the Prediction.",
-                                                    "type": "integer"
-                                                }
-                                            },
-                                            "required": [
-                                                "user_id",
-                                                "user_login",
-                                                "user_name",
-                                                "channel_points_won",
-                                                "channel_points_used"
-                                            ]
-                                        }
-                                    }
-                                }
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "description": "The outcome ID.",
+                                "type": "string"
                             },
-                            "required": [
-                                "id",
-                                "title",
-                                "color",
-                                "users",
-                                "channel_points",
-                                "top_predictors"
-                            ]
-                        }
+                            "title": {
+                                "description": "The outcome title.",
+                                "type": "string"
+                            },
+                            "color": {
+                                "description": "The color for the outcome. Valid values are pink and blue.",
+                                "type": "string"
+                            },
+                            "users": {
+                                "description": "The number of users who used Channel Points on this outcome.",
+                                "type": "integer"
+                            },
+                            "channel_points": {
+                                "description": "The total number of Channel Points used on this outcome.",
+                                "type": "int"
+                            },
+                            "top_predictors": {
+                                "description": "An array of users who used the most Channel Points on this outcome.",
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "user_id": {
+                                            "description": "The ID of the user.",
+                                            "type": "string"
+                                        },
+                                        "user_login": {
+                                            "description": "The login of the user.",
+                                            "type": "string"
+                                        },
+                                        "user_name": {
+                                            "description": "The display name of the user.",
+                                            "type": "string"
+                                        },
+                                        "channel_points_won": {
+                                            "description": "The number of Channel Points won. This value is always null in the event payload for Prediction progress and Prediction lock. This value is 0 if the outcome did not win or if the Prediction was canceled and Channel Points were refunded.",
+                                            "type": "integer"
+                                        },
+                                        "channel_points_used": {
+                                            "description": "The number of Channel Points used to participate in the Prediction.",
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "user_id",
+                                        "user_login",
+                                        "user_name",
+                                        "channel_points_won",
+                                        "channel_points_used"
+                                    ]
+                                }
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "title",
+                            "color",
+                            "users",
+                            "channel_points",
+                            "top_predictors"
+                        ]
                     }
                 },
                 "started_at": {
@@ -2509,79 +2449,75 @@
                 },
                 "outcomes": {
                     "description": "An array of outcomes for the Channel Points Prediction. Includes top_predictors.",
-                    "type": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "id": {
-                                    "description": "The outcome ID.",
-                                    "type": "string"
-                                },
-                                "title": {
-                                    "description": "The outcome title.",
-                                    "type": "string"
-                                },
-                                "color": {
-                                    "description": "The color for the outcome. Valid values are pink and blue.",
-                                    "type": "string"
-                                },
-                                "users": {
-                                    "description": "The number of users who used Channel Points on this outcome.",
-                                    "type": "integer"
-                                },
-                                "channel_points": {
-                                    "description": "The total number of Channel Points used on this outcome.",
-                                    "type": "int"
-                                },
-                                "top_predictors": {
-                                    "description": "An array of users who used the most Channel Points on this outcome.",
-                                    "type": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "object",
-                                            "properties": {
-                                                "user_id": {
-                                                    "description": "The ID of the user.",
-                                                    "type": "string"
-                                                },
-                                                "user_login": {
-                                                    "description": "The login of the user.",
-                                                    "type": "string"
-                                                },
-                                                "user_name": {
-                                                    "description": "The display name of the user.",
-                                                    "type": "string"
-                                                },
-                                                "channel_points_won": {
-                                                    "description": "The number of Channel Points won. This value is always null in the event payload for Prediction progress and Prediction lock. This value is 0 if the outcome did not win or if the Prediction was canceled and Channel Points were refunded.",
-                                                    "type": "integer"
-                                                },
-                                                "channel_points_used": {
-                                                    "description": "The number of Channel Points used to participate in the Prediction.",
-                                                    "type": "integer"
-                                                }
-                                            },
-                                            "required": [
-                                                "user_id",
-                                                "user_login",
-                                                "user_name",
-                                                "channel_points_won",
-                                                "channel_points_used"
-                                            ]
-                                        }
-                                    }
-                                }
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "description": "The outcome ID.",
+                                "type": "string"
                             },
-                            "required": [
-                                "id",
-                                "title",
-                                "color",
-                                "users",
-                                "channel_points",
-                                "top_predictors"
-                            ]
-                        }
+                            "title": {
+                                "description": "The outcome title.",
+                                "type": "string"
+                            },
+                            "color": {
+                                "description": "The color for the outcome. Valid values are pink and blue.",
+                                "type": "string"
+                            },
+                            "users": {
+                                "description": "The number of users who used Channel Points on this outcome.",
+                                "type": "integer"
+                            },
+                            "channel_points": {
+                                "description": "The total number of Channel Points used on this outcome.",
+                                "type": "int"
+                            },
+                            "top_predictors": {
+                                "description": "An array of users who used the most Channel Points on this outcome.",
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "user_id": {
+                                            "description": "The ID of the user.",
+                                            "type": "string"
+                                        },
+                                        "user_login": {
+                                            "description": "The login of the user.",
+                                            "type": "string"
+                                        },
+                                        "user_name": {
+                                            "description": "The display name of the user.",
+                                            "type": "string"
+                                        },
+                                        "channel_points_won": {
+                                            "description": "The number of Channel Points won. This value is always null in the event payload for Prediction progress and Prediction lock. This value is 0 if the outcome did not win or if the Prediction was canceled and Channel Points were refunded.",
+                                            "type": "integer"
+                                        },
+                                        "channel_points_used": {
+                                            "description": "The number of Channel Points used to participate in the Prediction.",
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "user_id",
+                                        "user_login",
+                                        "user_name",
+                                        "channel_points_won",
+                                        "channel_points_used"
+                                    ]
+                                }
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "title",
+                            "color",
+                            "users",
+                            "channel_points",
+                            "top_predictors"
+                        ]
                     }
                 },
                 "started_at": {
@@ -2656,79 +2592,75 @@
                 },
                 "outcomes": {
                     "description": "An array of outcomes for the Channel Points Prediction. Includes top_predictors.",
-                    "type": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "id": {
-                                    "description": "The outcome ID.",
-                                    "type": "string"
-                                },
-                                "title": {
-                                    "description": "The outcome title.",
-                                    "type": "string"
-                                },
-                                "color": {
-                                    "description": "The color for the outcome. Valid values are pink and blue.",
-                                    "type": "string"
-                                },
-                                "users": {
-                                    "description": "The number of users who used Channel Points on this outcome.",
-                                    "type": "integer"
-                                },
-                                "channel_points": {
-                                    "description": "The total number of Channel Points used on this outcome.",
-                                    "type": "int"
-                                },
-                                "top_predictors": {
-                                    "description": "An array of users who used the most Channel Points on this outcome.",
-                                    "type": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "object",
-                                            "properties": {
-                                                "user_id": {
-                                                    "description": "The ID of the user.",
-                                                    "type": "string"
-                                                },
-                                                "user_login": {
-                                                    "description": "The login of the user.",
-                                                    "type": "string"
-                                                },
-                                                "user_name": {
-                                                    "description": "The display name of the user.",
-                                                    "type": "string"
-                                                },
-                                                "channel_points_won": {
-                                                    "description": "The number of Channel Points won. This value is always null in the event payload for Prediction progress and Prediction lock. This value is 0 if the outcome did not win or if the Prediction was canceled and Channel Points were refunded.",
-                                                    "type": "integer"
-                                                },
-                                                "channel_points_used": {
-                                                    "description": "The number of Channel Points used to participate in the Prediction.",
-                                                    "type": "integer"
-                                                }
-                                            },
-                                            "required": [
-                                                "user_id",
-                                                "user_login",
-                                                "user_name",
-                                                "channel_points_won",
-                                                "channel_points_used"
-                                            ]
-                                        }
-                                    }
-                                }
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "description": "The outcome ID.",
+                                "type": "string"
                             },
-                            "required": [
-                                "id",
-                                "title",
-                                "color",
-                                "users",
-                                "channel_points",
-                                "top_predictors"
-                            ]
-                        }
+                            "title": {
+                                "description": "The outcome title.",
+                                "type": "string"
+                            },
+                            "color": {
+                                "description": "The color for the outcome. Valid values are pink and blue.",
+                                "type": "string"
+                            },
+                            "users": {
+                                "description": "The number of users who used Channel Points on this outcome.",
+                                "type": "integer"
+                            },
+                            "channel_points": {
+                                "description": "The total number of Channel Points used on this outcome.",
+                                "type": "int"
+                            },
+                            "top_predictors": {
+                                "description": "An array of users who used the most Channel Points on this outcome.",
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "user_id": {
+                                            "description": "The ID of the user.",
+                                            "type": "string"
+                                        },
+                                        "user_login": {
+                                            "description": "The login of the user.",
+                                            "type": "string"
+                                        },
+                                        "user_name": {
+                                            "description": "The display name of the user.",
+                                            "type": "string"
+                                        },
+                                        "channel_points_won": {
+                                            "description": "The number of Channel Points won. This value is always null in the event payload for Prediction progress and Prediction lock. This value is 0 if the outcome did not win or if the Prediction was canceled and Channel Points were refunded.",
+                                            "type": "integer"
+                                        },
+                                        "channel_points_used": {
+                                            "description": "The number of Channel Points used to participate in the Prediction.",
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "user_id",
+                                        "user_login",
+                                        "user_name",
+                                        "channel_points_won",
+                                        "channel_points_used"
+                                    ]
+                                }
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "title",
+                            "color",
+                            "users",
+                            "channel_points",
+                            "top_predictors"
+                        ]
                     }
                 },
                 "started_at": {
@@ -2807,79 +2739,75 @@
                 },
                 "outcomes": {
                     "description": "An array of outcomes for the Channel Points Prediction. Includes top_predictors.",
-                    "type": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "id": {
-                                    "description": "The outcome ID.",
-                                    "type": "string"
-                                },
-                                "title": {
-                                    "description": "The outcome title.",
-                                    "type": "string"
-                                },
-                                "color": {
-                                    "description": "The color for the outcome. Valid values are pink and blue.",
-                                    "type": "string"
-                                },
-                                "users": {
-                                    "description": "The number of users who used Channel Points on this outcome.",
-                                    "type": "integer"
-                                },
-                                "channel_points": {
-                                    "description": "The total number of Channel Points used on this outcome.",
-                                    "type": "int"
-                                },
-                                "top_predictors": {
-                                    "description": "An array of users who used the most Channel Points on this outcome.",
-                                    "type": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "object",
-                                            "properties": {
-                                                "user_id": {
-                                                    "description": "The ID of the user.",
-                                                    "type": "string"
-                                                },
-                                                "user_login": {
-                                                    "description": "The login of the user.",
-                                                    "type": "string"
-                                                },
-                                                "user_name": {
-                                                    "description": "The display name of the user.",
-                                                    "type": "string"
-                                                },
-                                                "channel_points_won": {
-                                                    "description": "The number of Channel Points won. This value is always null in the event payload for Prediction progress and Prediction lock. This value is 0 if the outcome did not win or if the Prediction was canceled and Channel Points were refunded.",
-                                                    "type": "integer"
-                                                },
-                                                "channel_points_used": {
-                                                    "description": "The number of Channel Points used to participate in the Prediction.",
-                                                    "type": "integer"
-                                                }
-                                            },
-                                            "required": [
-                                                "user_id",
-                                                "user_login",
-                                                "user_name",
-                                                "channel_points_won",
-                                                "channel_points_used"
-                                            ]
-                                        }
-                                    }
-                                }
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {
+                                "description": "The outcome ID.",
+                                "type": "string"
                             },
-                            "required": [
-                                "id",
-                                "title",
-                                "color",
-                                "users",
-                                "channel_points",
-                                "top_predictors"
-                            ]
-                        }
+                            "title": {
+                                "description": "The outcome title.",
+                                "type": "string"
+                            },
+                            "color": {
+                                "description": "The color for the outcome. Valid values are pink and blue.",
+                                "type": "string"
+                            },
+                            "users": {
+                                "description": "The number of users who used Channel Points on this outcome.",
+                                "type": "integer"
+                            },
+                            "channel_points": {
+                                "description": "The total number of Channel Points used on this outcome.",
+                                "type": "int"
+                            },
+                            "top_predictors": {
+                                "description": "An array of users who used the most Channel Points on this outcome.",
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "user_id": {
+                                            "description": "The ID of the user.",
+                                            "type": "string"
+                                        },
+                                        "user_login": {
+                                            "description": "The login of the user.",
+                                            "type": "string"
+                                        },
+                                        "user_name": {
+                                            "description": "The display name of the user.",
+                                            "type": "string"
+                                        },
+                                        "channel_points_won": {
+                                            "description": "The number of Channel Points won. This value is always null in the event payload for Prediction progress and Prediction lock. This value is 0 if the outcome did not win or if the Prediction was canceled and Channel Points were refunded.",
+                                            "type": "integer"
+                                        },
+                                        "channel_points_used": {
+                                            "description": "The number of Channel Points used to participate in the Prediction.",
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "user_id",
+                                        "user_login",
+                                        "user_name",
+                                        "channel_points_won",
+                                        "channel_points_used"
+                                    ]
+                                }
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "title",
+                            "color",
+                            "users",
+                            "channel_points",
+                            "top_predictors"
+                        ]
                     }
                 },
                 "status": {
@@ -2968,73 +2896,69 @@
                 },
                 "top_contributions": {
                     "description": "The contributors with the most points contributed.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "user_id": {
-                                "description": "The ID of the user.",
-                                "type": "string"
-                            },
-                            "user_login": {
-                                "description": "The login of the user.",
-                                "type": "string"
-                            },
-                            "user_name": {
-                                "description": "The display name of the user.",
-                                "type": "string"
-                            },
-                            "type": {
-                                "description": "Type of contribution. Valid values includebits,subscription.",
-                                "type": "string"
-                            },
-                            "total": {
-                                "description": "The total contributed.",
-                                "type": "integer"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "user_id": {
+                            "description": "The ID of the user.",
+                            "type": "string"
                         },
-                        "required": [
-                            "user_id",
-                            "user_login",
-                            "user_name",
-                            "type",
-                            "total"
-                        ]
-                    }
+                        "user_login": {
+                            "description": "The login of the user.",
+                            "type": "string"
+                        },
+                        "user_name": {
+                            "description": "The display name of the user.",
+                            "type": "string"
+                        },
+                        "type": {
+                            "description": "Type of contribution. Valid values includebits,subscription.",
+                            "type": "string"
+                        },
+                        "total": {
+                            "description": "The total contributed.",
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "user_id",
+                        "user_login",
+                        "user_name",
+                        "type",
+                        "total"
+                    ]
                 },
                 "last_contribution": {
                     "description": "The most recent contribution.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "user_id": {
-                                "description": "The ID of the user.",
-                                "type": "string"
-                            },
-                            "user_login": {
-                                "description": "The login of the user.",
-                                "type": "string"
-                            },
-                            "user_name": {
-                                "description": "The display name of the user.",
-                                "type": "string"
-                            },
-                            "type": {
-                                "description": "Type of contribution. Valid values includebits,subscription.",
-                                "type": "string"
-                            },
-                            "total": {
-                                "description": "The total contributed.",
-                                "type": "integer"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "user_id": {
+                            "description": "The ID of the user.",
+                            "type": "string"
                         },
-                        "required": [
-                            "user_id",
-                            "user_login",
-                            "user_name",
-                            "type",
-                            "total"
-                        ]
-                    }
+                        "user_login": {
+                            "description": "The login of the user.",
+                            "type": "string"
+                        },
+                        "user_name": {
+                            "description": "The display name of the user.",
+                            "type": "string"
+                        },
+                        "type": {
+                            "description": "Type of contribution. Valid values includebits,subscription.",
+                            "type": "string"
+                        },
+                        "total": {
+                            "description": "The total contributed.",
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "user_id",
+                        "user_login",
+                        "user_name",
+                        "type",
+                        "total"
+                    ]
                 },
                 "started_at": {
                     "description": "The time when the Hype Train started.",
@@ -3123,73 +3047,69 @@
                 },
                 "top_contributions": {
                     "description": "The contributors with the most points contributed.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "user_id": {
-                                "description": "The ID of the user.",
-                                "type": "string"
-                            },
-                            "user_login": {
-                                "description": "The login of the user.",
-                                "type": "string"
-                            },
-                            "user_name": {
-                                "description": "The display name of the user.",
-                                "type": "string"
-                            },
-                            "type": {
-                                "description": "Type of contribution. Valid values includebits,subscription.",
-                                "type": "string"
-                            },
-                            "total": {
-                                "description": "The total contributed.",
-                                "type": "integer"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "user_id": {
+                            "description": "The ID of the user.",
+                            "type": "string"
                         },
-                        "required": [
-                            "user_id",
-                            "user_login",
-                            "user_name",
-                            "type",
-                            "total"
-                        ]
-                    }
+                        "user_login": {
+                            "description": "The login of the user.",
+                            "type": "string"
+                        },
+                        "user_name": {
+                            "description": "The display name of the user.",
+                            "type": "string"
+                        },
+                        "type": {
+                            "description": "Type of contribution. Valid values includebits,subscription.",
+                            "type": "string"
+                        },
+                        "total": {
+                            "description": "The total contributed.",
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "user_id",
+                        "user_login",
+                        "user_name",
+                        "type",
+                        "total"
+                    ]
                 },
                 "last_contribution": {
                     "description": "The most recent contribution.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "user_id": {
-                                "description": "The ID of the user.",
-                                "type": "string"
-                            },
-                            "user_login": {
-                                "description": "The login of the user.",
-                                "type": "string"
-                            },
-                            "user_name": {
-                                "description": "The display name of the user.",
-                                "type": "string"
-                            },
-                            "type": {
-                                "description": "Type of contribution. Valid values includebits,subscription.",
-                                "type": "string"
-                            },
-                            "total": {
-                                "description": "The total contributed.",
-                                "type": "integer"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "user_id": {
+                            "description": "The ID of the user.",
+                            "type": "string"
                         },
-                        "required": [
-                            "user_id",
-                            "user_login",
-                            "user_name",
-                            "type",
-                            "total"
-                        ]
-                    }
+                        "user_login": {
+                            "description": "The login of the user.",
+                            "type": "string"
+                        },
+                        "user_name": {
+                            "description": "The display name of the user.",
+                            "type": "string"
+                        },
+                        "type": {
+                            "description": "Type of contribution. Valid values includebits,subscription.",
+                            "type": "string"
+                        },
+                        "total": {
+                            "description": "The total contributed.",
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "user_id",
+                        "user_login",
+                        "user_name",
+                        "type",
+                        "total"
+                    ]
                 },
                 "started_at": {
                     "description": "The time when the Hype Train started.",
@@ -3271,38 +3191,36 @@
                 },
                 "top_contributions": {
                     "description": "The contributors with the most points contributed.",
-                    "type": {
-                        "type": "object",
-                        "properties": {
-                            "user_id": {
-                                "description": "The ID of the user.",
-                                "type": "string"
-                            },
-                            "user_login": {
-                                "description": "The login of the user.",
-                                "type": "string"
-                            },
-                            "user_name": {
-                                "description": "The display name of the user.",
-                                "type": "string"
-                            },
-                            "type": {
-                                "description": "Type of contribution. Valid values includebits,subscription.",
-                                "type": "string"
-                            },
-                            "total": {
-                                "description": "The total contributed.",
-                                "type": "integer"
-                            }
+                    "type": "object",
+                    "properties": {
+                        "user_id": {
+                            "description": "The ID of the user.",
+                            "type": "string"
                         },
-                        "required": [
-                            "user_id",
-                            "user_login",
-                            "user_name",
-                            "type",
-                            "total"
-                        ]
-                    }
+                        "user_login": {
+                            "description": "The login of the user.",
+                            "type": "string"
+                        },
+                        "user_name": {
+                            "description": "The display name of the user.",
+                            "type": "string"
+                        },
+                        "type": {
+                            "description": "Type of contribution. Valid values includebits,subscription.",
+                            "type": "string"
+                        },
+                        "total": {
+                            "description": "The total contributed.",
+                            "type": "integer"
+                        }
+                    },
+                    "required": [
+                        "user_id",
+                        "user_login",
+                        "user_name",
+                        "type",
+                        "total"
+                    ]
                 },
                 "started_at": {
                     "description": "The time when the Hype Train started.",
