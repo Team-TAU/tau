@@ -1,3 +1,4 @@
+from tau.twitch.models import TwitchEventSubSubscription
 import uuid
 
 from django.http import HttpResponse, HttpResponseForbidden
@@ -67,8 +68,14 @@ class TwitchEventViewSet(viewsets.ViewSet):
         if status == 'webhook_callback_verification_pending':
             if valid_webhook_request(headers, body):
                 if pk not in ['stream-offline', 'stream-online']:
-                    status_key = f'STATUS_CHANNEL_{pk.upper().replace("-", "_")}'
-                    setattr(config, status_key, 'CONNECTED')
+                    sub_instance = TwitchEventSubSubscription.objects.get(
+                        lookup_name=pk
+                    )
+                    sub_instance.subscription = data['subscription']
+                    sub_instance.status = 'CON'
+                    sub_instance.save()
+                    # status_key = f'STATUS_CHANNEL_{pk.upper().replace("-", "_")}'
+                    # setattr(config, status_key, 'CONNECTED')
                 return HttpResponse(data['challenge'])
             else:
                 return HttpResponseForbidden()

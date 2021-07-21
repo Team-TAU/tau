@@ -17,7 +17,7 @@ from rest_framework import viewsets
 from constance import config
 import constance.settings
 
-from tau.twitch.models import TwitchAPIScope
+from tau.twitch.models import TwitchAPIScope, TwitchEventSubSubscription
 from tau.users.models import User
 from .forms import ChannelNameForm, FirstRunForm
 from  .utils import log_request
@@ -153,9 +153,18 @@ def get_channel_name_view(request):
 def refresh_token_scope(request):
     client_id = os.environ.get('TWITCH_APP_ID', None)
 
-    extra_scopes = list(TwitchAPIScope.objects.filter(required=True).values_list('scope', flat=True))
-    scopes = list(set(settings.TOKEN_SCOPES + extra_scopes))
-
+    helix_scopes = list(
+        TwitchAPIScope.objects.filter(
+            required=True
+        ).values_list('scope', flat=True)
+    )
+    eventsub_scopes = list(
+        TwitchEventSubSubscription.objects.filter(
+            active=True
+        ).values_list('scope_required', flat=True)
+    )
+    scopes = list(set(settings.TOKEN_SCOPES + eventsub_scopes + helix_scopes))
+    scopes = list(filter(lambda x: (x is not None), scopes))
     scope=' '.join(scopes)
 
     url = f'https://id.twitch.tv/oauth2/authorize?' \

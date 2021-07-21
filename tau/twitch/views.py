@@ -31,6 +31,21 @@ class TwitchEventSubSubcriptionsViewSet(viewsets.ModelViewSet):
     pagination_class = None
     lookup_field = 'lookup_name'
 
+    @action(methods=['PUT'], detail=False, url_path='bulk-activate')
+    def bulk_activate(self, request):
+        data = request.data
+        ids = [row['id'] for row in data]
+        for act_data in data:
+            instance = TwitchEventSubSubscription.objects.get(pk=act_data['id'])
+            instance.active = act_data['active']
+            instance.save()
+
+        instances = TwitchEventSubSubscription.objects.filter(id__in=ids)
+        serializer = self.get_serializer(instances, many=True)
+
+        return Response(serializer.data)
+
+
 class TwitchHelixEndpointViewSet(viewsets.ModelViewSet):
     queryset = TwitchHelixEndpoint.objects.all()
     serializer_class = TwitchEndpointSerializer
