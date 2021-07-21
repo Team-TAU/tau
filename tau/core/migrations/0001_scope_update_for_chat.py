@@ -9,6 +9,7 @@ def toggle_scope_update_required(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
+        ('database', '0002_auto_20190129_2304'),
     ]
 
     operations = [
