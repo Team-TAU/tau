@@ -18,17 +18,28 @@ from channels.db import database_sync_to_async
 from tau.twitchevents.models import TwitchEvent
 from tau.twitchevents.serializers import TwitchEventSerializer
 
-from .utils import init_webhooks, refresh_access_token, teardown_webhooks
+from .utils import (
+    setup_ngrok,
+    init_webhooks,
+    refresh_access_token,
+    teardown_webhooks,
+    get_active_event_sub_ids,
+    get_active_streamer_sub_ids
+)
 
 class Worker():
     irc_url = 'wss://irc-ws.chat.twitch.tv'
     connection = None
     loop = None
     tasks = []
+    irc_tasks = []
+    wh_delay = 2
+    active_event_sub_ids = []
+    active_streamer_sub_ids = []
+    ngrok_tunnel = None
 
-    def __init__(self, public_url, token):
+    def __init__(self, token):
         self.tau_token = token
-        self.public_url = public_url
 
     def setup_webhooks(self):
         twitch_access_token = config.TWITCH_APP_ACCESS_TOKEN
@@ -38,7 +49,7 @@ class Worker():
             print('     [Access tokens refreshed]')
             teardown_webhooks(self.tau_token)
             print('     [Old WebHooks torn down]')
-            init_webhooks(self.public_url, self.tau_token)
+            self.active_event_sub_ids, self.active_streamer_sub_ids = init_webhooks(self.public_url, self.tau_token)
             print('     [New WebHooks Initialized]\n')
         else:
             print(
@@ -62,12 +73,36 @@ class Worker():
 
     def create_event_loop(self):
         self.loop = asyncio.get_event_loop()
-        self.loop.run_until_complete(self.connect())
+        # self.loop.run_until_complete(self.connect())
+        # self.tasks = [
+        #     asyncio.ensure_future(self.recieve()),
+        #     asyncio.ensure_future(self.check_irc_settings())
+        # ]
         self.tasks = [
-            asyncio.ensure_future(self.recieve()),
-            asyncio.ensure_future(self.check_irc_settings())
+            asyncio.ensure_future(self.manage_webhooks())
         ]
         self.loop.run_until_complete(asyncio.wait(self.tasks))
+
+    async def manage_irc_loop(self):
+        pass
+
+    async def manage_webhooks(self):
+        refresh_webhooks = True
+        while True:
+            refreshed_ngrok = False
+            if settings.USE_NGROK and self.ngrok_tunnel is None:
+                self.public_url, self.ngrok_tunnel = setup_ngrok()
+                refreshed_ngrok = True
+            elif settings.USE_NGROK:
+                pass
+                # self.ngrok_tunnel.refresh_metrics()
+                # print(self.ngrok_tunnel.metrics)
+            
+            if refresh_webhooks or refreshed_ngrok:
+                await database_sync_to_async(self.setup_webhooks)()
+                refresh_webhooks = False
+
+            await asyncio.sleep(self.wh_delay)
 
     def clear_event_loop(self):
         for t in self.tasks:
@@ -78,19 +113,7 @@ class Worker():
     def run(self):
         self.token = config.TWITCH_ACCESS_TOKEN
         self.username = config.CHANNEL
-        self.setup_webhooks()
-        while True:
-            if config.USE_IRC:
-                try:
-                    self.create_event_loop()
-                except RuntimeError:
-                    # RuntimeError can occur when we interrupt the event_loop, if the
-                    # config.USE_IRC value is set to False by the user
-                    pass
-            else:
-                self.clear_event_loop()
-                while not config.USE_IRC:
-                    time.sleep(5)
+        self.create_event_loop()
 
     async def initial_connect(self):
         caps = 'twitch.tv/tags twitch.tv/commands twitch.tv/membership'

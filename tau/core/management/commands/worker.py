@@ -39,17 +39,17 @@ class Command(BaseCommand):
             time.sleep(0.5)
         print('     [WebHook endpoints now available]\n')
 
-        # Setup ngrok
-        if settings.USE_NGROK:
-            public_url = setup_ngrok()
-        else:
-            public_url = settings.BASE_URL
+        # # Setup ngrok
+        # if settings.USE_NGROK:
+        #     public_url = setup_ngrok()
+        # else:
+        #     public_url = settings.BASE_URL
 
         user = User.objects.get(username='worker_process')
         token, created = Token.objects.get_or_create(user=user)
         token = str(token)
 
-        client = Worker(public_url, token)
+        client = Worker(token)
         client.run()
         # Setup Webhooks
         # print(f'Setting webhooks with base url: {public_url}.')

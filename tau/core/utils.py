@@ -8,6 +8,7 @@ from django.conf import settings
 from constance import config
 
 from tau.twitch.models import TwitchEventSubSubscription
+from tau.streamers.models import Streamer
 
 def check_access_token():
     url = "https://id.twitch.tv/oauth2/validate"
@@ -73,12 +74,13 @@ def setup_ngrok():
         ngrok.set_auth_token(token)
 
     # Open an ngrok tunnel to the dev server
-    public_url = ngrok.connect(port).public_url.replace('http', 'https')
+    tunnel = ngrok.connect(port)
+    public_url = tunnel.public_url.replace('http', 'https')
     print(f"     [Tunnel url: {public_url}]\n")
 
     # Update any base URLs or webhooks to use the public ngrok URL
     settings.BASE_URL = public_url
-    return public_url
+    return public_url, tunnel
 
 def log_request(req):
     print('[REQUEST]')
@@ -124,7 +126,7 @@ def init_webhook(payload, url, worker_token):
         json=payload,
         headers=webhook_headers
     )
-    if(settings.DEBUG_TWITCH_CALLS):
+    if(settings.DEBUG_TWITCH_CALLS or True):
         log_request(req)
     #TODO Add code to handle bad response from initial sub handshake
 
@@ -133,8 +135,13 @@ def init_webhooks(base_url, worker_token):
 
     url = settings.LOCAL_URL
 
+    active_event_sub_ids = []
+    active_streamer_sub_ids = []
+
     for instance in TwitchEventSubSubscription.objects.filter(active=True):
+        print(f'setting up webhook')
         init_webhook(eventsub_payload(instance, base_url), url, worker_token)
+        active_event_sub_ids.append(instance.id)
 
     # streamers = Streamer.objects.filter(disabled=False)
     # for streamer in streamers:
@@ -151,6 +158,14 @@ def init_webhooks(base_url, worker_token):
     #         worker_token
     #     )
 
+    return active_event_sub_ids, active_streamer_sub_ids
+
+def get_active_event_sub_ids():
+    return [instance.id for instance in TwitchEventSubSubscription.objects.filter(active=True)]
+
+def get_active_streamer_sub_ids():
+    return [instance.id for instance in Streamer.objects.filter(disabled=False)]
+
 def teardown_webhooks(worker_token):
     url = settings.LOCAL_URL
     
@@ -162,11 +177,6 @@ def teardown_webhooks(worker_token):
         'Authorization': 'Bearer {}'.format(config.TWITCH_APP_ACCESS_TOKEN),
     }
 
-    # resp = requests.get('https://api.twitch.tv/helix/eventsub/subscriptions', headers=headers)
-    # if(settings.DEBUG_TWITCH_CALLS):
-    #     log_request(resp)
-
-    # data = resp.json()
     for sub in active_subs:
         req = requests.delete(
             f'https://api.twitch.tv/helix/eventsub/subscriptions?id={sub.subscription["id"]}',
