@@ -1,8 +1,17 @@
 let rewards = [];
+let eventSubList = [];
 const port = window.location.port ? `:${window.location.port}` : '';
 const host = window.location.hostname;
 const protocol = window.location.protocol;
 const socketProtocol = protocol === 'https:' ? 'wss:' : 'ws:';
+
+const testModals = {
+    "channel-follow": "#testFollowModal",
+    "channel-update": "#testUpdateModal",
+    "channel-raid": "#testRaidModal",
+    "channel-cheer": "#testCheersModal",
+    "channel-channel_points_custom_reward_redemption-add": "#testPointsRedemptionModal",
+}
 
 // Once the window/scripts/etc. have all been loaded, set up our json and text websockets.
 function twitchEventsWebsocket() {
@@ -61,40 +70,69 @@ const setupJsonWebsocket = (url, handler) => {
     }
 }
 
-const handleStatusMessage = (message) => {
-    message.forEach(row => {
-        setStatus(row.event_type, row.new_value);
+function loadEventSubSubscriptions() {
+    ajaxGet(`${protocol}//${host}${port}/api/v1/twitch/eventsub-subscriptions?active=true`).subscribe(res => {
+        eventSubList = res;
+        const tbody = document.getElementById('events-body');
+        let html = '';
+        res.forEach(row => {
+            const event = row.subscription_type;
+            const status = '<i class="bi bi-check2 text-success"></i>';
+            const test = row.lookup_name in testModals ? 
+                `<a href='#' class="text-decoration-none pe-2" data-bs-toggle="modal" data-bs-target="${testModals[row.lookup_name]}"><i class="bi bi-pencil-square"></i></a>` :
+                '';
+            html += `<tr id="${row.id}"><th scope="row">${event}</th><td class="text-center">${status}</td><td>${test}</td></tr>`
+        });
+        tbody.innerHTML = html;
     });
 }
 
-const handleEventMessage = (message) => {
-    console.log(message);
-    switch (message.event_type) {
-        case 'update':
-            appendUpdate(message);
-            break;
-        case 'cheer':
-            appendCheer(message);
-            break;
-        case 'follow':
-            appendFollow(message);
-            break;
-        case 'raid':
-            appendRaid(message);
-            break;
-        case 'point-redemption':
-            appendPointsRedemption(message);
-            break;
-        case 'subscribe':
-            appendSubscribe(message);
-            break;
-        case 'stream-offline':
-            appendStreamOffline(message);
-            break;
-        case 'stream-online':
-            appendStreamOnline(message);
-            break;
+function eventTitle(event) {
+    switch(event.event_type) {
+        case "channel-follow":
+            return `${event.event_data.user_name} followed.`;
+        case "channel-cheer":
+            return `${event.event_data.user_name} cheered ${event.event_data.bits} bits.`;
+        case "channel-raid":
+            return `${event.event_data.from_broadcaster_user_name} raided with ${event.event_data.viewers} viewers.`;
+        case "channel-channel_points_custom_reward_redemption-add":
+            const username = event.event_data.user_name;
+            const reward_name = event.event_data.reward.title;
+            return `${username} redeemed ${reward_name}.`;
+        case "channel-subscribe":
+            if (event.event_data.is_gift) {
+                return `${event.event_data.user_name} received a gift sub.`
+            } else {
+                return `${event.event_data.user_name} subscribed.`
+            }
+        case "channel-subscription-gift":
+            return `${event.event_data.user_name} gifted ${event.event_data.total} subs.`
+
     }
+    event_type = eventSubList.find(ev => ev.lookup_name === event.event_type);
+    return event_type.subscription_type;
+}
+
+const handleStatusMessage = (message) => {
+    // message.forEach(row => {
+    //     setStatus(row.event_type, row.new_value);
+    // });
+}
+
+const handleEventMessage = (message) => {
+    const titleText = eventTitle(message);
+    title = message.origin === 'test' ?
+        `[Test] ${titleText}` :
+        message.origin === 'replay' ?
+            `[Replay] ${titleText}` :
+            titleText;
+    replay = message.origin !== 'test' ?
+        `<button class='btn btn-sm btn-primary' onclick='replayEvent("${message.id}")'>Replay</button>` :
+        null;
+    payload = eventTemplate(title, message, replay);
+    const ele = document.getElementById('ws-accordion');
+    ele.innerHTML = payload + ele.innerHTML;
+    Prism.highlightAll();
 }
 
 

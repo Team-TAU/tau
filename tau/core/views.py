@@ -214,6 +214,7 @@ def process_twitch_callback_view(request):
     app_auth_data = app_auth_r.json()
     config.TWITCH_APP_ACCESS_TOKEN = app_auth_data['access_token']
     config.SCOPE_UPDATED_NEEDED = False
+    config.SCOPES_REFRESHED = True
     headers = {
         'Authorization': 'Bearer {}'.format(config.TWITCH_ACCESS_TOKEN),
         'Client-Id': client_id

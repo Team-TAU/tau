@@ -11,7 +11,7 @@ const channelFollowTest = () => {
         broadcaster_user_name,
         broadcaster_user_login: broadcaster_user_name.toLowerCase(),
     };
-    const sub = ajaxPost(`${protocol}//${host}${port}/api/v1/twitch-events/follow/test/`, payload).subscribe(resp => {
+    const sub = ajaxPost(`${protocol}//${host}${port}/api/v1/twitch-events/channel-follow/test/`, payload).subscribe(resp => {
         console.log(resp);
     });
     return false;

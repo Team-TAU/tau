@@ -74,8 +74,8 @@ def setup_ngrok():
         ngrok.set_auth_token(token)
 
     # Open an ngrok tunnel to the dev server
-    tunnel = ngrok.connect(port)
-    public_url = tunnel.public_url.replace('http', 'https')
+    tunnel = ngrok.connect(port, bind_tls=True)
+    public_url = tunnel.public_url
     print(f"     [Tunnel url: {public_url}]\n")
 
     # Update any base URLs or webhooks to use the public ngrok URL
@@ -92,13 +92,13 @@ def log_request(req):
     else:
         print(f'    NO RESPONSE DATA')
 
-def eventsub_payload(instance, base_url):
+def eventsub_payload(instance, base_url, broadcaster_key='broadcaster_user_id'):
     callback_url = f'{base_url}/api/v1/twitch-events/{instance.lookup_name}/webhook/'
     data = {
         "type": instance.name,
         "version": instance.version,
         "condition": {
-            "broadcaster_user_id": config.CHANNEL_ID
+            broadcaster_key: config.CHANNEL_ID
         },
         "transport": {
             "method": "webhook",
@@ -108,25 +108,25 @@ def eventsub_payload(instance, base_url):
     }
     return data
 
-def init_webhook(payload, url, worker_token):
+def init_webhook(payload, url, worker_token, instance_id=None):
     webhook_headers = {
         'Client-ID': os.environ.get('TWITCH_APP_ID', None),
         'Authorization': 'Bearer {}'.format(config.TWITCH_APP_ACCESS_TOKEN),
     }
-    # if(config_key is not None):
-    #     headers = {'Authorization': f'Token {worker_token}'}
-    #     req = requests.put(
-    #         f'{url}/api/v1/service-status/{config_key}/',
-    #         {'status': 'CONNECTING'},
-    #         headers=headers
-    #     )
+    if(instance_id is not None):
+        headers = {'Authorization': f'Token {worker_token}'}
+        req = requests.patch(
+            f'{url}/api/v1/twitch/eventsub-subscriptions/{instance_id}',
+            {'status': 'CTG'},
+            headers=headers
+        )
     
     req = requests.post(
         'https://api.twitch.tv/helix/eventsub/subscriptions',
         json=payload,
         headers=webhook_headers
     )
-    if(settings.DEBUG_TWITCH_CALLS or True):
+    if(settings.DEBUG_TWITCH_CALLS):
         log_request(req)
     #TODO Add code to handle bad response from initial sub handshake
 
@@ -139,8 +139,11 @@ def init_webhooks(base_url, worker_token):
     active_streamer_sub_ids = []
 
     for instance in TwitchEventSubSubscription.objects.filter(active=True):
-        print(f'setting up webhook')
-        init_webhook(eventsub_payload(instance, base_url), url, worker_token)
+        if instance.name == 'channel.raid':
+            broadcaster_key = 'to_broadcaster_user_id'
+        else:
+            broadcaster_key = 'broadcaster_user_id'
+        init_webhook(eventsub_payload(instance, base_url, broadcaster_key), url, worker_token)
         active_event_sub_ids.append(instance.id)
 
     # streamers = Streamer.objects.filter(disabled=False)
@@ -171,6 +174,11 @@ def teardown_webhooks(worker_token):
     
     active_subs = TwitchEventSubSubscription.objects.filter(subscription__isnull=False)
 
+    for sub in active_subs:
+        print(sub.name)
+        print(sub.subscription)
+        print('----------------')
+
     # Get subscriptions
     headers = {
         'Client-ID': os.environ.get('TWITCH_APP_ID', None),
@@ -182,17 +190,37 @@ def teardown_webhooks(worker_token):
             f'https://api.twitch.tv/helix/eventsub/subscriptions?id={sub.subscription["id"]}',
             headers=headers
         )
-        if(settings.DEBUG_TWITCH_CALLS):
+        if(settings.DEBUG_TWITCH_CALLS or True):
             log_request(req)
-        sub.status = 'DIS'
-        sub.subscription = None
-        sub.save()
+        
+        payload = {
+            'status': 'DIS',
+            'subscription': None
+        }
+        tau_headers = {'Authorization': f'Token {worker_token}'}
+        req = requests.patch(
+            f'{url}/api/v1/twitch/eventsub-subscriptions/{sub.lookup_name}',
+            json=payload,
+            headers=tau_headers
+        )
 
-    # headers = {'Authorization': f'Token {worker_token}'}
+def teardown_all_acct_webhooks():
+    headers = {
+        'Client-ID': os.environ.get('TWITCH_APP_ID', None),
+        'Authorization': 'Bearer {}'.format(config.TWITCH_APP_ACCESS_TOKEN),
+    }
 
-    # requests.put(
-    #         f'{url}/api/v1/service-status/SET_ALL/',
-    #         {'status': 'DISCONNECTED'},
-    #         headers=headers
-    #     )
+    resp = requests.get('https://api.twitch.tv/helix/eventsub/subscriptions', headers=headers)
 
+    if(settings.DEBUG_TWITCH_CALLS):
+        log_request(resp)
+    
+    data = resp.json()
+
+    for row in data['data']:
+        req = requests.delete(
+            'https://api.twitch.tv/helix/eventsub/subscriptions?id={}'.format(row['id']),
+            headers=headers
+        )
+        if(settings.DEBUG_TWITCH_CALLS):
+            log_request(resp)

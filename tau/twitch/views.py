@@ -6,6 +6,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
+from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import (
     TwitchAPIScope,
@@ -19,6 +20,8 @@ from .serializers import (
     TwitchEventSubSubscriptionSerializer
 )
 
+from .filters import TwitchEventSubSubscriptionFilter
+
 # Create your views here.
 def twitch_token_page_view(request):
     template = loader.get_template('twitch/twitch_token_scopes.html')
@@ -30,6 +33,8 @@ class TwitchEventSubSubcriptionsViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, )
     pagination_class = None
     lookup_field = 'lookup_name'
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = TwitchEventSubSubscriptionFilter
 
     @action(methods=['PUT'], detail=False, url_path='bulk-activate')
     def bulk_activate(self, request):

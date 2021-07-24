@@ -277,6 +277,7 @@ class Common(Configuration):  # pylint: disable=no-init
         'CHANNEL_ID': ('', 'Channel ID', str),
         'USE_IRC': (False, 'Use IRC for Channel Point Redemption Emotes', bool),
         'SCOPE_UPDATED_NEEDED': (False, 'Need to update Twitch Scopes', bool),
+        'SCOPES_REFRESHED': (False, 'Have the tokens just been refreshed?', bool),
         'TWITCH_ACCESS_TOKEN': ('', 'Twitch API Access Token', str),
         'TWITCH_REFRESH_TOKEN': ('', 'Twitch API Refresh Token', str),
         'TWITCH_APP_ACCESS_TOKEN': ('', 'Twitch API App Access Token', str),
