@@ -104,6 +104,10 @@ venv.bak/
 # django staticfiles
 /static
 
+# dashboard generated files
+/tau/dashboard/static
+/tau/dashboard/templates/dashboard
+
 # mypy
 .mypy_cache/
 

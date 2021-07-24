@@ -4,6 +4,8 @@ services:
   app:
     build:
       dockerfile: ./.devcontainer/Dockerfile
+    volumes:
+      - ./:/code:cached
     command: bash -c "source ./scripts/loadenv.sh && sleep infinity"
     # Runs app on the same network as the database container, allows "forwardPorts" in devcontainer.json function.
     # network_mode: service:db
