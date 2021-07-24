@@ -5,7 +5,7 @@ ENV PYTHONUNBUFFERED=1 PYTHONHASHSEED=random \
 
 ENV NODE_VERSION 14
 
-RUN curl --proto '=https' --tlsv1.2 -fsLS https://deb.nodesource.com/setup_14.x | sh -\ 
+RUN curl --proto '=https' --tlsv1.2 -fsLS https://deb.nodesource.com/setup_16.x | sh -\ 
         && apt install -y nodejs\
         && npm install --global npm\
         && npm install --global @vue/cli

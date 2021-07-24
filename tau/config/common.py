@@ -12,6 +12,7 @@ class Common(Configuration):  # pylint: disable=no-init
     BASE_PORT = int(os.environ.get("PORT", 8000))
     BASE_URL = f"{PROTOCOL}//{PUBLIC_URL}"
     BEHIND_PROXY = (os.environ.get("BEHIND_PROXY", "false").lower() == "true")
+    BASE_DIR = BASE_DIR
 
     if BASE_PORT not in [80, 443] and not BEHIND_PROXY:
         BASE_URL = BASE_URL + f":{BASE_PORT}"
