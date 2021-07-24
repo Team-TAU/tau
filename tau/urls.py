@@ -1,3 +1,4 @@
+from tau.dashboard.views import dashboard_view
 from tau.core.forms import CustomAuthenticationForm
 from django.conf import settings
 from django.urls import path, re_path, include, reverse_lazy
@@ -73,6 +74,8 @@ urlpatterns = [
     path('first-run/', first_run_view),
     path('streamers/', streamer_page_view),
     path('settings/', twitch_token_page_view),
+    path('dashboard', dashboard_view),
+    re_path(r'^dashboard/.*$', dashboard_view),
     path('', home_view),
 
     # the 'api-root' from django rest-frameworks default router
