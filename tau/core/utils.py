@@ -174,11 +174,6 @@ def teardown_webhooks(worker_token):
     
     active_subs = TwitchEventSubSubscription.objects.filter(subscription__isnull=False)
 
-    for sub in active_subs:
-        print(sub.name)
-        print(sub.subscription)
-        print('----------------')
-
     # Get subscriptions
     headers = {
         'Client-ID': os.environ.get('TWITCH_APP_ID', None),
@@ -190,7 +185,7 @@ def teardown_webhooks(worker_token):
             f'https://api.twitch.tv/helix/eventsub/subscriptions?id={sub.subscription["id"]}',
             headers=headers
         )
-        if(settings.DEBUG_TWITCH_CALLS or True):
+        if(settings.DEBUG_TWITCH_CALLS):
             log_request(req)
         
         payload = {

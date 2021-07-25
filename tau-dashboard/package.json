@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "serve": "echo \"VUE_APP_API_PORT=$PORT\" > .env && vue-cli-service serve --port $DASHBOARD_DEV_PORT",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },

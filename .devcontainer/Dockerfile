@@ -10,10 +10,6 @@ RUN curl --proto '=https' --tlsv1.2 -fsLS https://deb.nodesource.com/setup_16.x 
         && npm install --global npm\
         && npm install --global @vue/cli
 
-# RUN cd ~; curl -sL https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh -o install_nvm.sh
-# RUN cd ~; bash install_nvm.sh
-# RUN sh ~/.bashrc && nvm install 14 && nvm use 14
-
 # install supervisord (supervisor-stdout is not py3 compatible in pypi)
 RUN pip install supervisor git+https://github.com/coderanger/supervisor-stdout
 

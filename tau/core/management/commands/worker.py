@@ -12,7 +12,6 @@ from rest_framework.authtoken.models import Token
 
 from constance import config
 
-from tau.twitchevents.wsclient import WebSocketClient  # pylint: disable=import-error
 from tau.streamers.utils import update_all_streamers   # pylint: disable=import-error
 from tau.users.models import User                      # pylint: disable=import-error
 
