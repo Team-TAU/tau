@@ -1,8 +1,16 @@
-import { createStore } from 'vuex';
+import { Module, createStore } from 'vuex-smart-module';
+import auth from './modules/auth';
+import eventSubscriptions from './modules/event-subscriptions';
+import twitchEvents from './modules/twitch-events';
 
-export default createStore({
-  state: {},
-  mutations: {},
-  actions: {},
-  modules: {},
+const root = new Module({
+  modules: {
+    auth,
+    eventSubscriptions,
+    twitchEvents,
+  },
 });
+
+const store = createStore(root);
+
+export default store;

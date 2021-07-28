@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "vuex-module-decorators": "^1.0.1"
+  },
+  "devDependencies": {
+    "babel-plugin-transform-decorators": "^6.24.1"
+  }
+}
