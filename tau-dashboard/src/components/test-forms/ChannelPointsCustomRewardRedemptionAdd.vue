@@ -108,14 +108,21 @@ export default defineComponent({
               prompt: testData.reward.prompt,
             }
           : null,
-        user_input: testData.reward?.is_user_input_required
-          ? testData.user_input?.text
-          : '',
         status: testData.reward?.should_redemptions_skip_request_queue
           ? 'fulfilled'
           : 'unfulfilled',
         redeemed_at: new Date().toISOString(),
       };
+
+      if (testData.reward?.is_user_input_required) {
+        if (typeof testData.user_input !== 'string') {
+          payload.user_input = testData.user_input.text;
+        } else {
+          payload.user_input = testData.user_input;
+        }
+      } else {
+        payload.user_input = '';
+      }
       api$.tau.post(
         'twitch-events/channel-channel_points_custom_reward_redemption-add/test',
         payload,
