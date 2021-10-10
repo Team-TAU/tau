@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "core-js": "^3.6.5",
+    "date-fns": "^2.25.0",
     "primeflex": "^3.0.0",
     "primeicons": "^4.1.0",
     "primevue": "^3.5.1",
@@ -21,6 +22,8 @@
     "vuex-smart-module": "^1.0.0"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.175",
+    "@types/uuid": "^8.3.1",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
     "@vue/cli-plugin-babel": "~4.5.0",

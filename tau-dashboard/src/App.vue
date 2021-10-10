@@ -2,6 +2,29 @@
   <router-view />
 </template>
 
+<script lang="ts">
+import { useStore } from 'vuex';
+import { defineComponent, provide } from 'vue';
+import {
+  TauStatusWsService,
+  TauTwitchEventWsService,
+} from './services/tau-api-ws';
+
+export default defineComponent({
+  name: 'App',
+  setup() {
+    const store = useStore();
+
+    const tauStatusWs = new TauStatusWsService(store);
+    const twitchEventWs = new TauTwitchEventWsService(store);
+    provide('tauStatusWs', tauStatusWs);
+    provide('twitchEventWs', twitchEventWs);
+
+    return {};
+  },
+});
+</script>
+
 <style lang="scss">
 @import '@/assets/scss/main.scss';
 #app {
@@ -10,18 +33,5 @@
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-}
-
-#nav {
-  padding: 30px;
-
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
 }
 </style>

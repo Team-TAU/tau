@@ -1,5 +1,5 @@
 import { Mutations } from 'vuex-smart-module';
-import { EventSubscription } from './models';
+import { EventSubscription } from '@/models/event-subscription';
 import EventSubState from './state';
 
 export default class EventSubMutations extends Mutations<EventSubState> {
@@ -13,5 +13,18 @@ export default class EventSubMutations extends Mutations<EventSubState> {
     this.state.entities = payload.eventSubscriptions;
     this.state.loading = false;
     this.state.error = '';
+  }
+
+  updateOne(payload: EventSubscription) {
+    const idx = this.state.entities.findIndex(
+      (eventSub) => eventSub.id === payload.id,
+    );
+    if (idx > -1) {
+      this.state.entities = [
+        ...this.state.entities.slice(0, idx),
+        payload,
+        ...this.state.entities.slice(idx + 1),
+      ];
+    }
   }
 }

@@ -143,7 +143,7 @@ def init_webhooks(base_url, worker_token):
             broadcaster_key = 'to_broadcaster_user_id'
         else:
             broadcaster_key = 'broadcaster_user_id'
-        init_webhook(eventsub_payload(instance, base_url, broadcaster_key), url, worker_token)
+        init_webhook(eventsub_payload(instance, base_url, broadcaster_key), url, worker_token, instance.lookup_name)
         active_event_sub_ids.append(instance.id)
 
     # streamers = Streamer.objects.filter(disabled=False)

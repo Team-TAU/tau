@@ -1,5 +1,5 @@
 import { Getters } from 'vuex-smart-module';
-import { TwitchEvent } from './models';
+import { TwitchEvent } from '../../../models/twitch-event';
 import TwitchEventsState from './state';
 
 export default class EventSubGetters extends Getters<TwitchEventsState> {

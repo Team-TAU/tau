@@ -1,9 +1,10 @@
-import { ajax } from 'rxjs/ajax';
-import { map } from 'rxjs/operators';
 import { Actions } from 'vuex-smart-module';
 import EventSubGetters from './getters';
 import EventSubMutations from './mutations';
 import EventSubState from './state';
+
+import api$ from '@/services/tau-apis';
+import { EventSubscription } from '@/models/event-subscription';
 
 export default class EventSubActions extends Actions<
   EventSubState,
@@ -13,22 +14,29 @@ export default class EventSubActions extends Actions<
 > {
   loadAll(): Promise<boolean> {
     this.commit('loadAllRequest');
-    const baseUrl =
-      process.env.NODE_ENV === 'development'
-        ? `http://localhost:${process.env.VUE_APP_API_PORT}`
-        : '';
-    const url = `${baseUrl}/api/v1/twitch/eventsub-subscriptions?active=true`;
-    const token = localStorage.getItem('tau-token');
-    const headers = {
-      Authorization: `Token ${token}`,
-    };
-    return ajax({
-      url,
-      method: 'GET',
-      headers,
-    })
-      .pipe(map((resp) => resp.response))
-      .toPromise()
+    return api$.tau.get('twitch/eventsub-subscriptions').then(
+      (resp) => {
+        this.commit('loadAllSuccess', {
+          eventSubscriptions: resp,
+        });
+        return true;
+      },
+      (_err) => {
+        // this.commit('authError', {
+        //   error,
+        // });
+        return false;
+      },
+    );
+  }
+
+  updateOne(payload: EventSubscription) {
+    this.commit('updateOne', payload);
+  }
+
+  bulkActivate(payload: { id: string; active: boolean }[]) {
+    return api$.tau
+      .put('twitch/eventsub-subscriptions/bulk-activate', payload)
       .then(
         (resp) => {
           this.commit('loadAllSuccess', {
@@ -36,10 +44,7 @@ export default class EventSubActions extends Actions<
           });
           return true;
         },
-        (err) => {
-          // this.commit('authError', {
-          //   error,
-          // });
+        (_err) => {
           return false;
         },
       );

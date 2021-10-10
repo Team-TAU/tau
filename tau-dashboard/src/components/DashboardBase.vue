@@ -1,15 +1,7 @@
 <template>
   <div class="layout-container">
-    <!-- <div class="layout-top-bar">
-      <Button
-        label="Logout"
-        type="button"
-        class="p-button-raised p-button-secondary"
-        @click="logout()"
-      />
-    </div> -->
     <top-bar @logout="logout()"></top-bar>
-    <div class="layout-side-bar"></div>
+    <side-bar></side-bar>
     <div class="layout-content">
       <router-view></router-view>
     </div>
@@ -17,16 +9,18 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue';
+import { defineComponent, ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 
 import TopBar from './layout/TopBar.vue';
+import SideBar from './layout/SideBar.vue';
 
 export default defineComponent({
   name: 'Dashboard',
   components: {
     TopBar,
+    SideBar,
   },
   setup() {
     const store = useStore();
@@ -36,6 +30,12 @@ export default defineComponent({
       await store.dispatch('auth/logout');
       router.replace('/login');
     }
+
+    async function fetchEventSubscriptions() {
+      await store.dispatch('eventSubscriptions/loadAll');
+    }
+
+    onMounted(fetchEventSubscriptions);
 
     return {
       logout,
@@ -51,15 +51,6 @@ export default defineComponent({
   flex-direction: column;
   justify-content: space-between;
   min-height: 100vh;
-
-  .layout-side-bar {
-    position: fixed;
-    width: 250px;
-    height: 100%;
-    z-index: 999;
-    overflow-y: auto;
-    background-color: var(--bluegray-700);
-  }
 
   .layout-content {
     padding: 70px 2rem 2rem 2rem;
