@@ -59,13 +59,13 @@ export default defineComponent({
     function updateModel(reward: Reward | null) {
       console.log(reward);
       emit('update:value', {
-        id: reward.id,
-        cost: reward.cost,
-        title: reward.title,
-        prompt: reward.prompt,
-        is_user_input_required: reward.is_user_input_required,
+        id: reward?.id,
+        cost: reward?.cost,
+        title: reward?.title,
+        prompt: reward?.prompt,
+        is_user_input_required: reward?.is_user_input_required,
         should_redemptions_skip_request_queue:
-          reward.should_redemptions_skip_request_queue,
+          reward?.should_redemptions_skip_request_queue,
       });
     }
 
