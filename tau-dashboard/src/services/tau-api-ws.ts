@@ -8,7 +8,7 @@ abstract class BaseWsService {
   private ws: WebSocketSubject<unknown> | null = null;
 
   constructor(private endpoint: string) {
-    console.log('Constructed TauStatusWsService');
+    console.log(`Constructed base WS Service for ${endpoint}`);
   }
 
   get baseWsUrl() {
@@ -74,7 +74,6 @@ abstract class BaseWsService {
 export class TauTwitchEventWsService extends BaseWsService {
   constructor(private store: Store<any>) {
     super('ws/twitch-events/');
-    console.log('Constructed TauStatusWsService');
   }
 
   handle(msg: any) {
@@ -85,7 +84,6 @@ export class TauTwitchEventWsService extends BaseWsService {
 export class TauStatusWsService extends BaseWsService {
   constructor(private store: Store<any>) {
     super('ws/tau-status/');
-    console.log('Constructed TauStatusWsService');
   }
 
   handle(msg: any) {

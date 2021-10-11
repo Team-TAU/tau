@@ -38,13 +38,13 @@ export default defineComponent({
 
     onMounted(() => {
       console.log('broadcaster-info onMounted');
-      store.dispatch('broadcaster/load').then((res) => {
-        updateModel(
-          store.getters['broadcaster/data'].id,
-          store.getters['broadcaster/data'].display_name,
-          store.getters['broadcaster/data'].login,
-        );
-      });
+      //store.dispatch('broadcaster/load').then((res) => {
+      updateModel(
+        store.getters['broadcaster/data'].id,
+        store.getters['broadcaster/data'].display_name,
+        store.getters['broadcaster/data'].login,
+      );
+      //});
     });
 
     return {};

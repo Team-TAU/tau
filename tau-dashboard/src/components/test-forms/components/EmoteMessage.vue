@@ -173,7 +173,6 @@ export default defineComponent({
     }
 
     onMounted(async () => {
-      await store.dispatch('broadcaster/load');
       const broadcaster_id = store.getters['broadcaster/data'].id;
       emotes.global = (
         await tau.helix.get<EmoteResponse>(`chat/emotes/global`)

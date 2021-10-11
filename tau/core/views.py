@@ -94,15 +94,17 @@ def home_view(request):
     user_count = User.objects.all().exclude(username='worker_process').count()
     if user_count == 0:
         return HttpResponseRedirect('/first-run/')
-    elif not request.user.is_authenticated:
-        return HttpResponseRedirect('/accounts/login/')
+    # elif not request.user.is_authenticated:
+    #     return HttpResponseRedirect('/accounts/login/')
     elif config.CHANNEL == '':
         return HttpResponseRedirect('/set-channel/')
     elif config.SCOPE_UPDATED_NEEDED:
         return HttpResponseRedirect('/refresh-token-scope/')
     else:
-        template = loader.get_template('home.html')
-        return HttpResponse(template.render({'config': config}, request))
+        # # template = loader.get_template('home.html')
+        # template = loader.get_template('dashboard/index.html')
+        # return HttpResponse(template.render({'config': config}, request))
+        return HttpResponseRedirect('/dashboard')
 
 def first_run_view(request):
     user_count = User.objects.all().exclude(username='worker_process').count()

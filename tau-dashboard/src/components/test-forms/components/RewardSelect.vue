@@ -70,7 +70,6 @@ export default defineComponent({
     }
 
     onMounted(async () => {
-      await store.dispatch('broadcaster/load');
       const broadcaster_id = store.getters['broadcaster/data'].id;
       const rewardsResponse = await tau.helix.get<RewardsResponse>(
         `channel_points/custom_rewards`,

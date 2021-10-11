@@ -78,7 +78,6 @@ export default defineComponent({
     }
 
     onMounted(async () => {
-      await store.dispatch('broadcaster/load');
       const broadcaster_id = store.getters['broadcaster/data'].id;
       const moderatorsResponse = await tau.helix.get<ModeratorResponse>(
         `moderation/moderators`,

@@ -127,7 +127,6 @@ export default defineComponent({
       const componentName = _.startCase(
         _.camelCase(view.lookup_name.replaceAll('_', '-')),
       ).replace(/ /g, '');
-      console.log(componentName);
       const formExists =
         componentName in
         ((resolveComponent('test-form') as ComponentOptions)?.components || {});
@@ -143,7 +142,6 @@ export default defineComponent({
       view.lookup_name = view.lookup_name.replaceAll('_', '-');
       //.replace('channel-channel', 'channel');
 
-      console.log('opening ', view);
       store.dispatch('UI/setTestFormView', view);
     }
 
