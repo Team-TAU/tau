@@ -14,6 +14,7 @@ import ChannelBan from './ChannelBan.vue';
 import ChannelUnban from './ChannelUnban.vue';
 import ChannelRaid from './ChannelRaid.vue';
 import ChannelChannelPointsCustomRewardRedemptionAdd from './ChannelPointsCustomRewardRedemptionAdd.vue';
+import ChannelChannelPointsCustomRewardRedemptionUpdate from './ChannelPointsCustomRewardRedemptionUpdate.vue';
 import ChannelSubscribe from './ChannelSubscribe.vue';
 import ChannelSubscriptionEnd from './ChannelSubscriptionEnd.vue';
 import ChannelSubscriptionGift from './ChannelSubscriptionGift.vue';
@@ -26,6 +27,7 @@ export default defineComponent({
     ChannelCheer,
     ChannelRaid,
     ChannelChannelPointsCustomRewardRedemptionAdd,
+    ChannelChannelPointsCustomRewardRedemptionUpdate,
     ChannelSubscribe,
     ChannelSubscriptionEnd,
     ChannelSubscriptionGift,

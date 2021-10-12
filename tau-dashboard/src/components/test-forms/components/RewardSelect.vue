@@ -26,6 +26,7 @@ export interface Reward {
   prompt: string;
   is_user_input_required?: boolean;
   should_redemptions_skip_request_queue?: boolean;
+  is_enabled?: boolean;
 }
 
 export interface RewardsResponse {
@@ -44,6 +45,14 @@ export default defineComponent({
     label: {
       type: String,
       required: true,
+    },
+    queuedOnly: {
+      type: Boolean,
+      default: false,
+    },
+    enabledOnly: {
+      type: Boolean,
+      default: false,
     },
   },
   setup(props, { emit }) {
@@ -78,6 +87,14 @@ export default defineComponent({
         },
       );
       rewards.value = rewardsResponse.data;
+      if (props.queuedOnly) {
+        rewards.value = rewards.value.filter(
+          (reward) => !reward.should_redemptions_skip_request_queue,
+        );
+      }
+      if (props.enabledOnly) {
+        rewards.value = rewards.value.filter((reward) => reward.is_enabled);
+      }
     });
 
     return {
