@@ -1,11 +1,13 @@
 import os
 import requests
+import datetime
 
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse, Http404
 from django.template import loader
 from django.contrib.auth import login
 from django.conf import settings
 from django.http import Http404
+from django.utils import timezone
 import rest_framework
 
 from rest_framework.authtoken.models import Token
@@ -20,11 +22,13 @@ import constance.settings
 from tau.twitch.models import TwitchAPIScope, TwitchEventSubSubscription
 from tau.users.models import User
 from .forms import ChannelNameForm, FirstRunForm
-from  .utils import log_request
+from  .utils import log_request, check_access_token_expired, refresh_access_token
 from tau.twitch.models import TwitchHelixEndpoint
 
 @api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
 def helix_view(request, helix_path=None):
+    if check_access_token_expired():
+        refresh_access_token()
     try:
         endpoint_instance = TwitchHelixEndpoint.objects.get(
             endpoint=helix_path,
@@ -203,7 +207,8 @@ def process_twitch_callback_view(request):
         log_request(auth_r)
     config.TWITCH_ACCESS_TOKEN = response_data['access_token']
     config.TWITCH_REFRESH_TOKEN = response_data['refresh_token']
-
+    expiration = timezone.now() + datetime.timedelta(seconds=response_data['expires_in'])
+    config.TWITCH_ACCESS_TOKEN_EXPIRATION = expiration
     scope=' '.join(settings.TOKEN_SCOPES)
     app_auth_r = requests.post('https://id.twitch.tv/oauth2/token', data = {
         'client_id': client_id,

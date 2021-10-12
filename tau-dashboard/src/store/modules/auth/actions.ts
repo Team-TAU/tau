@@ -17,7 +17,7 @@ export default class AuthActions extends Actions<
     const baseUrl =
       process.env.NODE_ENV === 'development'
         ? `http://localhost:${process.env.VUE_APP_API_PORT}`
-        : '';
+        : window.location.origin;
     const url = `${baseUrl}/api-token-auth/`;
 
     return ajax({

@@ -2,8 +2,10 @@ import os
 import json
 from textwrap import indent
 import requests
+import datetime
 
 from django.conf import settings
+from django.utils import timezone
 
 from constance import config
 
@@ -23,6 +25,11 @@ def check_access_token():
     else:
         return True
 
+def check_access_token_expired():
+    expiration_time = config.TWITCH_ACCESS_TOKEN_EXPIRATION
+    current_time = timezone.now()
+    return current_time > expiration_time
+
 def refresh_access_token():
     refresh_token = config.TWITCH_REFRESH_TOKEN
     client_id = os.environ.get('TWITCH_APP_ID', None)
@@ -39,6 +46,9 @@ def refresh_access_token():
     if 'access_token' in data:
         config.TWITCH_REFRESH_TOKEN = data['refresh_token']
         config.TWITCH_ACCESS_TOKEN = data['access_token']
+        expiration = timezone.now() + datetime.timedelta(seconds=data['expires_in'])
+        config.TWITCH_ACCESS_TOKEN_EXPIRATION = expiration
+
     else:
         print('[ERROR] Could not refresh access token.')
 

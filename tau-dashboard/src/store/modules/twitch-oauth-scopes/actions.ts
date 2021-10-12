@@ -4,6 +4,7 @@ import TwitchOAuthScopeMutations from './mutations';
 import TwitchOAuthScopesState from './state';
 
 import api$ from '@/services/tau-apis';
+import { TwitchOAuthScope } from '@/models/twitch-oauth-scope';
 
 export default class TwitchOAuthScopesActions extends Actions<
   TwitchOAuthScopesState,
@@ -24,6 +25,19 @@ export default class TwitchOAuthScopesActions extends Actions<
         // this.commit('authError', {
         //   error,
         // });
+        return false;
+      },
+    );
+  }
+  bulkUpdate(payload: TwitchOAuthScope[]) {
+    return api$.tau.put('twitch/scopes/bulk', payload).then(
+      (resp) => {
+        this.commit('loadAllSuccess', {
+          twitchOAuthScopes: resp,
+        });
+        return true;
+      },
+      (_err) => {
         return false;
       },
     );

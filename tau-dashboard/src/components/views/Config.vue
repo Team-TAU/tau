@@ -61,17 +61,15 @@
         </template>
       </Column>
     </DataTable>
+    <Button @click="updateTokenScopes()">Update Token Scopes</Button>
   </Panel>
 </template>
 
 <script lang="ts">
-import {
-  EventSubscription,
-  EventSubSubscription,
-} from '@/models/event-subscription';
+import { EventSubscription } from '@/models/event-subscription';
 import { TwitchHelixEndpoint } from '@/models/twitch-helix-endpoint';
 import { TwitchOAuthScope } from '@/models/twitch-oauth-scope';
-import eventSub from '@/store/modules/event-subscriptions';
+import baseUrl from '@/services/base-api-url';
 import { computed, defineComponent, onMounted, ref } from 'vue';
 import { useStore } from 'vuex';
 
@@ -125,7 +123,14 @@ export default defineComponent({
         };
       });
       await store.dispatch('eventSubscriptions/bulkActivate', payload);
-      window.location.href = 'http://localhost:8008/refresh-token-scope/';
+      window.location.href = `${baseUrl}/refresh-token-scope/`;
+    }
+
+    async function updateTokenScopes() {
+      const scopeData = scopes.value as TwitchOAuthScope[];
+      const payload = scopeData.map((scope) => ({ ...scope }));
+      await store.dispatch('twitchOAuthScopes/bulkUpdate', payload);
+      window.location.href = `${baseUrl}/refresh-token-scope/`;
     }
 
     async function loadHelixData() {
@@ -141,6 +146,7 @@ export default defineComponent({
       scopes,
       scopeEndpoints,
       updateEventSubs,
+      updateTokenScopes,
     };
   },
 });

@@ -4,6 +4,7 @@ from os.path import join
 from distutils.util import strtobool
 from configurations import Configuration
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from datetime import datetime
 
 
 class Common(Configuration):  # pylint: disable=no-init
@@ -282,7 +283,9 @@ class Common(Configuration):  # pylint: disable=no-init
         'SCOPES_REFRESHED': (False, 'Have the tokens just been refreshed?', bool),
         'TWITCH_ACCESS_TOKEN': ('', 'Twitch API Access Token', str),
         'TWITCH_REFRESH_TOKEN': ('', 'Twitch API Refresh Token', str),
+        'TWITCH_ACCESS_TOKEN_EXPIRATION': ('', 'Expiration time for Twitch API Access Token', datetime),
         'TWITCH_APP_ACCESS_TOKEN': ('', 'Twitch API App Access Token', str),
+        'TWITCH_APP_ACCESS_TOKEN_EXPIRATION': ('', 'Expiration time for Twitch API App Access Token', datetime),
         'TWITCH_APP_REFRESH_TOKEN': ('', 'Twitch API App Refresh Token', str),
         'STATUS_WEBSOCKET': ('INACTIVE', 'Twitch WS Connection Status', str),
         'STATUS_CHANNEL_UPDATE': ('INACTIVE', 'Channel Update Connection Status', str),
