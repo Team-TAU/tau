@@ -1,5 +1,4 @@
 <template>
-  <h1>{{ view?.lookup_name }}</h1>
   <component :is="view?.lookup_name"></component>
 </template>
 

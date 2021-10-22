@@ -14,6 +14,7 @@
       ></Column>
       <Column field="description" header="Description"></Column>
     </DataTable>
+    <Button @click="updateSettings()">Update Settings</Button>
   </Panel>
   <Panel class="dark-header" header="Twitch EventSub Subscriptions">
     <p>
@@ -70,6 +71,8 @@ import { EventSubscription } from '@/models/event-subscription';
 import { TwitchHelixEndpoint } from '@/models/twitch-helix-endpoint';
 import { TwitchOAuthScope } from '@/models/twitch-oauth-scope';
 import baseUrl from '@/services/base-api-url';
+import api$ from '@/services/tau-apis';
+
 import { computed, defineComponent, onMounted, ref } from 'vue';
 import { useStore } from 'vuex';
 
@@ -133,12 +136,24 @@ export default defineComponent({
       window.location.href = `${baseUrl}/refresh-token-scope/`;
     }
 
-    async function loadHelixData() {
-      await store.dispatch('twitchOAuthScopes/loadAll');
-      await store.dispatch('twitchHelixEndpoints/loadAll');
+    async function updateSettings() {
+      console.log('update settings called!');
+      for (const setting of settings.value) {
+        if (setting.setting === 'Use IRC') {
+          const payload = {
+            value: setting.active,
+          };
+          const res = await api$.tau.put('settings/use_irc', payload);
+        }
+      }
     }
 
-    onMounted(loadHelixData);
+    onMounted(async () => {
+      await store.dispatch('twitchOAuthScopes/loadAll');
+      await store.dispatch('twitchHelixEndpoints/loadAll');
+      const irc_res = await api$.tau.get('settings/use_irc');
+      settings.value[0].active = irc_res.use_irc;
+    });
 
     return {
       settings,
@@ -147,6 +162,7 @@ export default defineComponent({
       scopeEndpoints,
       updateEventSubs,
       updateTokenScopes,
+      updateSettings,
     };
   },
 });

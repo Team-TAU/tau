@@ -117,6 +117,23 @@ def eventsub_payload(instance, base_url, broadcaster_key='broadcaster_user_id'):
         }
     }
     return data
+    
+
+def streamer_payload(base_url, status, streamer_id):
+    callback_url = f'{base_url}/api/v1/twitch-events/stream-{status}/webhook/'
+    data = {
+        "type": f'stream.{status}',
+        "version": "1",
+        "condition": {
+            'broadcaster_user_id': streamer_id
+        },
+        "transport": {
+            "method": "webhook",
+            "callback": callback_url,
+            "secret": os.environ.get('TWITCH_WEBHOOK_SECRET', None)
+        }
+    }
+    return data
 
 def init_webhook(payload, url, worker_token, instance_id=None):
     webhook_headers = {
@@ -153,23 +170,26 @@ def init_webhooks(base_url, worker_token):
             broadcaster_key = 'to_broadcaster_user_id'
         else:
             broadcaster_key = 'broadcaster_user_id'
-        init_webhook(eventsub_payload(instance, base_url, broadcaster_key), url, worker_token, instance.lookup_name)
+        init_webhook(
+            eventsub_payload(instance, base_url, broadcaster_key),
+            url,
+            worker_token,
+            instance.lookup_name
+        )
         active_event_sub_ids.append(instance.id)
 
-    # streamers = Streamer.objects.filter(disabled=False)
-    # for streamer in streamers:
-    #     CoreConfig.init_webhook(
-    #         webhook_payloads.stream_online(base_url, streamer.twitch_id),
-    #         None,
-    #         url,
-    #         worker_token
-    #     )
-    #     CoreConfig.init_webhook(
-    #         webhook_payloads.stream_offline(base_url, streamer.twitch_id),
-    #         None,
-    #         url,
-    #         worker_token
-    #     )
+    streamers = Streamer.objects.filter(disabled=False)
+    for streamer in streamers:
+        init_webhook(
+           streamer_payload(base_url, 'online', streamer.twitch_id),
+            url,
+            worker_token
+        )
+        init_webhook(
+            streamer_payload(base_url, 'offline', streamer.twitch_id),
+            url,
+            worker_token
+        )
 
     return active_event_sub_ids, active_streamer_sub_ids
 
@@ -208,6 +228,15 @@ def teardown_webhooks(worker_token):
             json=payload,
             headers=tau_headers
         )
+    active_streamers = Streamer.objects.filter(disabled=False, subscription__isnull=False)
+    for streamer in active_streamers:
+        req = requests.delete(
+            f'https://api.twitch.tv/helix/eventsub/subscriptions?id={streamer.subscription["id"]}',
+            headers=headers
+        )
+        if(settings.DEBUG_TWITCH_CALLS):
+            log_request(req)
+
 
 def teardown_all_acct_webhooks():
     headers = {

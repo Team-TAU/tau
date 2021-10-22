@@ -12,6 +12,7 @@ from django.conf import settings
 
 from constance import config
 from channels.db import database_sync_to_async
+from tau.streamers.utils import update_all_streamers
 
 from tau.twitchevents.models import TwitchEvent
 from tau.twitchevents.serializers import TwitchEventSerializer
@@ -49,7 +50,9 @@ class Worker():
             teardown_webhooks(self.tau_token)
             print('     [Old WebHooks torn down]')
             self.active_event_sub_ids, self.active_streamer_sub_ids = init_webhooks(self.public_url, self.tau_token)
-            print('     [New WebHooks Initialized]\n')
+            print('     [New WebHooks Initialized]')
+            update_all_streamers()
+            print('     [All streamer statuses updated]\n')
         else:
             print(
                 'You have not yet set up a username, or authorized TAU to connect '
@@ -63,6 +66,7 @@ class Worker():
             if self.connection.open:
                 print('---- Connected to twitch irc ws server ----')
                 await self.initial_connect()
+                print('---- Actually connected I think! ----')
                 self.irc_connected = True
                 break
             else:
@@ -168,11 +172,12 @@ class Worker():
         setattr(config, setting, value)
 
     def handle_channel_points(self, data):
+        print('HANDLE CHANNEL POINTS FROM IRC')
         start_time = timezone.now() - datetime.timedelta(seconds=2)
 
         time.sleep(1)
         redemption = TwitchEvent.objects.filter(
-            event_type='point-redemption',
+            event_type='channel-channel_points_custom_reward_redemption-add',
             created__gte=start_time,
             event_data__user_login=data['tags']['display-name'].lower()
         )

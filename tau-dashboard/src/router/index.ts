@@ -35,6 +35,11 @@ const routes: Array<RouteRecordRaw> = [
             /* webpackChunkName: "about" */ '../components/views/Config.vue'
           ),
       },
+      {
+        path: 'streamers',
+        name: 'Streamers',
+        component: () => import('../components/views/Streamers.vue'),
+      },
     ],
   },
 ];
