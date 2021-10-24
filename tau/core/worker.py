@@ -37,6 +37,7 @@ class Worker():
     active_event_sub_ids = []
     active_streamer_sub_ids = []
     ngrok_tunnel = None
+    token_refreshed = False
 
     def __init__(self, token):
         self.tau_token = token
@@ -44,8 +45,9 @@ class Worker():
     def setup_webhooks(self):
         twitch_access_token = config.TWITCH_APP_ACCESS_TOKEN
         if twitch_access_token != '':
-            print('---- Setting up WebHooks for Twitch ----')
+            print(f'---- Establishing IRC and Webhook Connections ----')
             refresh_access_token()  # refresh the access token
+            self.token_refreshed = True
             print('     [Access tokens refreshed]')
             teardown_webhooks(self.tau_token)
             print('     [Old WebHooks torn down]')
@@ -62,18 +64,21 @@ class Worker():
     async def connect(self):
         delay = 1
         while True:
-            self.connection = await websockets.client.connect(self.irc_url)
-            if self.connection.open:
-                print('---- Connected to twitch irc ws server ----')
-                await self.initial_connect()
-                print('---- Actually connected I think! ----')
-                self.irc_connected = True
-                break
+            if self.token_refreshed:
+                self.connection = await websockets.client.connect(self.irc_url)
+                if self.connection.open:
+                    print('     [Opening IRC Connection]')
+                    await self.initial_connect()
+                    print('     [Connected to IRC]')
+                    self.irc_connected = True
+                    break
+                else:
+                    print(f'---- Could not connect, waiting {delay}s to reconnect ----')
+                    await asyncio.sleep(delay)
+                    if delay < 120:
+                        delay = max(delay*2, 120)
             else:
-                print(f'---- Could not connect, waiting {delay}s to reconnect ----')
                 await asyncio.sleep(delay)
-                if delay < 120:
-                    delay = max(delay*2, 120)
 
     def create_event_loop(self):
         self.loop = asyncio.get_event_loop()
@@ -131,9 +136,10 @@ class Worker():
         self.create_event_loop()
 
     async def initial_connect(self):
+        token = await database_sync_to_async(self.lookup_setting)('TWITCH_ACCESS_TOKEN')
         caps = 'twitch.tv/tags twitch.tv/commands twitch.tv/membership'
         await self.connection.send(f'CAP REQ :{caps}')
-        await self.connection.send(f'PASS oauth:{self.token}')
+        await self.connection.send(f'PASS oauth:{token}')
         await self.connection.send(f'NICK {self.username}')
         await self.connection.send(f'JOIN #{self.username.lower()}')
 
@@ -172,7 +178,6 @@ class Worker():
         setattr(config, setting, value)
 
     def handle_channel_points(self, data):
-        print('HANDLE CHANNEL POINTS FROM IRC')
         start_time = timezone.now() - datetime.timedelta(seconds=2)
 
         time.sleep(1)
