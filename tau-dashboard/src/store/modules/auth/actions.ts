@@ -1,6 +1,8 @@
 import { ajax } from 'rxjs/ajax';
 import { map } from 'rxjs/operators';
 
+import Cookies from 'js-cookie';
+
 import { Actions } from 'vuex-smart-module';
 import AuthGetters from './getters';
 import AuthMutations from './mutations';
@@ -18,12 +20,14 @@ export default class AuthActions extends Actions<
       process.env.NODE_ENV === 'development'
         ? `http://localhost:${process.env.VUE_APP_API_PORT}`
         : window.location.origin;
+    const csrftoken = Cookies.get('csrftoken');
     const url = `${baseUrl}/api-token-auth/`;
-
+    const headers = csrftoken ? { 'X-CSRFToken': csrftoken } : {};
     return ajax({
       url,
       method: 'POST',
       body: payload,
+      headers,
     })
       .pipe(map((resp) => resp.response))
       .toPromise()

@@ -51,7 +51,7 @@ class BaseApiService {
     const url = `${baseUrl}${this.basePath}${endpoint}`;
     return ajax({
       url,
-      method: 'post',
+      method: 'POST',
       headers: this.authHeader,
       body: payload,
     })

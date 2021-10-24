@@ -45,6 +45,11 @@ export default defineComponent({
         icon: 'pi pi-cog',
         routeTo: '/dashboard/config',
       },
+      {
+        label: 'User',
+        icon: 'pi pi-user',
+        routeTo: '/dashboard/user',
+      },
     ]);
     return {
       items,

@@ -40,6 +40,11 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Streamers',
         component: () => import('../components/views/Streamers.vue'),
       },
+      {
+        path: 'user',
+        name: 'User',
+        component: () => import('../components/views/User.vue'),
+      },
     ],
   },
 ];

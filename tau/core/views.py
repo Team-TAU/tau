@@ -189,6 +189,17 @@ def get_tau_token(request):
         token = Token.objects.get(user=request.user)
         return JsonResponse({'token': token.key})
 
+@api_view(['POST'])
+def refresh_tau_token(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'You must be logged into access this endpoint.'})
+    else:
+        token = Token.objects.get(user=request.user)
+        token.delete()
+        token = Token.objects.create(user=request.user)
+
+        return JsonResponse({'token': token.key})
+
 def process_twitch_callback_view(request):
     port = os.environ.get('PORT', 8000)
     params = request.GET
