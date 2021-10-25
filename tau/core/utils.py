@@ -6,11 +6,13 @@ import datetime
 
 from django.conf import settings
 from django.utils import timezone
+from django.apps import apps
 
 from constance import config
 
 from tau.twitch.models import TwitchEventSubSubscription
-from tau.streamers.models import Streamer
+# from tau.streamers.models import Streamer
+
 
 def check_access_token():
     url = "https://id.twitch.tv/oauth2/validate"
@@ -90,6 +92,7 @@ def setup_ngrok():
 
     # Update any base URLs or webhooks to use the public ngrok URL
     settings.BASE_URL = public_url
+    config.PUBLIC_URL = public_url
     return public_url, tunnel
 
 def log_request(req):
@@ -135,7 +138,7 @@ def streamer_payload(base_url, status, streamer_id):
     }
     return data
 
-def init_webhook(payload, url, worker_token, instance_id=None):
+def init_webhook(payload, url=None, worker_token=None, instance_id=None):
     webhook_headers = {
         'Client-ID': os.environ.get('TWITCH_APP_ID', None),
         'Authorization': 'Bearer {}'.format(config.TWITCH_APP_ACCESS_TOKEN),
@@ -158,7 +161,8 @@ def init_webhook(payload, url, worker_token, instance_id=None):
     #TODO Add code to handle bad response from initial sub handshake
 
 def init_webhooks(base_url, worker_token):
-    from tau.streamers.models import Streamer
+    # from tau.streamers.models import Streamer
+    Streamer = apps.get_model('streamers.Streamer')
 
     url = settings.LOCAL_URL
 
@@ -197,13 +201,13 @@ def get_active_event_sub_ids():
     return [instance.id for instance in TwitchEventSubSubscription.objects.filter(active=True)]
 
 def get_active_streamer_sub_ids():
+    Streamer = apps.get_model('streamers.Streamer')
     return [instance.id for instance in Streamer.objects.filter(disabled=False)]
 
 def teardown_webhooks(worker_token):
+    Streamer = apps.get_model('streamers.Streamer')
     url = settings.LOCAL_URL
-    
     active_subs = TwitchEventSubSubscription.objects.filter(subscription__isnull=False)
-
     # Get subscriptions
     headers = {
         'Client-ID': os.environ.get('TWITCH_APP_ID', None),
@@ -228,10 +232,20 @@ def teardown_webhooks(worker_token):
             json=payload,
             headers=tau_headers
         )
-    active_streamers = Streamer.objects.filter(disabled=False, subscription__isnull=False)
-    for streamer in active_streamers:
+    
+    active_streamers_online = Streamer.objects.filter(disabled=False, online_subscription__isnull=False)
+    for streamer in active_streamers_online:
         req = requests.delete(
-            f'https://api.twitch.tv/helix/eventsub/subscriptions?id={streamer.subscription["id"]}',
+            f'https://api.twitch.tv/helix/eventsub/subscriptions?id={streamer.online_subscription["id"]}',
+            headers=headers
+        )
+        if(settings.DEBUG_TWITCH_CALLS):
+            log_request(req)
+
+    active_streamers_offline = Streamer.objects.filter(disabled=False, offline_subscription__isnull=False)
+    for streamer in active_streamers_offline:
+        req = requests.delete(
+            f'https://api.twitch.tv/helix/eventsub/subscriptions?id={streamer.offline_subscription["id"]}',
             headers=headers
         )
         if(settings.DEBUG_TWITCH_CALLS):

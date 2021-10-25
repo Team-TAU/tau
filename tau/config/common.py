@@ -275,6 +275,7 @@ class Common(Configuration):  # pylint: disable=no-init
     CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 
     CONSTANCE_CONFIG = {
+        'PUBLIC_URL': ('', 'Public URL', str),
         'FIRST_RUN': (True, 'First Run', bool),
         'CHANNEL': ('', 'Channel name', str),
         'CHANNEL_ID': ('', 'Channel ID', str),

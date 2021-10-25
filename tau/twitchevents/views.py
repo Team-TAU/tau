@@ -74,11 +74,12 @@ class TwitchEventViewSet(viewsets.ViewSet):
                     sub_instance.subscription = data['subscription']
                     sub_instance.status = 'CON'
                     sub_instance.save()
-                    # status_key = f'STATUS_CHANNEL_{pk.upper().replace("-", "_")}'
-                    # setattr(config, status_key, 'CONNECTED')
                 else:
                     streamer = Streamer.objects.get(twitch_id=data['subscription']['condition']['broadcaster_user_id'])
-                    streamer.subscription = data['subscription']
+                    if pk == 'stream-online':
+                        streamer.online_subscription = data['subscription']
+                    else:
+                        streamer.offline_subscription = data['subscription']
                     streamer.save()
                 return HttpResponse(data['challenge'])
             else:

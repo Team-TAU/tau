@@ -109,14 +109,16 @@ class Worker():
         while True:
             refreshed_ngrok = False
             if settings.USE_NGROK and self.ngrok_tunnel is None:
-                self.public_url, self.ngrok_tunnel = setup_ngrok()
+                self.public_url, self.ngrok_tunnel = await database_sync_to_async(setup_ngrok)()
                 refreshed_ngrok = True
             elif settings.USE_NGROK:
                 # Check to see if tunnel is still alive
                 pass
                 # self.ngrok_tunnel.refresh_metrics()
                 # print(self.ngrok_tunnel.metrics)
-            
+            else:
+                self.public_url = settings.BASE_URL
+                await database_sync_to_async(self.set_setting)('PUBLIC_URL', settings.BASE_URL)
             # check for difference in required webhooks:
             new_event_sub_ids = await database_sync_to_async(get_active_event_sub_ids)()
             scopes_refreshed = await database_sync_to_async(self.lookup_setting)('SCOPES_REFRESHED')
