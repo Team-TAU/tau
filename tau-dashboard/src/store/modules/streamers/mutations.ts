@@ -1,6 +1,7 @@
 import { Mutations } from 'vuex-smart-module';
 import StreamersState from './state';
 import { Streamer } from '@/models/streamer';
+import { single } from 'rxjs/operators';
 
 export default class StreamerMutations extends Mutations<StreamersState> {
   loadAllRequest() {
@@ -23,5 +24,22 @@ export default class StreamerMutations extends Mutations<StreamersState> {
     this.state.entities = this.state.entities.filter(
       (streamer) => streamer.id !== payload.streamer.id,
     );
+  }
+
+  streamerStatus(payload: { id: string; streaming: boolean }) {
+    const streamer = this.state.entities.find(
+      (s) => s.twitch_id === payload.id,
+    );
+    const streamerId = this.state.entities.findIndex(
+      (s) => s.twitch_id === payload.id,
+    );
+    if (streamer) {
+      streamer.streaming = payload.streaming;
+      this.state.entities = [
+        ...this.state.entities.slice(0, streamerId),
+        { ...streamer },
+        ...this.state.entities.slice(streamerId + 1),
+      ];
+    }
   }
 }

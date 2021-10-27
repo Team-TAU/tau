@@ -4,6 +4,16 @@ import { retryWhen, delay } from 'rxjs/operators';
 
 import baseUrl from './base-api-url';
 
+interface TwitchEventMessage {
+  created: string;
+  event_data: any;
+  event_id: string;
+  event_source: string;
+  event_type: string;
+  id: string;
+  origin: string;
+}
+
 abstract class BaseWsService {
   private ws: WebSocketSubject<unknown> | null = null;
 
@@ -76,8 +86,19 @@ export class TauTwitchEventWsService extends BaseWsService {
     super('ws/twitch-events/');
   }
 
-  handle(msg: any) {
+  handle(msg: TwitchEventMessage) {
     this.store.dispatch('twitchEvents/createOne', msg);
+    if (msg.event_type === 'stream-online') {
+      this.store.dispatch(
+        'streamers/streamerOnline',
+        msg.event_data.broadcaster_user_id,
+      );
+    } else if (msg.event_type === 'stream-offline') {
+      this.store.dispatch(
+        'streamers/streamerOffline',
+        msg.event_data.broadcaster_user_id,
+      );
+    }
   }
 }
 

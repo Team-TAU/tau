@@ -63,4 +63,12 @@ export default class StreamerActions extends Actions<
       },
     );
   }
+
+  streamerOnline(payload: string) {
+    this.commit('streamerStatus', { id: payload, streaming: true });
+  }
+
+  streamerOffline(payload: string) {
+    this.commit('streamerStatus', { id: payload, streaming: false });
+  }
 }
