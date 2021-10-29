@@ -1,11 +1,13 @@
 import os
 import requests
+import datetime
 
 from django.http import HttpResponseRedirect, HttpResponse, JsonResponse, Http404
 from django.template import loader
 from django.contrib.auth import login
 from django.conf import settings
 from django.http import Http404
+from django.utils import timezone
 import rest_framework
 
 from rest_framework.authtoken.models import Token
@@ -17,14 +19,16 @@ from rest_framework import viewsets
 from constance import config
 import constance.settings
 
-from tau.twitch.models import TwitchAPIScope
+from tau.twitch.models import TwitchAPIScope, TwitchEventSubSubscription
 from tau.users.models import User
 from .forms import ChannelNameForm, FirstRunForm
-from  .utils import log_request
+from  .utils import log_request, check_access_token_expired, refresh_access_token
 from tau.twitch.models import TwitchHelixEndpoint
 
 @api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
 def helix_view(request, helix_path=None):
+    if check_access_token_expired():
+        refresh_access_token()
     try:
         endpoint_instance = TwitchHelixEndpoint.objects.get(
             endpoint=helix_path,
@@ -94,15 +98,17 @@ def home_view(request):
     user_count = User.objects.all().exclude(username='worker_process').count()
     if user_count == 0:
         return HttpResponseRedirect('/first-run/')
-    elif not request.user.is_authenticated:
-        return HttpResponseRedirect('/accounts/login/')
+    # elif not request.user.is_authenticated:
+    #     return HttpResponseRedirect('/accounts/login/')
     elif config.CHANNEL == '':
         return HttpResponseRedirect('/set-channel/')
     elif config.SCOPE_UPDATED_NEEDED:
         return HttpResponseRedirect('/refresh-token-scope/')
     else:
-        template = loader.get_template('home.html')
-        return HttpResponse(template.render({'config': config}, request))
+        # # template = loader.get_template('home.html')
+        # template = loader.get_template('dashboard/index.html')
+        # return HttpResponse(template.render({'config': config}, request))
+        return HttpResponseRedirect('/dashboard')
 
 def first_run_view(request):
     user_count = User.objects.all().exclude(username='worker_process').count()
@@ -153,9 +159,18 @@ def get_channel_name_view(request):
 def refresh_token_scope(request):
     client_id = os.environ.get('TWITCH_APP_ID', None)
 
-    extra_scopes = list(TwitchAPIScope.objects.filter(required=True).values_list('scope', flat=True))
-    scopes = list(set(settings.TOKEN_SCOPES + extra_scopes))
-
+    helix_scopes = list(
+        TwitchAPIScope.objects.filter(
+            required=True
+        ).values_list('scope', flat=True)
+    )
+    eventsub_scopes = list(
+        TwitchEventSubSubscription.objects.filter(
+            active=True
+        ).values_list('scope_required', flat=True)
+    )
+    scopes = list(set(settings.TOKEN_SCOPES + eventsub_scopes + helix_scopes))
+    scopes = list(filter(lambda x: (x is not None), scopes))
     scope=' '.join(scopes)
 
     url = f'https://id.twitch.tv/oauth2/authorize?' \
@@ -172,6 +187,17 @@ def get_tau_token(request):
         return JsonResponse({'error': 'You must be logged into access this endpoint.'})
     else:
         token = Token.objects.get(user=request.user)
+        return JsonResponse({'token': token.key})
+
+@api_view(['POST'])
+def refresh_tau_token(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'You must be logged into access this endpoint.'})
+    else:
+        token = Token.objects.get(user=request.user)
+        token.delete()
+        token = Token.objects.create(user=request.user)
+
         return JsonResponse({'token': token.key})
 
 def process_twitch_callback_view(request):
@@ -192,7 +218,8 @@ def process_twitch_callback_view(request):
         log_request(auth_r)
     config.TWITCH_ACCESS_TOKEN = response_data['access_token']
     config.TWITCH_REFRESH_TOKEN = response_data['refresh_token']
-
+    expiration = timezone.now() + datetime.timedelta(seconds=response_data['expires_in'])
+    config.TWITCH_ACCESS_TOKEN_EXPIRATION = expiration
     scope=' '.join(settings.TOKEN_SCOPES)
     app_auth_r = requests.post('https://id.twitch.tv/oauth2/token', data = {
         'client_id': client_id,
@@ -205,6 +232,7 @@ def process_twitch_callback_view(request):
     app_auth_data = app_auth_r.json()
     config.TWITCH_APP_ACCESS_TOKEN = app_auth_data['access_token']
     config.SCOPE_UPDATED_NEEDED = False
+    config.SCOPES_REFRESHED = True
     headers = {
         'Authorization': 'Bearer {}'.format(config.TWITCH_ACCESS_TOKEN),
         'Client-Id': client_id

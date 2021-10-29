@@ -4,6 +4,7 @@ from os.path import join
 from distutils.util import strtobool
 from configurations import Configuration
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from datetime import datetime
 
 
 class Common(Configuration):  # pylint: disable=no-init
@@ -12,6 +13,7 @@ class Common(Configuration):  # pylint: disable=no-init
     BASE_PORT = int(os.environ.get("PORT", 8000))
     BASE_URL = f"{PROTOCOL}//{PUBLIC_URL}"
     BEHIND_PROXY = (os.environ.get("BEHIND_PROXY", "false").lower() == "true")
+    BASE_DIR = BASE_DIR
 
     if BASE_PORT not in [80, 443] and not BEHIND_PROXY:
         BASE_URL = BASE_URL + f":{BASE_PORT}"
@@ -52,6 +54,7 @@ class Common(Configuration):  # pylint: disable=no-init
         'tau.twitch.apps.TwitchConfig',
         'tau.twitchevents.apps.TwitcheventsConfig',
         'tau.streamers.apps.StreamersConfig',
+        'tau.dashboard.apps.DashboardConfig'
     )
 
     # https://docs.djangoproject.com/en/2.0/topics/http/middleware/
@@ -264,22 +267,26 @@ class Common(Configuration):  # pylint: disable=no-init
             'rest_framework.permissions.IsAuthenticated',
         ],
         'DEFAULT_AUTHENTICATION_CLASSES': (
-            'rest_framework.authentication.SessionAuthentication',
             'rest_framework.authentication.TokenAuthentication',
+            'rest_framework.authentication.SessionAuthentication',
         )
     }
 
     CONSTANCE_BACKEND = 'constance.backends.database.DatabaseBackend'
 
     CONSTANCE_CONFIG = {
+        'PUBLIC_URL': ('', 'Public URL', str),
         'FIRST_RUN': (True, 'First Run', bool),
         'CHANNEL': ('', 'Channel name', str),
         'CHANNEL_ID': ('', 'Channel ID', str),
         'USE_IRC': (False, 'Use IRC for Channel Point Redemption Emotes', bool),
         'SCOPE_UPDATED_NEEDED': (False, 'Need to update Twitch Scopes', bool),
+        'SCOPES_REFRESHED': (False, 'Have the tokens just been refreshed?', bool),
         'TWITCH_ACCESS_TOKEN': ('', 'Twitch API Access Token', str),
         'TWITCH_REFRESH_TOKEN': ('', 'Twitch API Refresh Token', str),
+        'TWITCH_ACCESS_TOKEN_EXPIRATION': ('', 'Expiration time for Twitch API Access Token', datetime),
         'TWITCH_APP_ACCESS_TOKEN': ('', 'Twitch API App Access Token', str),
+        'TWITCH_APP_ACCESS_TOKEN_EXPIRATION': ('', 'Expiration time for Twitch API App Access Token', datetime),
         'TWITCH_APP_REFRESH_TOKEN': ('', 'Twitch API App Refresh Token', str),
         'STATUS_WEBSOCKET': ('INACTIVE', 'Twitch WS Connection Status', str),
         'STATUS_CHANNEL_UPDATE': ('INACTIVE', 'Channel Update Connection Status', str),

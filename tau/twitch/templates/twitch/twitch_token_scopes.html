@@ -40,6 +40,18 @@
 <section class="container pb-4">
     <div class="card mb-4 shadow-sm">
         <div class="card-header bg-secondary text-white">
+            <h4 class="my-0 fw-normal">Twitch EventSub Subscriptions</h4>
+        </div>
+        <div class="card-body">
+            <p><em>Check the subscriptions you would like to use, then click "Update Token" at the bottom of the list.</em></p>
+            <form id="subs-form" onsubmit="return onSubsFormSubmit()"></form>
+        </div>
+    </div>
+</section>
+
+<section class="container pb-4">
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-secondary text-white">
             <h4 class="my-0 fw-normal">Twitch Helix API Token Scopes</h4>
         </div>
         <div class="card-body">

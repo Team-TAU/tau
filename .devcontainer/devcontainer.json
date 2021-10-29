@@ -9,20 +9,21 @@
 	],
 	"service": "app",
 	"workspaceFolder": "/code",
-
 	// Set *default* container specific settings.json values on container create.
-	"settings": { 
+	"settings": {
 		"terminal.integrated.shell.linux": "/bin/bash",
-		"sqltools.connections": [{
-			"name": "Container database",
-			"driver": "PostgreSQL",
-			"previewLimit": 50,
-			"server": "localhost",
-			"port": 5432,
-			"database": "postgres",
-			"username": "postgres",
-			"password": "owifjajf20jfAT#GAgkvk9"
-		}],
+		"sqltools.connections": [
+			{
+				"name": "Container database",
+				"driver": "PostgreSQL",
+				"previewLimit": 50,
+				"server": "localhost",
+				"port": 5432,
+				"database": "postgres",
+				"username": "postgres",
+				"password": "owifjajf20jfAT#GAgkvk9"
+			}
+		],
 		"python.pythonPath": "/usr/local/bin/python",
 		"python.linting.enabled": true,
 		"python.linting.pylintEnabled": true,
@@ -43,20 +44,20 @@
 		"python.linting.pylintPath": "/usr/local/py-utils/bin/pylint",
 		"python.testing.pytestPath": "/usr/local/py-utils/bin/pytest"
 	},
-
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"ms-python.python",
 		"mtxr.sqltools",
-		"mtxr.sqltools-driver-pg"
+		"mtxr.sqltools-driver-pg",
+		"octref.vetur",
+		"batisteo.vscode-django",
+		"eamodio.gitlens",
+		"esbenp.prettier-vscode",
 	],
-
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [5000, 5432],
-
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "pip install --user -r requirements.txt",
-
 	// Comment out connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
 	// "remoteUser": "vscode"
 }

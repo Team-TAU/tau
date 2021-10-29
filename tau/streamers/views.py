@@ -32,7 +32,7 @@ class StreamerViewSet(viewsets.ModelViewSet):
             return self.get_paginated_response(serializer.data)
 
         serializer = StreamSerializer(streams, many=True)
-        return paginator.get_paginated_response(serializer.data)
+        return self.paginator.get_paginated_response(serializer.data)
 
     @action(detail=True, methods=['get'], url_path='streams/latest')
     def latest_stream(self, request, pk=None):

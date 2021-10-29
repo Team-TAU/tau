@@ -1,3 +1,4 @@
+from tau.twitch.models import TwitchEventSubSubscription
 import uuid
 
 from django.http import HttpResponse, HttpResponseForbidden
@@ -67,8 +68,19 @@ class TwitchEventViewSet(viewsets.ViewSet):
         if status == 'webhook_callback_verification_pending':
             if valid_webhook_request(headers, body):
                 if pk not in ['stream-offline', 'stream-online']:
-                    status_key = f'STATUS_CHANNEL_{pk.upper().replace("-", "_")}'
-                    setattr(config, status_key, 'CONNECTED')
+                    sub_instance = TwitchEventSubSubscription.objects.get(
+                        lookup_name=pk
+                    )
+                    sub_instance.subscription = data['subscription']
+                    sub_instance.status = 'CON'
+                    sub_instance.save()
+                else:
+                    streamer = Streamer.objects.get(twitch_id=data['subscription']['condition']['broadcaster_user_id'])
+                    if pk == 'stream-online':
+                        streamer.online_subscription = data['subscription']
+                    else:
+                        streamer.offline_subscription = data['subscription']
+                    streamer.save()
                 return HttpResponse(data['challenge'])
             else:
                 return HttpResponseForbidden()
@@ -85,13 +97,13 @@ class TwitchEventViewSet(viewsets.ViewSet):
                 event_data=event
             )
             if pk == 'stream-online':
-                streamer_username = event['broadcaster_user_login']
-                streamer = Streamer.objects.get(twitch_username=streamer_username)
+                streamer_id = event['broadcaster_user_id']
+                streamer = Streamer.objects.get(twitch_id=streamer_id)
                 streamer.streaming = True
                 streamer.save()
             elif pk == 'stream-offline':
-                streamer_username = event['broadcaster_user_login']
-                streamer = Streamer.objects.get(twitch_username=streamer_username)
+                streamer_id = event['broadcaster_user_id']
+                streamer = Streamer.objects.get(twitch_id=streamer_id)
                 streamer.streaming = False
                 streamer.save()
 

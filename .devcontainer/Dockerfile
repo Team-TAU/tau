@@ -1,27 +1,25 @@
-# [Choice] Python version: 3, 3.8, 3.7, 3.6
-ARG VARIANT=3
-FROM mcr.microsoft.com/vscode/devcontainers/python:0-${VARIANT}
+FROM python:3.8
 
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONUNBUFFERED=1 PYTHONHASHSEED=random \
+    PYTHONDONTWRITEBYTECODE=1 PIP_NO_CACHE_DIR=1
 
-# Update args in docker-compose.yaml to set the UID/GID of the "vscode" user.
-ARG USER_UID=1000
-ARG USER_GID=$USER_UID
-RUN if [ "$USER_GID" != "1000" ] || [ "$USER_UID" != "1000" ]; then groupmod --gid $USER_GID vscode && usermod --uid $USER_UID --gid $USER_GID vscode; fi
+ENV NODE_VERSION 14
 
-# [Option] Install Node.js
-ARG INSTALL_NODE="true"
-ARG NODE_VERSION="lts/*"
-RUN if [ "${INSTALL_NODE}" = "true" ]; then su vscode -c "umask 0002 && . /usr/local/share/nvm/nvm.sh && nvm install ${NODE_VERSION} 2>&1"; fi
+RUN curl --proto '=https' --tlsv1.2 -fsLS https://deb.nodesource.com/setup_16.x | sh -\ 
+        && apt install -y nodejs\
+        && npm install --global npm\
+        && npm install --global @vue/cli
 
-# [Optional] If your requirements rarely change, uncomment this section to add them to the image.
-COPY requirements.txt /tmp/pip-tmp/
-RUN pip3 --disable-pip-version-check --no-cache-dir install -r /tmp/pip-tmp/requirements.txt \
-   && rm -rf /tmp/pip-tmp
+# install supervisord (supervisor-stdout is not py3 compatible in pypi)
+RUN pip install supervisor git+https://github.com/coderanger/supervisor-stdout
 
-# [Optional] Uncomment this section to install additional OS packages.
-# RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-#     && apt-get -y install --no-install-recommends <your-package-list-here>
+# Sets work directory to /code
+WORKDIR /code
 
+# Allows docker to cache installed dependencies between builds
+COPY ./requirements.txt .
+RUN pip install -r requirements.txt
+COPY ./supervisord.conf /etc/supervisord.conf
 
-
+# Adds our application code to the image
+COPY ./ /code

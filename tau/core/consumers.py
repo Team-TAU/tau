@@ -16,8 +16,8 @@ class TauStatusConsumer(AsyncJsonWebsocketConsumer):
             self.group_name, self.channel_name
         )
         await self.accept()
-        data = await database_sync_to_async(get_all_statuses)()
-        await self.taustatus_event({'data': data})
+        # data = await database_sync_to_async(get_all_statuses)()
+        # await self.taustatus_event({'data': data})
 
     async def disconnect(self, code):
         await self.channel_layer.group_discard(
@@ -32,8 +32,9 @@ class TauStatusConsumer(AsyncJsonWebsocketConsumer):
                 data = json.loads(text_data)
                 if 'token' in data.keys():
                     token = data['token']
-                    user = await database_sync_to_async(Token.objects.get(key=token).user)()
-                    self.scope['user'] = user
+                    user = await database_sync_to_async(self.get_user_from_token)(token)
+                    if user is not None:
+                        self.scope['user'] = user
             except Exception as err:
                 print(err)
         if not self.scope['user'].id:
@@ -41,6 +42,13 @@ class TauStatusConsumer(AsyncJsonWebsocketConsumer):
 
         data = await database_sync_to_async(get_all_statuses)()
         await self.taustatus_event({'data': data})
+
+    def get_user_from_token(self, token):
+        try:
+            tokenObj = Token.objects.get(key=token)
+            return tokenObj.user
+        except Token.DoesNotExist:
+            return None
 
     async def taustatus_event(self, event):
         if self.scope['user'].id:

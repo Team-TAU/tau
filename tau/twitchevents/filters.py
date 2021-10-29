@@ -4,7 +4,7 @@ from django_filters import rest_framework as filters
 from .models import TwitchEvent
 
 class TwitchEventFilter(filters.FilterSet):
-    user_id = filters.CharFilter(method='user_id_filter', label='User Id  ')
+    user_id = filters.CharFilter(method='user_id_filter', label='User Id')
     user_name = filters.CharFilter(method='user_name_filter', label='User Name')
     recipient_user_id = filters.CharFilter(method='recipient_user_id_filter', label='Recipient User Id')
     recipient_user_name = filters.CharFilter(method='recipient_user_name_filter', label='Recipient User Name')

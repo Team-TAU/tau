@@ -1,5 +1,13 @@
-FROM python:3.8
+# build stage
+FROM node:16 as build-stage
+WORKDIR /app
+COPY ./tau-dashboard/package*.json ./
+RUN npm install
+COPY ./tau-dashboard /app
+RUN npm run build
 
+# prododuction stage
+FROM python:3.8 as prod-stage
 ENV PYTHONUNBUFFERED=1 PYTHONHASHSEED=random \
     PYTHONDONTWRITEBYTECODE=1 PIP_NO_CACHE_DIR=1
 
@@ -16,5 +24,6 @@ COPY supervisord.conf /etc/supervisord.conf
 
 # Adds our application code to the image
 COPY . /code
+COPY --from=build-stage /app/dist /code/tau-dashboard/dist
 
 CMD bash -c "./scripts/start.sh"

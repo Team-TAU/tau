@@ -12,7 +12,7 @@ from .serializers import TwitchEventSerializer
 # Send message over twitchevents ws whenever a twitch-event is updated
 @receiver(post_save, sender=TwitchEvent)
 def twitch_event_saved(sender, instance, created, **kwargs):
-    if config.USE_IRC and created and instance.event_type == 'point-redemption' and instance.event_data['user_input'] != '':
+    if config.USE_IRC and created and instance.event_type == 'channel-channel_points_custom_reward_redemption-add' and instance.event_data['user_input'] != '':
         return
     print('broadcasting twitch event')
     channel_layer = get_channel_layer()

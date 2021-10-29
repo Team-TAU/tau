@@ -3,11 +3,37 @@ import requests
 
 from constance import config
 
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from django.utils import timezone
+from django.conf import settings
+
+from tau.core.utils import log_request
 
 from .models import Streamer, Stream
+
+@receiver(pre_delete, sender=Streamer)
+def streamer_deleted(sender, instance, **kwargs):
+    if instance.online_subscription is not None:
+        headers = {
+            'Client-ID': os.environ.get('TWITCH_APP_ID', None),
+            'Authorization': 'Bearer {}'.format(config.TWITCH_APP_ACCESS_TOKEN),
+        }
+        req = requests.delete(
+            f'https://api.twitch.tv/helix/eventsub/subscriptions?id={instance.online_subscription["id"]}',
+            headers=headers
+        )
+        if(settings.DEBUG_TWITCH_CALLS):
+            log_request(req)
+            
+    if instance.offline_subscription is not None:
+        req = requests.delete(
+            f'https://api.twitch.tv/helix/eventsub/subscriptions?id={instance.offline_subscription["id"]}',
+            headers=headers
+        )
+        if(settings.DEBUG_TWITCH_CALLS):
+            log_request(req)
+
 
 @receiver(post_save, sender=Streamer)
 def streamer_saved(sender, instance, created, **kwargs):
@@ -23,6 +49,7 @@ def streamer_saved(sender, instance, created, **kwargs):
         twitch_id = user_data['data'][0]['id']
         instance.twitch_id = twitch_id
         instance.save()
+        instance.init_webhooks()
     else:
         is_streaming = instance.streaming
         if not is_streaming:

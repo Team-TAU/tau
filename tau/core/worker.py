@@ -1,10 +1,11 @@
-import pprint
-
+from os import truncate
 import time
 import datetime
 import json
 
 import requests
+
+from pyngrok import ngrok
 
 import websockets
 import asyncio
@@ -14,73 +15,146 @@ from django.conf import settings
 
 from constance import config
 from channels.db import database_sync_to_async
+from tau.streamers.utils import update_all_streamers
 
-from .models import TwitchEvent
-from .serializers import TwitchEventSerializer
+from tau.twitchevents.models import TwitchEvent
+from tau.twitchevents.serializers import TwitchEventSerializer
 
-class IRCClient():
-    url = 'wss://irc-ws.chat.twitch.tv'
+from .utils import (
+    setup_ngrok,
+    init_webhooks,
+    refresh_access_token,
+    teardown_webhooks,
+    get_active_event_sub_ids,
+    get_active_streamer_sub_ids
+)
+
+class Worker():
+    irc_url = 'wss://irc-ws.chat.twitch.tv'
     connection = None
     loop = None
     tasks = []
+    irc_connected = False
+    wh_delay = 15
+    irc_delay = 2
+    active_event_sub_ids = []
+    active_streamer_sub_ids = []
+    ngrok_tunnel = None
+    token_refreshed = False
 
     def __init__(self, token):
         self.tau_token = token
 
+    def setup_webhooks(self):
+        twitch_access_token = config.TWITCH_APP_ACCESS_TOKEN
+        if twitch_access_token != '':
+            print(f'---- Establishing IRC and Webhook Connections ----')
+            refresh_access_token()  # refresh the access token
+            self.token_refreshed = True
+            print('     [Access tokens refreshed]')
+            teardown_webhooks(self.tau_token)
+            print('     [Old WebHooks torn down]')
+            self.active_event_sub_ids, self.active_streamer_sub_ids = init_webhooks(self.public_url, self.tau_token)
+            print('     [New WebHooks Initialized]')
+            update_all_streamers()
+            print('     [All streamer statuses updated]\n')
+        else:
+            print(
+                'You have not yet set up a username, or authorized TAU to connect '
+                'to your twitch account.  Webhooks will be set up after you do so.'
+            )
+
     async def connect(self):
         delay = 1
         while True:
-            self.connection = await websockets.client.connect(self.url)
-            if self.connection.open:
-                print('---- Connected to twitch irc ws server ----')
-                await self.initial_connect()
-                break
+            if self.token_refreshed:
+                self.connection = await websockets.client.connect(self.irc_url)
+                if self.connection.open:
+                    print('     [Opening IRC Connection]')
+                    await self.initial_connect()
+                    print('     [Connected to IRC]')
+                    self.irc_connected = True
+                    break
+                else:
+                    print(f'---- Could not connect, waiting {delay}s to reconnect ----')
+                    await asyncio.sleep(delay)
+                    if delay < 120:
+                        delay = max(delay*2, 120)
             else:
-                print(f'---- Could not connect, waiting {delay}s to reconnect ----')
                 await asyncio.sleep(delay)
-                if delay < 120:
-                    delay = max(delay*2, 120)
 
     def create_event_loop(self):
         self.loop = asyncio.get_event_loop()
-        self.loop.run_until_complete(self.connect())
         self.tasks = [
-            asyncio.ensure_future(self.recieve()),
-            asyncio.ensure_future(self.check_irc_settings())
+            asyncio.ensure_future(self.manage_webhooks()),
+            asyncio.ensure_future(self.manage_irc_loop()),
+            asyncio.ensure_future(self.check_irc_settings()),
         ]
         self.loop.run_until_complete(asyncio.wait(self.tasks))
 
-    def clear_event_loop(self):
-        for t in self.tasks:
-            t.cancel()
-            t = None
-        self.tasks = []
+    async def manage_irc_loop(self):
+        while True:
+            use_irc = await database_sync_to_async(self.lookup_setting)('USE_IRC')
+            if use_irc and not self.irc_connected:
+                await self.connect_irc()
+
+            await asyncio.sleep(self.irc_delay)
+
+    async def connect_irc(self):
+        await self.connect()
+        await self.recieve()
+
+    def disconnect_irc(self):
+        pass
+
+    async def manage_webhooks(self):
+        refresh_webhooks = True
+        while True:
+            refreshed_ngrok = False
+            if settings.USE_NGROK and self.ngrok_tunnel is None:
+                self.public_url, self.ngrok_tunnel = await database_sync_to_async(setup_ngrok)()
+                refreshed_ngrok = True
+            elif settings.USE_NGROK:
+                # Check to see if tunnel is still alive
+                r = requests.get(f'{self.public_url}/api/v1/heartbeat')
+                if r.status_code != 200:
+                    try:
+                        ngrok.disconnect(self.ngrok_tunnel.public_url)
+                    except:
+                        pass
+
+                    self.public_url, self.ngrok_tunnel = await database_sync_to_async(setup_ngrok)()
+                    refreshed_ngrok = True
+            else:
+                self.public_url = settings.BASE_URL
+                await database_sync_to_async(self.set_setting)('PUBLIC_URL', settings.BASE_URL)
+            # check for difference in required webhooks:
+            new_event_sub_ids = await database_sync_to_async(get_active_event_sub_ids)()
+            scopes_refreshed = await database_sync_to_async(self.lookup_setting)('SCOPES_REFRESHED')
+            if set(self.active_event_sub_ids) != set(new_event_sub_ids) and scopes_refreshed:
+                refresh_webhooks = True
+                await database_sync_to_async(self.set_setting)('SCOPES_REFRESHED', False)
+
+            if refresh_webhooks or refreshed_ngrok:
+                await database_sync_to_async(self.setup_webhooks)()
+                refresh_webhooks = False
+
+            await asyncio.sleep(self.wh_delay)
 
     def run(self):
         self.token = config.TWITCH_ACCESS_TOKEN
         self.username = config.CHANNEL
-        while True:
-            if config.USE_IRC:
-                try:
-                    self.create_event_loop()
-                except RuntimeError:
-                    # RuntimeError can occur when we interrupt the event_loop, if the
-                    # config.USE_IRC value is set to False by the user
-                    pass
-            else:
-                self.clear_event_loop()
-                while not config.USE_IRC:
-                    time.sleep(5)
+        self.create_event_loop()
 
     async def initial_connect(self):
+        token = await database_sync_to_async(self.lookup_setting)('TWITCH_ACCESS_TOKEN')
         caps = 'twitch.tv/tags twitch.tv/commands twitch.tv/membership'
         await self.connection.send(f'CAP REQ :{caps}')
-        await self.connection.send(f'PASS oauth:{self.token}')
+        await self.connection.send(f'PASS oauth:{token}')
         await self.connection.send(f'NICK {self.username}')
         await self.connection.send(f'JOIN #{self.username.lower()}')
 
     async def recieve(self):
-        # pp = pprint.PrettyPrinter(indent=2)
         while True:
             try:
                 message = await self.connection.recv()
@@ -96,25 +170,30 @@ class IRCClient():
                 if use_irc:
                     print('Websocket to twitch irc unexpectedly closed... reconnecting')
                     await self.connect()
+                else:
+                    break
 
     async def check_irc_settings(self): 
         while True:
-            await asyncio.sleep(5)
+            await asyncio.sleep(self.irc_delay)
             use_irc = await database_sync_to_async(self.lookup_setting)('USE_IRC')
-            if not use_irc and self.loop.is_running():
+            if not use_irc and self.irc_connected:
                 await self.connection.close()
+                self.irc_connected = False
                 print('---- Disconnected from twitch irc ws server ----')
-                self.loop.stop()
 
     def lookup_setting(self, setting):
         return getattr(config, setting)
+
+    def set_setting(self, setting, value):
+        setattr(config, setting, value)
 
     def handle_channel_points(self, data):
         start_time = timezone.now() - datetime.timedelta(seconds=2)
 
         time.sleep(1)
         redemption = TwitchEvent.objects.filter(
-            event_type='point-redemption',
+            event_type='channel-channel_points_custom_reward_redemption-add',
             created__gte=start_time,
             event_data__user_login=data['tags']['display-name'].lower()
         )
@@ -230,6 +309,3 @@ class IRCClient():
             message['tags']['emotes'] = emote_list
 
         return message
-
-
-

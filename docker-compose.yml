@@ -24,8 +24,6 @@ services:
       - redis
     build:
       context: .
-    volumes:
-      - ./:/code:cached
     ports:
       - ${PORT:-8000}:${PORT:-8000}
 

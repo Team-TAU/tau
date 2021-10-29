@@ -1,6 +1,11 @@
 import uuid
 
 from django.db import models
+from django.conf import settings
+
+from constance import config
+
+from tau.core.utils import init_webhook, streamer_payload
 
 # Create your models here.
 class Streamer(models.Model):
@@ -11,6 +16,18 @@ class Streamer(models.Model):
     disabled = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    online_subscription = models.JSONField(blank=True, null=True)
+    offline_subscription = models.JSONField(blank=True, null=True)
+
+    def init_webhooks(self):
+        print('initing webhooks')
+        url = config.PUBLIC_URL
+        init_webhook(
+           streamer_payload(url, 'online', self.twitch_id),
+        )
+        init_webhook(
+            streamer_payload(url, 'offline', self.twitch_id),
+        )
 
 class Stream(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
