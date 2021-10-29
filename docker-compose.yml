@@ -1,25 +1,24 @@
-version: '3'
+version: "3"
 
 services:
   app:
     restart: unless-stopped
     env_file: .env
     environment:
-      POSTGRES_PASSWORD: ${POSTGRES_PW}
-      REDIS_ENDPOINT: ${REDIS_ENDPOINT:-redis:6379}
-      DASHBOARD_DEV_PORT: ${DASHBOARD_DEV_PORT:-8500}
-      DJANGO_DB_TYPE: ${DJANGO_DB_TYPE:-postgres}
-      DJANGO_DB_HOST: ${DJANGO_DB_HOST:-db}
-      DJANGO_DB: ${DJANGO_DB:-tau_db}
-      DJANGO_DB_USER: ${DJANGO_DB_USER:-tau_db}
-      DJANGO_DB_PW: ${DJANGO_DB_PW}
-      DJANGO_CONFIGURATION: ${DJANGO_CONFIGURATION:-Local}
-      PROTOCOL: ${PROTOCOL:-http:}
-      PUBLIC_URL: ${PUBLIC_URL:-localhost}
-      USE_NGROK: ${USE_NGROK:-True}
-      PORT: ${PORT:-8000}
-      TWITCH_WEBHOOK_SECRET: ${TWITCH_WEBHOOK_SECRET}
-      DEBUG_TWITCH_CALLS: ${DEBUG_TWITCH_CALLS:-False}
+      POSTGRES_PASSWORD: "${POSTGRES_PW}"
+      REDIS_ENDPOINT: "${REDIS_ENDPOINT:-redis:6379}"
+      DJANGO_DB_TYPE: "${DJANGO_DB_TYPE:-postgres}"
+      DJANGO_DB_HOST: "${DJANGO_DB_HOST:-db}"
+      DJANGO_DB: "${DJANGO_DB:-tau_db}"
+      DJANGO_DB_USER: "${DJANGO_DB_USER:-tau_db}"
+      DJANGO_DB_PW: "${DJANGO_DB_PW}"
+      DJANGO_CONFIGURATION: "${DJANGO_CONFIGURATION:-Local}"
+      PROTOCOL: "${PROTOCOL:-http:}"
+      PUBLIC_URL: "${PUBLIC_URL:-localhost}"
+      USE_NGROK: "${USE_NGROK:-True}"
+      PORT: "${PORT:-8000}"
+      TWITCH_WEBHOOK_SECRET: "${TWITCH_WEBHOOK_SECRET}"
+      DEBUG_TWITCH_CALLS: "${DEBUG_TWITCH_CALLS:-False}"
     depends_on:
       - db
       - redis
@@ -28,7 +27,6 @@ services:
     ports:
       - ${PORT:-8000}:${PORT:-8000}
 
-  
   db:
     image: postgres:13-alpine
     restart: unless-stopped
