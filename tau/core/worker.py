@@ -1,8 +1,11 @@
+from os import truncate
 import time
 import datetime
 import json
 
 import requests
+
+from pyngrok import ngrok
 
 import websockets
 import asyncio
@@ -32,7 +35,7 @@ class Worker():
     loop = None
     tasks = []
     irc_connected = False
-    wh_delay = 2
+    wh_delay = 15
     irc_delay = 2
     active_event_sub_ids = []
     active_streamer_sub_ids = []
@@ -113,9 +116,15 @@ class Worker():
                 refreshed_ngrok = True
             elif settings.USE_NGROK:
                 # Check to see if tunnel is still alive
-                pass
-                # self.ngrok_tunnel.refresh_metrics()
-                # print(self.ngrok_tunnel.metrics)
+                r = requests.get(f'{self.public_url}/api/v1/heartbeat')
+                if r.status_code != 200:
+                    try:
+                        ngrok.disconnect(self.ngrok_tunnel.public_url)
+                    except:
+                        pass
+
+                    self.public_url, self.ngrok_tunnel = await database_sync_to_async(setup_ngrok)()
+                    refreshed_ngrok = True
             else:
                 self.public_url = settings.BASE_URL
                 await database_sync_to_async(self.set_setting)('PUBLIC_URL', settings.BASE_URL)

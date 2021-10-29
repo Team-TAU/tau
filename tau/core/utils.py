@@ -72,8 +72,9 @@ def get_all_statuses():
 
 def setup_ngrok():
     # pyngrok will only be installed if it is used.
+    print('importing ngrok')
     from pyngrok import ngrok
-
+    print('done importing')
     print('---- Setting up ngrok tunnel ----')
     # Get the dev server port (defaults to 8000 for Django, can be overridden with the
     # last arg when calling `runserver`)

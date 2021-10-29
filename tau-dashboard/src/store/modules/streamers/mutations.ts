@@ -1,7 +1,6 @@
 import { Mutations } from 'vuex-smart-module';
 import StreamersState from './state';
 import { Streamer } from '@/models/streamer';
-import { single } from 'rxjs/operators';
 
 export default class StreamerMutations extends Mutations<StreamersState> {
   loadAllRequest() {
