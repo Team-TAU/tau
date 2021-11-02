@@ -6,6 +6,7 @@ A recent release of TAU created some breaking changes from the original version 
 - old: `follow`, new: `channel-follow`
 - old: `point-redemption`, new: `channel-channel_points_custom_reward_redemption-add`
 - old: `cheer`, new: `channel-cheer`
+- old: `subscribe`, new: `channel-subscribe`
 - old: `raid`, new: `channel-raid`
 - old: `hype-train-progress`, new: `channel-hype_train-progress`
 - old: `hype-train-begin`, new: `channel-hype_train-begin`
