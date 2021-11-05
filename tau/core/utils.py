@@ -251,6 +251,29 @@ def teardown_webhooks(worker_token):
         if(settings.DEBUG_TWITCH_CALLS):
             log_request(req)
 
+def cleanup_webhooks():
+    headers = {
+        'Client-ID': os.environ.get('TWITCH_APP_ID', None),
+        'Authorization': 'Bearer {}'.format(config.TWITCH_APP_ACCESS_TOKEN),
+    }
+
+    resp = requests.get('https://api.twitch.tv/helix/eventsub/subscriptions', headers=headers)
+
+    if(settings.DEBUG_TWITCH_CALLS):
+        log_request(resp)
+    
+    data = resp.json()
+
+    bad_webhooks = list(filter(lambda x: (x['status'] != 'enabled'), data['data']))
+
+    for webhook in bad_webhooks:
+        req = requests.delete(
+            'https://api.twitch.tv/helix/eventsub/subscriptions?id={}'.format(webhook['id']),
+            headers=headers
+        )
+        if(settings.DEBUG_TWITCH_CALLS):
+            log_request(req)
+
 
 def teardown_all_acct_webhooks():
     headers = {
@@ -271,4 +294,4 @@ def teardown_all_acct_webhooks():
             headers=headers
         )
         if(settings.DEBUG_TWITCH_CALLS):
-            log_request(resp)
+            log_request(req)
