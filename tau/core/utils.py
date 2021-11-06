@@ -275,6 +275,31 @@ def cleanup_webhooks():
             log_request(req)
 
 
+def cleanup_remote_webhooks():
+    headers = {
+        'Client-ID': os.environ.get('TWITCH_APP_ID', None),
+        'Authorization': 'Bearer {}'.format(config.TWITCH_APP_ACCESS_TOKEN),
+    }
+
+    resp = requests.get('https://api.twitch.tv/helix/eventsub/subscriptions', headers=headers)
+
+    if(settings.DEBUG_TWITCH_CALLS):
+        log_request(resp)
+    
+    data = resp.json()
+        
+    public_url = config.PUBLIC_URL.split('/')[2]
+
+    remote_webhooks = list(filter(lambda x: (x["transport"]["callback"].split("/")[2] != public_url), data['data']))
+
+    for row in remote_webhooks:
+        req = requests.delete(
+            'https://api.twitch.tv/helix/eventsub/subscriptions?id={}'.format(row['id']),
+            headers=headers
+        )
+        if(settings.DEBUG_TWITCH_CALLS):
+            log_request(req)
+
 def teardown_all_acct_webhooks():
     headers = {
         'Client-ID': os.environ.get('TWITCH_APP_ID', None),

@@ -282,6 +282,8 @@ class Common(Configuration):  # pylint: disable=no-init
         'USE_IRC': (False, 'Use IRC for Channel Point Redemption Emotes', bool),
         'SCOPE_UPDATED_NEEDED': (False, 'Need to update Twitch Scopes', bool),
         'SCOPES_REFRESHED': (False, 'Have the tokens just been refreshed?', bool),
+        'FORCE_WEBHOOK_REFRESH': (False, 'Force active webhooks to be refreshed', bool),
+        'RESET_ALL_WEBHOOKS': (False, 'Force all webhooks to be refreshed (used for migrations)', bool),
         'TWITCH_ACCESS_TOKEN': ('', 'Twitch API Access Token', str),
         'TWITCH_REFRESH_TOKEN': ('', 'Twitch API Refresh Token', str),
         'TWITCH_ACCESS_TOKEN_EXPIRATION': ('', 'Expiration time for Twitch API Access Token', datetime),
