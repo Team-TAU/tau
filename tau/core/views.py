@@ -189,6 +189,14 @@ def get_tau_token(request):
         token = Token.objects.get(user=request.user)
         return JsonResponse({'token': token.key})
 
+@api_view(['GET'])
+def get_public_url(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'You must be logged into access this endpoint.'})
+    else:
+        public_url = config.PUBLIC_URL
+        return JsonResponse({'public_url': public_url})
+
 @api_view(['POST'])
 def refresh_tau_token(request):
     if not request.user.is_authenticated:
