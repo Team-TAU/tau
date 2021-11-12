@@ -22,7 +22,7 @@ import constance.settings
 from tau.twitch.models import TwitchAPIScope, TwitchEventSubSubscription
 from tau.users.models import User
 from .forms import ChannelNameForm, FirstRunForm
-from  .utils import log_request, check_access_token_expired, refresh_access_token
+from  .utils import cleanup_remote_webhooks, cleanup_webhooks, log_request, check_access_token_expired, refresh_access_token, teardown_all_acct_webhooks, teardown_webhooks
 from tau.twitch.models import TwitchHelixEndpoint
 
 @api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
@@ -207,6 +207,24 @@ def refresh_tau_token(request):
         token = Token.objects.create(user=request.user)
 
         return JsonResponse({'token': token.key})
+
+@api_view(['POST'])
+def reset_webhooks(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'You must be logged into access this endpoint.'})
+    data = request.data
+    if data['type'] == 'all':
+        teardown_all_acct_webhooks()
+    elif data['type'] == 'remote':
+        token = Token.objects.get(user=request.user)
+        cleanup_remote_webhooks()
+    elif data['type'] == 'broken':
+        token = Token.objects.get(user=request.user)
+        cleanup_webhooks()
+    else:
+        return JsonResponse({'webhooks_reset': False, 'error': 'Proper type not found.'})
+    config.FORCE_WEBHOOK_REFRESH = True
+    return JsonResponse({'webhooks_reset': True})
 
 def process_twitch_callback_view(request):
     port = os.environ.get('PORT', 8000)

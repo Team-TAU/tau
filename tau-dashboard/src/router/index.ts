@@ -45,6 +45,11 @@ const routes: Array<RouteRecordRaw> = [
         name: 'User',
         component: () => import('../components/views/User.vue'),
       },
+      {
+        path: 'webhook-monitor',
+        name: 'WebhookMonitor',
+        component: () => import('../components/views/WebhookMonitor.vue'),
+      },
     ],
   },
 ];
