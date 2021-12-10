@@ -20,7 +20,7 @@ export const eventTitleMap: { [key: string]: any } = {
   'channel-subscription-end': (obj: any) => `${obj.event_data.user_name} stopped subscribing`,
   'channel-subscribe': (obj: any) => `${obj.event_data.user_name} subscribed`,
   'channel-subscription-gift': (obj: any) => `${obj.event_data.user_name} gifted ${obj.event_data.total} subs`,
-  'channel-raid': (obj: any) => `${obj.event_data.from_broadcaster_user_name} raided with ${obj.event_data.viewers} viewers`
+  'channel-raid': (obj: any) => `${obj.event_data.from_broadcaster_user_name} raided with ${obj.event_data.viewers} viewers`,
   default: (obj: any) =>
     `${obj.event_type.replaceAll('-', ' ').replaceAll('_', ' ')}`,
 };
