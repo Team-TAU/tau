@@ -42,7 +42,8 @@ from .core.views import (
     ServiceStatusViewSet,
     helix_view,
     irc_message_view,
-    TAUSettingsViewSet
+    TAUSettingsViewSet,
+    reset_webhooks
 )
 
 router = OptionalSlashRouter()
@@ -70,6 +71,7 @@ urlpatterns = [
     path('api/v1/tau-user-token/refresh/', refresh_tau_token),
     path('api/v1/public_url', get_public_url),
     path('api/v1/irc', irc_message_view),
+    path('api/v1/reset-webhooks', reset_webhooks),
     path('api/twitch/helix/<path:helix_path>', helix_view),
     path('api/v1/', include(router.urls)),
     path('api-token-auth/', views.obtain_auth_token),

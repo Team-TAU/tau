@@ -50,6 +50,11 @@ export default defineComponent({
         icon: 'pi pi-user',
         routeTo: '/dashboard/user',
       },
+      {
+        label: 'Webhooks',
+        icon: 'pi pi-sitemap',
+        routeTo: '/dashboard/webhook-monitor',
+      },
     ]);
     return {
       items,

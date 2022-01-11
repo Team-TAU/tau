@@ -146,6 +146,12 @@ class Worker():
             if refresh_webhooks or refreshed_ngrok:
                 await database_sync_to_async(self.setup_webhooks)()
                 refresh_webhooks = False
+            
+            force_refresh_webhooks = await database_sync_to_async(self.lookup_setting)('FORCE_WEBHOOK_REFRESH')
+
+            if force_refresh_webhooks:
+                await database_sync_to_async(self.setup_webhooks)()
+                await database_sync_to_async(self.set_setting)('FORCE_WEBHOOK_REFRESH', False)
 
             await asyncio.sleep(self.wh_delay)
 
