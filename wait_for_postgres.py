@@ -2,6 +2,7 @@
 """Command-line utility for db setup."""
 import os
 import logging
+import sys
 from time import time, sleep
 from psycopg2 import connect, sql, OperationalError
 db_type = os.getenv("DJANGO_DB_TYPE","sqlite3")
