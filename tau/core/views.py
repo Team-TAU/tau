@@ -8,13 +8,16 @@ from django.contrib.auth import login
 from django.conf import settings
 from django.http import Http404
 from django.utils import timezone
-import rest_framework
+from requests import status_codes
 
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
-from rest_framework import viewsets
+from rest_framework import viewsets, status
+
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 from constance import config
 import constance.settings
@@ -24,6 +27,15 @@ from tau.users.models import User
 from .forms import ChannelNameForm, FirstRunForm
 from  .utils import cleanup_remote_webhooks, cleanup_webhooks, log_request, check_access_token_expired, refresh_access_token, teardown_all_acct_webhooks, teardown_webhooks
 from tau.twitch.models import TwitchHelixEndpoint
+
+@api_view(['POST'])
+def irc_message_view(request):
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)('twitchchat', {
+        'type': 'twitchchat.event',
+        'data': request.data
+    })
+    return Response({}, status=status.HTTP_201_CREATED)
 
 @api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
 def helix_view(request, helix_path=None):

@@ -112,7 +112,7 @@ class Common(Configuration):  # pylint: disable=no-init
                 'USER': os.getenv('DJANGO_DB_USER'),
                 'PASSWORD': os.getenv('DJANGO_DB_PW'),
                 'HOST': os.getenv('DJANGO_DB_HOST'),
-                'PORT': '',
+                'PORT': os.getenv('DJANGO_DB_PORT', 5432),
             }
         }
     else:

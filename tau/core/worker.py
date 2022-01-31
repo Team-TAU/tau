@@ -176,6 +176,16 @@ class Worker():
                 # pp.pprint(data)
                 if 'custom-reward-id' in data['tags']:
                     await database_sync_to_async(self.handle_channel_points)(data)
+                elif data['command'] == "PRIVMSG":
+                    headers = {
+                        'Authorization': f'Token {self.tau_token}',
+                        'Content-type': 'application/json'
+                    }
+                    requests.post(
+                        f'{settings.LOCAL_URL}/api/v1/irc',
+                        data=json.dumps(data),
+                        headers=headers
+                    )
                 elif data['prefix'] is None and data['command'] == 'PING':
                     await self.connection.send('PONG')
                 
