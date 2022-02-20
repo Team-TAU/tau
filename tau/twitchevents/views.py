@@ -34,7 +34,7 @@ class TwitchEventViewSet(viewsets.ViewSet):
     """
     permission_classes = (AllowAny,)
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], permission_classes=(IsAuthenticated,))
     def test(self, request, pk=None):
         event_data = request.data
         id_ = None
