@@ -2,7 +2,7 @@ import hmac
 import hashlib
 import os
 
-def valid_webhook_request(headers, body):
+def generate_signature(headers, body):
     secret = os.environ.get('TWITCH_WEBHOOK_SECRET', None)
     hmac_message = headers['Twitch-Eventsub-Message-Id'] \
                    + headers['Twitch-Eventsub-Message-Timestamp'] \
@@ -13,6 +13,8 @@ def valid_webhook_request(headers, body):
         digestmod = hashlib.sha256
     ).hexdigest().lower()
 
-    matching = 'sha256='+signature == headers['Twitch-Eventsub-Message-Signature'].lower()
+    return f'sha256={signature}'
 
-    return matching
+def valid_webhook_request(headers, body):
+    signature = generate_signature(headers, body)
+    return signature == headers['Twitch-Eventsub-Message-Signature'].lower()

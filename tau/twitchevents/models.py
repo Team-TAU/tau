@@ -5,9 +5,11 @@ from django.db import models
 class TwitchEvent(models.Model):
     PUBSUB = 'PubSub'
     EVENTSUB = 'EventSub'
+    TEST = 'Test'
     EVENT_SOURCE_CHOICES = [
         (PUBSUB, 'PubSub'),
-        (EVENTSUB, 'EventSub')
+        (EVENTSUB, 'EventSub'),
+        (TEST, 'Test'),
     ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     event_id = models.CharField(max_length=255, null=True, blank=True)

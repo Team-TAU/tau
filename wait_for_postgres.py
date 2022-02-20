@@ -37,20 +37,27 @@ def pg_isready(host, user, password, dbname):
             user_count = cur.fetchone()[0]
             cur.execute("SELECT COUNT(*) AS count FROM pg_database WHERE datname=%s;",(db_name,))
             db_count = cur.fetchone()[0]
+            
+            if db_count == 0:
+                logger.info(f"Creating database {db_name}")
+                add_db_query = f"CREATE DATABASE {db_name};"
+                cur.execute(add_db_query)
+
             if user_count == 0:
                 logger.info(f"Creating user {db_user}")
                 add_user_query = f"CREATE USER {db_user} WITH ENCRYPTED PASSWORD '{db_pw}';"
                 cur.execute(add_user_query)
                 grant_query = f"GRANT ALL PRIVILEGES ON DATABASE {db_name} TO {db_user};"
                 cur.execute(grant_query)
+                create_db_query = f"ALTER USER {db_user} WITH CREATEDB;"
+                cur.execute(create_db_query)
             else:
                 logger.info(f"Found a user {db_user}, updating password to current DJANGO_DB_PW value.")
                 update_user_query = f"ALTER USER {db_user} WITH ENCRYPTED PASSWORD '{db_pw}'"
                 cur.execute(update_user_query)
-            if db_count == 0:
-                logger.info(f"Creating database {db_name}")
-                add_db_query = f"CREATE DATABASE {db_name};"
-                cur.execute(add_db_query)
+                create_db_query = f"ALTER USER {db_user} WITH CREATEDB;"
+                cur.execute(create_db_query)
+
             logger.info("Postgres is ready!")
             conn.close()
             return True
