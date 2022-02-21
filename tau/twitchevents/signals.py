@@ -14,7 +14,6 @@ from .serializers import TwitchEventSerializer
 def twitch_event_saved(sender, instance, created, **kwargs):
     if config.USE_IRC and created and instance.event_type == 'channel-channel_points_custom_reward_redemption-add' and instance.event_data['user_input'] != '':
         return
-    print('broadcasting twitch event')
     channel_layer = get_channel_layer()
     serializer = TwitchEventSerializer(instance=instance)
     data = serializer.data
