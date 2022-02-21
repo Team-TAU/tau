@@ -24,6 +24,8 @@ class TestAPI():
             'field_2': 'value 2'
         }
     }
+
+    
     @pytest.mark.django_db
     def test_subscription_test_response(self, settings):
         u = UserFactory.create()
