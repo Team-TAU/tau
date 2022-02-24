@@ -25,7 +25,6 @@ class TestAPI():
         }
     }
 
-    
     @pytest.mark.django_db
     def test_subscription_test_response(self, settings):
         u = UserFactory.create()
@@ -42,7 +41,7 @@ class TestAPI():
         assert response_data['event_type'] == self.event_type
         assert response_data['event_source'] == 'TestCall'
         assert response_data['origin'] == 'test'
-        assert response_data['event_data'] == self.event_data    
+        assert response_data['event_data'] == self.event_data
 
     @pytest.mark.django_db
     def test_subscription_test_requires_auth(self, settings):

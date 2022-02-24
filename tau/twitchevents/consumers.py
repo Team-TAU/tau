@@ -29,6 +29,8 @@ class TwitchEventConsumer(AsyncJsonWebsocketConsumer):
                     token = data['token']
                     user = await database_sync_to_async(self.get_user_from_token)(token)
                     self.scope['user'] = user
+                else:
+                    await self.send_json({'error': 'Missing token field'})
             except Exception as err:
                 await self.send_json({'error': 'Invalid Login'})
 

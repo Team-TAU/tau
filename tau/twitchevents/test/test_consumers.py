@@ -85,12 +85,26 @@ class TestChannels:
         assert connected
         await communicator.send_to("non-json packet")
         response = await communicator.receive_json_from()
-        assert response == {'error': 'Invalid Login'}
         instance = await self.generate_event()
         received_nothing = await communicator.receive_nothing() is True
         await communicator.disconnect()
 
         assert response == {'error': 'Invalid Login'}
+        assert received_nothing
+
+    async def test_invalid_login_data_fields(self, settings):
+        communicator = WebsocketCommunicator(
+            application=application, path='/ws/twitch-events/'
+        )
+        connected, _ = await communicator.connect()
+        assert connected
+        await communicator.send_json_to({"not_a_token": "oops!"})
+        response = await communicator.receive_json_from()
+        instance = await self.generate_event()
+        received_nothing = await communicator.receive_nothing() is True
+        await communicator.disconnect()
+
+        assert response == {'error': 'Missing token field'}
         assert received_nothing
 
     async def test_twitch_event_bad_auth(self, settings):

@@ -15,6 +15,6 @@ class TwitchEventSubSubscriptionFactory(factory.django.DjangoModelFactory):
     version = '1'
     scope_required = 'test:subscription'
     status = 'DIS'
-    subscription = {'description': 'test-subscription data'}
+    subscription = {'description': 'test-subscription data', 'id': 'SUBSCRIPTION_ID'}
     event_schema = {'description': 'schema for test-subscription'}
     condition_schema = {'description': 'conditions for setting up subscription'}

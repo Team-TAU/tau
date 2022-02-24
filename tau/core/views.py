@@ -85,7 +85,6 @@ def helix_view(request, helix_path=None):
             data=body,
             headers=headers
         )
-        print(data)
     elif request.method == 'PATCH':
         data = requests.patch(
             url,
