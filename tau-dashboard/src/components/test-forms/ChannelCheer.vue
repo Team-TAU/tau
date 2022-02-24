@@ -62,7 +62,7 @@ interface CheerData {
 }
 
 export default defineComponent({
-  name: 'ChannelFollow',
+  name: 'ChannelCheer',
   components: {
     BroadcasterInfo,
     TwitchUser,
