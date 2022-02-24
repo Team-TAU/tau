@@ -1,22 +1,27 @@
 <template>
   <Dialog
     v-model:visible="display"
-    header="Test Channel Subscribe"
+    header="Test Channel Goal Progress"
     :modal="true"
-    @hide="hide"
     :closable="false"
+    style="width: 450px"
   >
-    <twitch-user
-      v-model:valueId="testData.user_id"
-      v-model:valueName="testData.user_name"
-      v-model:valueLogin="testData.user_login"
-      label="User"
-    ></twitch-user>
-    <sub-tier-select
-      v-model:value="testData.tier"
-      label="Tier"
-    ></sub-tier-select>
-    <toggle v-model:value="testData.is_gift" label="Is Gift?"></toggle>
+    <text-input
+      v-model:value="testData.description"
+      label="Description"
+    ></text-input>
+    <goal-type-select
+      v-model:value="testData.type"
+      label="Goal Type"
+    ></goal-type-select>
+    <number-input
+      v-model:value="testData.target_amount"
+      label="Target Amount"
+    ></number-input>
+    <number-input
+      v-model:value="testData.current_amount"
+      label="Current Amount"
+    ></number-input>
     <broadcaster-info
       v-model:valueUserId="testData.broadcaster_user_id"
       v-model:valueUserLogin="testData.broadcaster_user_login"
@@ -41,43 +46,45 @@
 
 <script lang="ts">
 import { defineComponent, reactive, ref } from 'vue';
+import TextInput from './components/TextInput.vue';
+import GoalTypeSelect from './components/GoalTypeSelect.vue';
+import NumberInput from './components/NumberInput.vue';
 import BroadcasterInfo from './components/BroadcasterInfo.vue';
-import TwitchUser from './components/TwitchUser.vue';
-import SubTierSelect from './components/SubTierSelect.vue';
-import Toggle from './components/Toggle.vue';
 
 import api$ from '@/services/tau-apis';
 
 import { useStore } from 'vuex';
 
 export default defineComponent({
-  name: 'ChannelSubscribe',
+  name: 'ChannelUpdate',
   components: {
+    TextInput,
+    GoalTypeSelect,
+    NumberInput,
     BroadcasterInfo,
-    TwitchUser,
-    SubTierSelect,
-    Toggle,
   },
   setup() {
     const store = useStore();
     const display = ref(true);
     const testData = reactive({
-      user_id: '',
-      user_name: '',
-      user_login: '',
+      id: Array.from(Array(27), () =>
+        Math.floor(Math.random() * 36).toString(36),
+      ).join(''),
+      type: 'follow',
+      started_at: new Date().toISOString(),
+      description: '',
+      target_amount: 30,
+      current_amount: 23,
       broadcaster_user_id: '',
       broadcaster_user_name: '',
       broadcaster_user_login: '',
-      tier: '',
-      is_gift: false,
     });
 
     const close = () => {
       store.dispatch('UI/clearTestFormView');
     };
-
     const submit = () => {
-      api$.tau.post('twitch-events/channel-subscribe/test', testData);
+      api$.tau.post('twitch-events/channel-goal-progress/test', testData);
     };
 
     return {

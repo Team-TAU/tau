@@ -127,6 +127,7 @@ export default defineComponent({
       const componentName = _.startCase(
         _.camelCase(view.lookup_name.replaceAll('_', '-')),
       ).replace(/ /g, '');
+      console.log(componentName);
       const formExists =
         componentName in
         ((resolveComponent('test-form') as ComponentOptions)?.components || {});
