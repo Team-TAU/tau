@@ -37,12 +37,22 @@ class TestUtils():
         monkeypatch.setattr('pyngrok.ngrok.connect', NgrokConnectMock)
         setup_ngrok()
 
+    @pytest.mark.django_db
+    def test_setup_ngrok_no_token(self, monkeypatch):
+        port = 8000
+        ngrok_token = "UNIT_TEST_NGROK_TOKEN"
+        monkeypatch.setenv("PORT", port)
+        monkeypatch.delenv("NGROK_TOKEN")
+        monkeypatch.setattr('pyngrok.ngrok.kill', NgrokKillMock)
+        monkeypatch.setattr('pyngrok.ngrok.connect', NgrokConnectMock)
+        setup_ngrok()
 
     @pytest.mark.django_db
-    def test_check_access_token_valid(self, settings):
+    @pytest.mark.parametrize("debug_output", [False, True])
+    def test_check_access_token_valid(self, settings, debug_output):
         access_token = "UNIT_TEST_ACCESS_TOKEN"
         config.TWITCH_ACCESS_TOKEN = access_token
-
+        settings.DEBUG_TWITCH_CALLS = debug_output
         with requests_mock.Mocker() as m:
             m.get(
                 'https://id.twitch.tv/oauth2/validate',
@@ -61,7 +71,9 @@ class TestUtils():
             assert req.headers['Authorization'] == f"OAuth {access_token}"
 
     @pytest.mark.django_db
-    def test_check_access_token_invalid(self, settings):
+    @pytest.mark.parametrize("debug_output", [False, True])
+    def test_check_access_token_invalid(self, settings, debug_output):
+        settings.DEBUG_TWITCH_CALLS = debug_output
         with requests_mock.Mocker() as m:
             m.get(
                 'https://id.twitch.tv/oauth2/validate',
@@ -85,8 +97,10 @@ class TestUtils():
         assert check_access_token_expired()
 
     @pytest.mark.django_db
-    def test_refresh_access_token_success(self, settings):
+    @pytest.mark.parametrize("debug_output", [False, True])
+    def test_refresh_access_token_success(self, settings, debug_output):
         config.TWITCH_ACCESS_TOKEN_EXPIRATION = timezone.now() - timedelta(hours=1)
+        settings.DEBUG_TWITCH_CALLS = debug_output
         new_access_token = 'NEW_ACCESS_TOKEN'
         new_refresh_token = 'NEW_REFRESH_TOKEN'
         expires_in = 3600
@@ -108,8 +122,10 @@ class TestUtils():
         assert not check_access_token_expired()
 
     @pytest.mark.django_db
-    def test_refresh_access_token_invalid(self, settings):
+    @pytest.mark.parametrize("debug_output", [False, True])
+    def test_refresh_access_token_invalid(self, settings, debug_output):
         config.TWITCH_ACCESS_TOKEN_EXPIRATION = timezone.now() - timedelta(hours=1)
+        settings.DEBUG_TWITCH_CALLS = debug_output
         with requests_mock.Mocker() as m:
             m.post(
                 'https://id.twitch.tv/oauth2/token',
@@ -199,10 +215,12 @@ class TestUtils():
         assert payload == expected_payload
 
     @pytest.mark.django_db
-    def test_init_webhook_instance(self, settings, monkeypatch):
+    @pytest.mark.parametrize("debug_output", [False, True])
+    def test_init_webhook_instance(self, settings, monkeypatch, debug_output):
         base_url = 'https://test.url'
         config.CHANNEL_ID="123456"
         monkeypatch.setenv('TWITCH_WEBHOOK_SECRET', 'UNIT_TESTING_SECRET')
+        settings.DEBUG_TWITCH_CALLS = debug_output
         worker_token = 'WORKER_TOKEN'
 
         instance = TwitchEventSubSubscriptionFactory.create()
@@ -221,10 +239,12 @@ class TestUtils():
             assert history[1].url == 'https://api.twitch.tv/helix/eventsub/subscriptions'
 
     @pytest.mark.django_db
-    def test_init_webhook_no_instance(self, settings, monkeypatch):
+    @pytest.mark.parametrize("debug_output", [False, True])
+    def test_init_webhook_no_instance(self, settings, monkeypatch, debug_output):
         base_url = 'https://test.url'
         config.CHANNEL_ID="123456"
         monkeypatch.setenv('TWITCH_WEBHOOK_SECRET', 'UNIT_TESTING_SECRET')
+        settings.DEBUG_TWITCH_CALLS = debug_output
         worker_token = 'WORKER_TOKEN'
 
         payload = streamer_payload(base_url, 'online', '12345')
@@ -239,9 +259,11 @@ class TestUtils():
             assert history[0].url == 'https://api.twitch.tv/helix/eventsub/subscriptions'
 
     @pytest.mark.django_db
-    def test_init_webhooks(self, settings, monkeypatch):
+    @pytest.mark.parametrize("debug_output", [False, True])
+    def test_init_webhooks(self, settings, monkeypatch, debug_output):
         base_url = 'https://test.url'
         settings.LOCAL_URL = base_url
+        settings.DEBUG_TWITCH_CALLS = debug_output
         TwitchEventSubSubscriptionFactory.create(
             name='channel.raid',
             lookup_name='channel-raid',
@@ -264,9 +286,11 @@ class TestUtils():
             assert m.call_count == 6
 
     @pytest.mark.django_db
-    def test_teardown_webhooks(self, settings, monkeypatch):
+    @pytest.mark.parametrize("debug_output", [False, True])
+    def test_teardown_webhooks(self, settings, monkeypatch, debug_output):
         base_url = 'https://test.url'
         settings.LOCAL_URL = base_url
+        settings.DEBUG_TWITCH_CALLS = debug_output
         config.TWITCH_APP_ACCESS_TOKEN = 'UNIT_TESTING_TWITCH_ACCESS_TOKEN'
         monkeypatch.setenv('TWITCH_APP_ID', 'UNIT_TESTING_TWITCH_APP_ID')
         worker_token = 'WORKER_TOKEN'
@@ -324,9 +348,11 @@ class TestUtils():
                     assert req.headers['Authorization'] == 'Token WORKER_TOKEN'
 
     @pytest.mark.django_db
-    def test_cleanup_webhooks(self, settings, monkeypatch):
+    @pytest.mark.parametrize("debug_output", [False, True])
+    def test_cleanup_webhooks(self, settings, monkeypatch, debug_output):
         config.TWITCH_APP_ACCESS_TOKEN = 'UNIT_TESTING_TWITCH_ACCESS_TOKEN'
         monkeypatch.setenv('TWITCH_APP_ID', 'UNIT_TESTING_TWITCH_APP_ID')
+        settings.DEBUG_TWITCH_CALLS = debug_output
         with requests_mock.Mocker() as m:
             m.get(f'https://api.twitch.tv/helix/eventsub/subscriptions', json={
                     'data': [
@@ -348,9 +374,11 @@ class TestUtils():
                 assert req.qs['id'][0].upper() == 'SHOULD_DELETE_ID'
 
     @pytest.mark.django_db
-    def test_cleanup_remote_webhooks(self, settings, monkeypatch):
+    @pytest.mark.parametrize("debug_output", [False, True])
+    def test_cleanup_remote_webhooks(self, settings, monkeypatch, debug_output):
         config.TWITCH_APP_ACCESS_TOKEN = 'UNIT_TESTING_TWITCH_ACCESS_TOKEN'
         monkeypatch.setenv('TWITCH_APP_ID', 'UNIT_TESTING_TWITCH_APP_ID')
+        settings.DEBUG_TWITCH_CALLS = debug_output
         config.PUBLIC_URL='https://local.url/'
         with requests_mock.Mocker() as m:
             m.get(f'https://api.twitch.tv/helix/eventsub/subscriptions', json={
@@ -373,9 +401,11 @@ class TestUtils():
                 assert req.qs['id'][0].upper() == 'SHOULD_DELETE_ID'
 
     @pytest.mark.django_db
-    def test_teardown_all_acct_webhooks(self, settings, monkeypatch):
+    @pytest.mark.parametrize("debug_output", [False, True])
+    def test_teardown_all_acct_webhooks(self, settings, monkeypatch, debug_output):
         config.TWITCH_APP_ACCESS_TOKEN = 'UNIT_TESTING_TWITCH_ACCESS_TOKEN'
         monkeypatch.setenv('TWITCH_APP_ID', 'UNIT_TESTING_TWITCH_APP_ID')
+        settings.DEBUG_TWITCH_CALLS = debug_output
         config.PUBLIC_URL='https://local.url/'
         with requests_mock.Mocker() as m:
             m.get(f'https://api.twitch.tv/helix/eventsub/subscriptions', json={

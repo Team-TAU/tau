@@ -32,23 +32,29 @@ class TauStatusConsumer(AsyncJsonWebsocketConsumer):
                 data = json.loads(text_data)
                 if 'token' in data.keys():
                     token = data['token']
+                    print(token)
                     user = await database_sync_to_async(self.get_user_from_token)(token)
-                    if user is not None:
-                        self.scope['user'] = user
+                    print(user)
+                    self.scope['user'] = user
+                else:
+                    await self.send_json({'error': 'Missing token field'})
+                    return
+
             except Exception as err:
-                print(err)
-        if not self.scope['user'].id:
-            self.close()
+                await self.send_json({'error': 'Invalid Login'})
+                return
+
+            if not self.scope['user'].id:
+                print('No user found with submitted token.  Closing connection.')
+                self.close()
+                return
 
         data = await database_sync_to_async(get_all_statuses)()
         await self.taustatus_event({'data': data})
 
     def get_user_from_token(self, token):
-        try:
-            tokenObj = Token.objects.get(key=token)
-            return tokenObj.user
-        except Token.DoesNotExist:
-            return None
+        user = Token.objects.get(key=token).user
+        return user
 
     async def taustatus_event(self, event):
         if self.scope['user'].id:
