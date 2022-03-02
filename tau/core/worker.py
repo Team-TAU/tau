@@ -141,9 +141,6 @@ class Worker:
             try:
                 print("waiting for message...")
                 message =  json.loads(await self.server_connection.recv())
-                print(message)
-                print(f'PRIVMSG #{self.username.lower()} :{message["data"]}')
-                # print(f'PRIVMSG #{self.username.lower()} :{message["data"]}')
                 await self.connection.send(f'PRIVMSG #{self.username.lower()} :{message["data"]}')
             except websockets.exceptions.ConnectionClosed:
                 print('Websocket to twitch irc unexpectedly closed... reconnecting')
