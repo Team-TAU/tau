@@ -108,10 +108,10 @@ class Common(Configuration):  # pylint: disable=no-init
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.postgresql_psycopg2',
-                'NAME': os.getenv('DJANGO_DB'),
-                'USER': os.getenv('DJANGO_DB_USER'),
+                'NAME': os.getenv('DJANGO_DB', 'tau_db'),
+                'USER': os.getenv('DJANGO_DB_USER', 'tau_db'),
                 'PASSWORD': os.getenv('DJANGO_DB_PW'),
-                'HOST': os.getenv('DJANGO_DB_HOST'),
+                'HOST': os.getenv('DJANGO_DB_HOST', 'db'),
                 'PORT': os.getenv('DJANGO_DB_PORT', 5432),
             }
         }

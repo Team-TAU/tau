@@ -5,18 +5,31 @@ import logging
 import sys
 from time import time, sleep
 from psycopg2 import connect, sql, OperationalError
-db_type = os.getenv("DJANGO_DB_TYPE","sqlite3")
+db_type = os.getenv("DJANGO_DB_TYPE", "postgres")
 db_user = os.getenv("DJANGO_DB_USER","tau_db")
-db_name = os.getenv("DJANGO_DB","tau-db")
+db_name = os.getenv("DJANGO_DB","tau_db")
 db_pw = os.getenv("DJANGO_DB_PW","")
 check_timeout = os.getenv("POSTGRES_CHECK_TIMEOUT", 30)
 check_interval = os.getenv("POSTGRES_CHECK_INTERVAL", 1)
 interval_unit = "second" if check_interval == 1 else "seconds"
 config = {
     "dbname": os.getenv("POSTGRES_DB", "postgres"),
-    "user": os.getenv("POSTGRES_USER", "postgres"),
-    "password": os.getenv("POSTGRES_PASSWORD", ""),
-    "host": os.getenv("DJANGO_DB_HOST", "db")
+    "user": os.getenv(
+        "PGUSER",
+        os.getenv("POSTGRES_USER", "postgres")
+    ),
+    "password": os.getenv(
+        "PGPASSWORD",
+        os.getenv("POSTGRES_PASSWORD", "")
+    ),
+    "host": os.getenv(
+        "PGHOST",
+        os.getenv("DJANGO_DB_HOST", "db")
+    ),
+    "port": os.getenv(
+        "PGPORT",
+        os.getenv("DJANGO_DB_PORT", 5432)
+    )
 }
 
 start_time = time()
@@ -24,7 +37,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 logger.addHandler(logging.StreamHandler())
 
-def pg_isready(host, user, password, dbname):
+def pg_isready(host, user, password, dbname, port):
     if db_type != "postgres":
         logger.info("DJANGO_DB_TYPE is not set to \"postgres\". Skipping.")
         return True

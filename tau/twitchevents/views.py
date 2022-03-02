@@ -119,6 +119,7 @@ class TwitchEventModelViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post', 'get'])
     def replay(self, request, pk=None):
+        instance = TwitchEvent.objects.get(pk=pk)
         instance = self.get_object()
         serializer = TwitchEventSerializer(instance, many=False)
         ws_payload = serializer.data
