@@ -7,17 +7,19 @@
 1. [Create a railway account/login](https://railway.app/login)
 1. [Go to your railway dashboard](https://railway.app/dashboard)
 1. Click "+ New Project" and select "Empty Project"
-1. Click "Add Plugin" and select "Add PostgreSQL"
-1. Click "Add Plugin" and select "Add Redis"
-1. Click "Deployments" then the "Domains" tab. Edit the production domain to a url that you want (e.g.- tau-twitchname.up.railway.com). Note this domain, as it will be required in your environment variables, and when setting up TAU in the twitch dev dashboard.
+1. Click "+ New" in the upper right, and select "Database" --> "Add PostgreSQL"
+1. Click "+ New" in the upper right, and select "Database" --> "Add Redis"
+1. Click "+ New" in the upper right, and select "Empty Service"
+1. Click on the new empty service which was just created.
+1. Click the "Domains" tab. Edit the production domain to a url that you want (e.g.- tau-twitchname.up.railway.com). Note this domain, as it will be required in your environment variables, and when setting up TAU in the twitch dev dashboard.
 1. [Get a Twitch Client ID and Client Secret](./twitch_dev.md). NOTE- rather than `http://localhost:PORT/twitch-callback/` as your OAuth redirect URL, you must use https, the domain you set up in the prior step, and no port. E.g.: `https://tau-twitchname.up.railway.com`.
 1. Copy the sample `.env` data below, and paste in a text editor. Add values for the first six enviornment variables as explained below.
-1. Back in the `Variables` section of your railway project, click `Bulk Import`, and paste in your edited .env data, and click `Add`.
+1. Back in the `Variables` section of your railway projects empty service, click `Bulk Import`, and paste in your edited .env data, and click `Add`. Then close the service panel (x in the upper right corner of the panel)
 1. In a terminal install the railway CLI using npm: `npm i -g @railway/cli` then login to railway: `railway login`
-1. In your railway project dashboard, click on "Setup". Copy the link command with your projects UUID (something like: `railway link SOME-UUID-HERE`)
+1. In your railway project dashboard, click on "Set up your project locally" in the lower left. Copy the link command with your projects UUID (something like: `railway link SOME-UUID-HERE`)
 1. In the terminal, navigate to the TAU root directory, and paste/run the link command.
 1. In the terminal, spin up your railway TAU instance (from the root TAU directory) with the command: `railway up`.
-1. After the container spins up, navigate to your projects url, and complete the setup wizard.
+1. After the container spins up, navigate to your projects url, and complete the setup wizard. Note- it can take a few minutes for everything to spin up. When you navigate to your project url, you may see a warning that the project is spinning up or isnt connecting properly. Be patient, and it should start working in a couple minutes.
 1. You're now running TAU!
 
 ## Sample .env data.
