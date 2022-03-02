@@ -170,17 +170,19 @@ def init_webhooks(base_url, worker_token):
     active_streamer_sub_ids = []
 
     for instance in TwitchEventSubSubscription.objects.filter(active=True):
-        if instance.name == 'channel.raid':
-            broadcaster_key = 'to_broadcaster_user_id'
-        else:
-            broadcaster_key = 'broadcaster_user_id'
-        init_webhook(
-            eventsub_payload(instance, base_url, broadcaster_key),
-            url,
-            worker_token,
-            instance.lookup_name
-        )
-        active_event_sub_ids.append(instance.id)
+        # if instance.name == 'channel.raid':
+        #     broadcaster_key = 'to_broadcaster_user_id'
+        # else:
+        #     broadcaster_key = 'broadcaster_user_id'
+        
+        for broadcaster_key in instance.condition_schema['properties'].keys():
+            init_webhook(
+                eventsub_payload(instance, base_url, broadcaster_key),
+                url,
+                worker_token,
+                instance.lookup_name
+            )
+            active_event_sub_ids.append(instance.id)
 
     streamers = Streamer.objects.filter(disabled=False)
     for streamer in streamers:
@@ -215,13 +217,22 @@ def teardown_webhooks(worker_token):
     }
 
     for sub in active_subs:
-        req = requests.delete(
-            f'https://api.twitch.tv/helix/eventsub/subscriptions?id={sub.subscription["id"]}',
-            headers=headers
-        )
-        if(settings.DEBUG_TWITCH_CALLS):
-            log_request(req)
-        
+        if isinstance(sub.subscription, list):
+            for sub_dat in sub.subscription:
+                req = requests.delete(
+                    f'https://api.twitch.tv/helix/eventsub/subscriptions?id={sub_dat["id"]}',
+                    headers=headers
+                )
+                if(settings.DEBUG_TWITCH_CALLS):
+                    log_request(req)
+        else:
+            req = requests.delete(
+                f'https://api.twitch.tv/helix/eventsub/subscriptions?id={sub.subscription["id"]}',
+                headers=headers
+            )
+            if(settings.DEBUG_TWITCH_CALLS):
+                log_request(req)
+
         payload = {
             'status': 'DIS',
             'subscription': None
