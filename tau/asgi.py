@@ -18,6 +18,7 @@ application = ProtocolTypeRouter({
     "websocket": AuthMiddlewareStack(
         URLRouter(
             [
+                url(r'ws/worker-server/$', coreconsumers.ServerWorkerConsumer.as_asgi()),
                 url(r'ws/twitch-events/$', twitcheventsconsumers.TwitchEventConsumer.as_asgi()),
                 url(r'ws/tau-status/$', coreconsumers.TauStatusConsumer.as_asgi()),
                 url(r'ws/irc-messages/$', coreconsumers.TwitchChatConsumer.as_asgi())

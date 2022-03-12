@@ -310,5 +310,6 @@ class Common(Configuration):  # pylint: disable=no-init
         'channel:read:redemptions',
         'channel:read:hype_train',
         'channel_subscriptions',
-        'chat:read'
+        'chat:read',
+        'chat:edit'
     ]

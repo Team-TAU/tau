@@ -2,6 +2,9 @@ import json
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
 from rest_framework.authtoken.models import Token
 
 from .utils import get_all_statuses
@@ -55,6 +58,31 @@ class TauStatusConsumer(AsyncJsonWebsocketConsumer):
             await self.send_json(event['data'])
 
 
+class ServerWorkerConsumer(AsyncJsonWebsocketConsumer):
+    def __init__(self, *args, **kwargs):
+        self.group_name = 'serverworker'
+        super().__init__(*args, **kwargs)
+
+    async def connect(self):
+        await self.channel_layer.group_add(
+            self.group_name, self.channel_name
+        )
+        await self.accept()
+
+    async def disconnect(self, code):
+        await self.channel_layer.group_discard(
+            self.group_name, self.channel_name
+        )
+
+    async def receive(self, text_data=None, bytes_data=None, **kwargs):
+        print(text_data)
+    
+    async def serverworker_event(self, event):
+        print("Sending to listeners")
+        print(event)
+        await self.send_json(event['data'])
+
+
 class TwitchChatConsumer(AsyncJsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):
         self.group_name = 'twitchchat'
@@ -73,7 +101,18 @@ class TwitchChatConsumer(AsyncJsonWebsocketConsumer):
 
     async def receive(self, text_data=None, bytes_data=None, **kwargs):
         if self.scope['user'].id:
-            pass
+            # pass message to be posted to twitch chat
+            # channel_layer = get_channel_layer()
+            await self.channel_layer.group_send(
+                'serverworker',
+                {
+                    'type': 'serverworker.event',
+                    'data': {
+                        'message_type': 'irc-message',
+                        'data': text_data
+                    }
+                }
+            )
         else:
             try:
                 data = json.loads(text_data)
