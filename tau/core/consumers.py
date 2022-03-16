@@ -74,8 +74,6 @@ class ServerWorkerConsumer(AsyncJsonWebsocketConsumer):
         print(text_data)
     
     async def serverworker_event(self, event):
-        print("Sending to listeners")
-        print(event)
         await self.send_json(event['data'])
 
 
@@ -95,7 +93,8 @@ class MessageBrokerConsumer(AsyncJsonWebsocketConsumer):
             self.group_name, self.channel_name
         )
 
-    async def receive_json(self, json_data):
+    async def receive(self, text_data=None, bytes_data=None, **kwargs):
+        json_data = json.loads(text_data)
         if self.scope['user'].id:
             # pass message to be posted to twitch chat
             # channel_layer = get_channel_layer()
@@ -130,7 +129,6 @@ class MessageBrokerConsumer(AsyncJsonWebsocketConsumer):
             return None
 
     async def messagebroker_message(self, event):
-        print("Sending to listeners")
         await self.send_json(event['data'])
 
 
