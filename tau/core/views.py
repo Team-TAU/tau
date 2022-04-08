@@ -76,20 +76,19 @@ def helix_view(request, helix_path=None):
     elif request.method == 'POST':
         data = requests.post(
             url,
-            data=body,
+            json=body,
             headers=headers
         )
     elif request.method == 'PUT':
         data = requests.put(
             url,
-            data=body,
+            json=body,
             headers=headers
         )
-        print(data)
     elif request.method == 'PATCH':
         data = requests.patch(
             url,
-            data=body,
+            json=body,
             headers=headers
         )
     elif request.method == 'DELETE':
