@@ -136,7 +136,6 @@ class Worker:
         await self.recieve_server()
 
     async def recieve_server(self):
-        print('receieve server')
         while True:
             try:
                 print("waiting for message...")
@@ -151,8 +150,9 @@ class Worker:
         await self.connect()
         await self.recieve()
 
-    def disconnect_irc(self):
-        pass
+    async def disconnect_irc(self):
+        await self.connection.close()
+        self.irc_connected = False
 
     async def manage_webhooks(self):
         refresh_webhooks = True
@@ -210,6 +210,10 @@ class Worker:
     async def recieve(self):
         while True:
             try:
+                use_irc = await database_sync_to_async(self.lookup_setting)('USE_IRC')
+                if not use_irc:
+                    await self.disconnect_irc()
+                    return
                 message = await self.connection.recv()
                 data = self.parse_message(message)
                 # pp.pprint(data)
