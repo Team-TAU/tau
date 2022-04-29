@@ -30,11 +30,14 @@ from .utils import (
     get_active_streamer_sub_ids
 )
 
-class Worker():
+class Worker:
     irc_url = 'wss://irc-ws.chat.twitch.tv'
+    server_url = f'ws://localhost:{settings.BASE_PORT}/ws/worker-server/'
     connection = None
+    server_connection = None
     loop = None
     tasks = []
+    server_connected = False
     irc_connected = False
     wh_delay = 15
     irc_delay = 2
@@ -91,9 +94,23 @@ class Worker():
             else:
                 await asyncio.sleep(delay)
 
+    async def open_server_connection(self):
+        delay = 1
+        self.server_connection = await websockets.client.connect(self.server_url)
+        if self.server_connection.open:
+            print('    [WS CONNECTION BETWEEN WORKER AND SERVER UP]')
+            self.server_connected = True
+        else:
+            self.server_connected = False
+            print('---- Could not connect to server websocket.  Reconnecting... ----')
+            await asyncio.sleep(delay)
+            if delay < 120:
+                delay = max(delay*2, 120)
+
     def create_event_loop(self):
         self.loop = asyncio.get_event_loop()
         self.tasks = [
+            asyncio.ensure_future(self.manage_server_loop()),
             asyncio.ensure_future(self.manage_webhooks()),
             asyncio.ensure_future(self.manage_irc_loop()),
             asyncio.ensure_future(self.check_irc_settings()),
@@ -107,6 +124,28 @@ class Worker():
                 await self.connect_irc()
 
             await asyncio.sleep(self.irc_delay)
+
+    async def manage_server_loop(self):
+        while True:
+            if not self.server_connected:
+                await self.connect_server()
+            await asyncio.sleep(self.irc_delay)
+
+    async def connect_server(self):
+        await self.open_server_connection()
+        await self.recieve_server()
+
+    async def recieve_server(self):
+        print('receieve server')
+        while True:
+            try:
+                print("waiting for message...")
+                message =  json.loads(await self.server_connection.recv())
+                await self.connection.send(f'PRIVMSG #{self.username.lower()} :{message["data"]}')
+            except websockets.exceptions.ConnectionClosed:
+                print('Websocket to twitch irc unexpectedly closed... reconnecting')
+                await self.open_server_connection()
+
 
     async def connect_irc(self):
         await self.connect()

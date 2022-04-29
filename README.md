@@ -8,12 +8,12 @@ If you have been running the original version of TAU (the dashboard has a monoto
 
 # Table of Contents
 
-- [Introduction](#Introduction)
-- [Features](#Features)
-- [Prerequisites](#Prerequisites)
-- [Getting Started](#Getting-Started)
-- [Updating](#Updating)
-- [Todo/Issues](#Todo/Issues)
+- [Introduction](#microphone-introduction)
+- [Features](#star-features)
+- [Prerequisites](#white_check_mark-prerequisites)
+- [Getting Started](#gear-getting-started)
+- [Updating](#hourglass_flowing_sand-updating)
+- [Todo/Issues](#thought_balloon-todoissues)
 
 # :microphone: Introduction
 

@@ -1,594 +1,602 @@
 [
-    {
-        "description": "Start Commercial",
-        "endpoint": "channels/commercial",
-        "method": "POST",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#start-commercial",
-        "token_type": "OAuth",
-        "scope": "channel:edit:commercial"
-    },
-    {
-        "description": "Get Extension Analytics",
-        "endpoint": "analytics/extensions",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-extension-analytics",
-        "token_type": "OAuth",
-        "scope": "analytics:read:extensions"
-    },
-    {
-        "description": "Get Game Analytics",
-        "endpoint": "analytics/games",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-game-analytics",
-        "token_type": "OAuth",
-        "scope": "analytics:read:games"
-    },
-    {
-        "description": "Get Bits Leaderboard",
-        "endpoint": "bits/leaderboard",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-bits-leaderboard",
-        "token_type": "OAuth",
-        "scope": "bits:read"
-    },
-    {
-        "description": "Get Cheermotes",
-        "endpoint": "bits/cheermotes",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-cheermotes",
-        "token_type": "OAuth",
-        "scope": null
-    },
-    {
-        "description": "Get Extension Transactions",
-        "endpoint": "extensions/transactions",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-extension-transactions",
-        "token_type": "OAuth",
-        "scope": null
-    },
-    {
-        "description": "Get Channel Information",
-        "endpoint": "channels",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-channel-information",
-        "token_type": "OAuth",
-        "scope": null
-    },
-    {
-        "description": "Modify Channel Information",
-        "endpoint": "channels",
-        "method": "PATCH",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#modify-channel-information",
-        "token_type": "OAuth",
-        "scope": "channel:manage:broadcast"
-    },
-    {
-        "description": "Get Channel Editors",
-        "endpoint": "channels/editors",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-channel-editors",
-        "token_type": "OAuth",
-        "scope": "channel:read:editors"
-    },
-    {
-        "description": "Create Custom Rewards",
-        "endpoint": "channel_points/custom_rewards",
-        "method": "POST",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#create-custom-rewards",
-        "token_type": "OAuth",
-        "scope": "channel:manage:redemptions"
-    },
-    {
-        "description": "Delete Custom Reward",
-        "endpoint": "channel_points/custom_rewards",
-        "method": "DELETE",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#delete-custom-reward",
-        "token_type": "OAuth",
-        "scope": "channel:manage:redemptions"
-    },
-    {
-        "description": "Get Custom Reward",
-        "endpoint": "channel_points/custom_rewards",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-custom-reward",
-        "token_type": "OAuth",
-        "scope": "channel:read:redemptions"
-    },
-    {
-        "description": "Get Custom Reward Redemption",
-        "endpoint": "channel_points/custom_rewards/redemptions",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-custom-reward-redemption",
-        "token_type": "OAuth",
-        "scope": "channel:read:redemptions"
-    },
-    {
-        "description": "Update Custom Reward",
-        "endpoint": "channel_points/custom_rewards",
-        "method": "PATCH",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#update-custom-reward",
-        "token_type": "OAuth",
-        "scope": "channel:manage:redemptions"
-    },
-    {
-        "description": "Update Redemption Status",
-        "endpoint": "channel_points/custom_rewards/redemptions",
-        "method": "PATCH",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#update-redemption-status",
-        "token_type": "OAuth",
-        "scope": "channel:manage:redemptions"
-    },
-    {
-        "description": "Get Channel Emotes",
-        "endpoint": "chat/emotes",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-channel-emotes",
-        "token_type": "OAuth",
-        "scope": null
-    },
-    {
-        "description": "Get Global Emotes",
-        "endpoint": "chat/emotes/global",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-global-emotes",
-        "token_type": "OAuth",
-        "scope": null
-    },
-    {
-        "description": "Get Emote Sets",
-        "endpoint": "chat/emotes/set",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-emote-sets",
-        "token_type": "OAuth",
-        "scope": null
-    },
-    {
-        "description": "Get Channel Chat Badges",
-        "endpoint": "chat/badges",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-channel-chat-badges",
-        "token_type": "OAuth",
-        "scope": null
-    },
-    {
-        "description": "Get Global Chat Badges",
-        "endpoint": "chat/badges/global",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-global-chat-badges",
-        "token_type": "OAuth",
-        "scope": null
-    },
-    {
-        "description": "Create Clip",
-        "endpoint": "clips",
-        "method": "POST",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#create-clip",
-        "token_type": "OAuth",
-        "scope": "clips:edit"
-    },
-    {
-        "description": "Get Clips",
-        "endpoint": "clips",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-clips",
-        "token_type": "OAuth",
-        "scope": null
-    },
-    {
-        "description": "Create EventSub Subscription",
-        "endpoint": "eventsub/subscriptions",
-        "method": "POST",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#create-eventsub-subscription",
-        "token_type": "AppAccess",
-        "scope": null
-    },
-    {
-        "description": "Delete EventSub Subscription",
-        "endpoint": "eventsub/subscriptions",
-        "method": "DELETE",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#delete-eventsub-subscription",
-        "token_type": "AppAccess",
-        "scope": null
-    },
-    {
-        "description": "Get EventSub Subscriptions",
-        "endpoint": "eventsub/subscriptions",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-eventsub-subscriptions",
-        "token_type": "AppAccess",
-        "scope": null
-    },
-    {
-        "description": "Get Top Games",
-        "endpoint": "games/top",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-top-games",
-        "token_type": "OAuth",
-        "scope": null
-    },
-    {
-        "description": "Get Games",
-        "endpoint": "games",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-games",
-        "token_type": "OAuth",
-        "scope": null
-    },
-    {
-        "description": "Get Hype Train Events",
-        "endpoint": "hypetrain/events",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-hype-train-events",
-        "token_type": "OAuth",
-        "scope": "channel:read:hype_train"
-    },
-    {
-        "description": "Check AutoMod Status",
-        "endpoint": "moderation/enforcements/status",
-        "method": "POST",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#check-automod-status",
-        "token_type": "OAuth",
-        "scope": "moderation:read"
-    },
-    {
-        "description": "Manage Held AutoMod Messages",
-        "endpoint": "moderation/automod/message",
-        "method": "POST",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#manage-held-automod-messages",
-        "token_type": "OAuth",
-        "scope": "moderator:manage:automod"
-    },
-    {
-        "description": "Get Banned Events",
-        "endpoint": "moderation/banned/events",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-banned-events",
-        "token_type": "OAuth",
-        "scope": "moderation:read"
-    },
-    {
-        "description": "Get Banned Users",
-        "endpoint": "moderation/banned",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-banned-users",
-        "token_type": "OAuth",
-        "scope": "moderation:read"
-    },
-    {
-        "description": "Get Moderators",
-        "endpoint": "moderation/moderators",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-moderators",
-        "token_type": "OAuth",
-        "scope": "moderation:read"
-    },
-    {
-        "description": "Get Moderator Events",
-        "endpoint": "moderation/moderators/events",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-moderator-events",
-        "token_type": "OAuth",
-        "scope": "moderation:read"
-    },
-    {
-        "description": "Get Polls",
-        "endpoint": "polls",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-polls",
-        "token_type": "OAuth",
-        "scope": "channel:read:polls"
-    },
-    {
-        "description": "Create Poll",
-        "endpoint": "polls",
-        "method": "POST",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#create-poll",
-        "token_type": "OAuth",
-        "scope": "channel:manage:polls"
-    },
-    {
-        "description": "End Poll",
-        "endpoint": "polls",
-        "method": "PATCH",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#end-poll",
-        "token_type": "OAuth",
-        "scope": "channel:manage:polls"
-    },
-    {
-        "description": "Get Predictions",
-        "endpoint": "predictions",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-predictions",
-        "token_type": "OAuth",
-        "scope": "channel:read:predictions"
-    },
-    {
-        "description": "Create Prediction",
-        "endpoint": "predictions",
-        "method": "POST",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#create-prediction",
-        "token_type": "OAuth",
-        "scope": "channel:manage:predictions"
-    },
-    {
-        "description": "End Prediction",
-        "endpoint": "predictions",
-        "method": "PATCH",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#end-prediction",
-        "token_type": "OAuth",
-        "scope": "channel:manage:predictions"
-    },
-    {
-        "description": "Get Channel Stream Schedule",
-        "endpoint": "schedule",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-channel-stream-schedule",
-        "token_type": "OAuth",
-        "scope": null
-    },
-    {
-        "description": "Get Channel iCalendar",
-        "endpoint": "schedule/icalendar",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-channel-icalendar",
-        "token_type": "OAuth",
-        "scope": null
-    },
-    {
-        "description": "Update Channel Stream Schedule",
-        "endpoint": "schedule/settings",
-        "method": "PATCH",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#update-channel-stream-schedule",
-        "token_type": "OAuth",
-        "scope": "channel:manage:schedule"
-    },
-    {
-        "description": "Create Channel Stream Schedule Segment",
-        "endpoint": "schedule/segment",
-        "method": "POST",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#create-channel-stream-schedule-segment",
-        "token_type": "OAuth",
-        "scope": "channel:manage:schedule"
-    },
-    {
-        "description": "Update Channel Stream Schedule Segment",
-        "endpoint": "schedule/segment",
-        "method": "PATCH",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#update-channel-stream-schedule-segment",
-        "token_type": "OAuth",
-        "scope": "channel:manage:schedule"
-    },
-    {
-        "description": "Delete Channel Stream Schedule Segment",
-        "endpoint": "schedule/segment",
-        "method": "DELETE",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#delete-channel-stream-schedule-segment",
-        "token_type": "OAuth",
-        "scope": "channel:manage:schedule"
-    },
-    {
-        "description": "Search Categories",
-        "endpoint": "search/categories",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#search-categories",
-        "token_type": "OAuth",
-        "scope": null
-    },
-    {
-        "description": "Search Channels",
-        "endpoint": "search/channels",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#search-channels",
-        "token_type": "OAuth",
-        "scope": null
-    },
-    {
-        "description": "Get Stream Key",
-        "endpoint": "streams/key",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-stream-key",
-        "token_type": "OAuth",
-        "scope": "channel:read:stream_key"
-    },
-    {
-        "description": "Get Streams",
-        "endpoint": "streams",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-streams",
-        "token_type": "OAuth",
-        "scope": null
-    },
-    {
-        "description": "Get Followed Streams",
-        "endpoint": "streams/followed",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-followed-streams",
-        "token_type": "OAuth",
-        "scope": "user:read:follows"
-    },
-    {
-        "description": "Create Stream Marker",
-        "endpoint": "streams/markers",
-        "method": "POST",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#create-stream-marker",
-        "token_type": "OAuth",
-        "scope": "channel:manage:broadcast"
-    },
-    {
-        "description": "Get Stream Markers",
-        "endpoint": "streams/markers",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-stream-markers",
-        "token_type": "OAuth",
-        "scope": "user:read:broadcast"
-    },
-    {
-        "description": "Get Broadcaster Subscriptions",
-        "endpoint": "subscriptions",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-broadcaster-subscriptions",
-        "token_type": "OAuth",
-        "scope": "channel:read:subscriptions"
-    },
-    {
-        "description": "Check User Subscription",
-        "endpoint": "subscriptions/user",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#check-user-subscription",
-        "token_type": "OAuth",
-        "scope": "user:read:subscriptions"
-    },
-    {
-        "description": "Get All Stream Tags",
-        "endpoint": "tags/streams",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-all-stream-tags",
-        "token_type": "AppAccess",
-        "scope": null
-    },
-    {
-        "description": "Get Stream Tags",
-        "endpoint": "streams/tags",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-stream-tags",
-        "token_type": "OAuth",
-        "scope": null
-    },
-    {
-        "description": "Replace Stream Tags",
-        "endpoint": "streams/tags",
-        "method": "PUT",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#replace-stream-tags",
-        "token_type": "OAuth",
-        "scope": "channel:manage:broadcast"
-    },
-    {
-        "description": "Get Channel Teams",
-        "endpoint": "teams/channel",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-channel-teams",
-        "token_type": "OAuth",
-        "scope": null
-    },
-    {
-        "description": "Get Teams",
-        "endpoint": "teams",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-teams",
-        "token_type": "OAuth",
-        "scope": null
-    },
-    {
-        "description": "Get Users",
-        "endpoint": "users",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-users",
-        "token_type": "OAuth",
-        "scope": null
-    },
-    {
-        "description": "Update User",
-        "endpoint": "users",
-        "method": "PUT",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#update-user",
-        "token_type": "OAuth",
-        "scope": "user:edit"
-    },
-    {
-        "description": "Get Users Follows",
-        "endpoint": "users/follows",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-users-follows",
-        "token_type": "OAuth",
-        "scope": null
-    },
-    {
-        "description": "Create User Follows",
-        "endpoint": "users/follows",
-        "method": "POST",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#create-user-follows",
-        "token_type": "OAuth",
-        "scope": "user:edit:follows"
-    },
-    {
-        "description": "Delete User Follows",
-        "endpoint": "users/follows",
-        "method": "DELETE",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#delete-user-follows",
-        "token_type": "OAuth",
-        "scope": "user:edit:follows"
-    },
-    {
-        "description": "Get User Block List",
-        "endpoint": "users/blocks",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-user-block-list",
-        "token_type": "OAuth",
-        "scope": "user:read:blocked_users"
-    },
-    {
-        "description": "Block User",
-        "endpoint": "users/blocks",
-        "method": "PUT",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#block-user",
-        "token_type": "OAuth",
-        "scope": "user:manage:blocked_users"
-    },
-    {
-        "description": "Unblock User",
-        "endpoint": "users/blocks",
-        "method": "DELETE",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#unblock-user",
-        "token_type": "OAuth",
-        "scope": "user:manage:blocked_users"
-    },
-    {
-        "description": "Get User Extensions",
-        "endpoint": "users/extensions/list",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-user-extensions",
-        "token_type": "OAuth",
-        "scope": "user:read:broadcast"
-    },
-    {
-        "description": "Get User Active Extensions",
-        "endpoint": "users/extensions",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-user-active-extensions",
-        "token_type": "OAuth",
-        "scope": "user:read:broadcast"
-    },
-    {
-        "description": "Update User Extensions",
-        "endpoint": "users/extensions",
-        "method": "PUT",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#update-user-extensions",
-        "token_type": "OAuth",
-        "scope": "user:edit:broadcast"
-    },
-    {
-        "description": "Get Videos",
-        "endpoint": "videos",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-videos",
-        "token_type": "OAuth",
-        "scope": null
-    },
-    {
-        "description": "Delete Videos",
-        "endpoint": "videos",
-        "method": "DELETE",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#delete-videos",
-        "token_type": "OAuth",
-        "scope": "channel:manage:videos"
-    },
-    {
-        "description": "Get Webhook Subscriptions",
-        "endpoint": "webhooks/subscriptions",
-        "method": "GET",
-        "reference_url": "https://dev.twitch.tv/docs/api/reference#get-webhook-subscriptions",
-        "token_type": "AppAccess",
-        "scope": null
-    }
+  {
+    "description": "Start Commercial",
+    "endpoint": "channels/commercial",
+    "method": "POST",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#start-commercial",
+    "token_type": "OAuth",
+    "scope": "channel:edit:commercial"
+  },
+  {
+    "description": "Get Extension Analytics",
+    "endpoint": "analytics/extensions",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-extension-analytics",
+    "token_type": "OAuth",
+    "scope": "analytics:read:extensions"
+  },
+  {
+    "description": "Get Game Analytics",
+    "endpoint": "analytics/games",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-game-analytics",
+    "token_type": "OAuth",
+    "scope": "analytics:read:games"
+  },
+  {
+    "description": "Get Bits Leaderboard",
+    "endpoint": "bits/leaderboard",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-bits-leaderboard",
+    "token_type": "OAuth",
+    "scope": "bits:read"
+  },
+  {
+    "description": "Get Cheermotes",
+    "endpoint": "bits/cheermotes",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-cheermotes",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Get Extension Transactions",
+    "endpoint": "extensions/transactions",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-extension-transactions",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Get Channel Information",
+    "endpoint": "channels",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-channel-information",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Modify Channel Information",
+    "endpoint": "channels",
+    "method": "PATCH",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#modify-channel-information",
+    "token_type": "OAuth",
+    "scope": "channel:manage:broadcast"
+  },
+  {
+    "description": "Get Channel Editors",
+    "endpoint": "channels/editors",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-channel-editors",
+    "token_type": "OAuth",
+    "scope": "channel:read:editors"
+  },
+  {
+    "description": "Create Custom Rewards",
+    "endpoint": "channel_points/custom_rewards",
+    "method": "POST",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#create-custom-rewards",
+    "token_type": "OAuth",
+    "scope": "channel:manage:redemptions"
+  },
+  {
+    "description": "Delete Custom Reward",
+    "endpoint": "channel_points/custom_rewards",
+    "method": "DELETE",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#delete-custom-reward",
+    "token_type": "OAuth",
+    "scope": "channel:manage:redemptions"
+  },
+  {
+    "description": "Get Custom Reward",
+    "endpoint": "channel_points/custom_rewards",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-custom-reward",
+    "token_type": "OAuth",
+    "scope": "channel:read:redemptions"
+  },
+  {
+    "description": "Get Custom Reward Redemption",
+    "endpoint": "channel_points/custom_rewards/redemptions",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-custom-reward-redemption",
+    "token_type": "OAuth",
+    "scope": "channel:read:redemptions"
+  },
+  {
+    "description": "Update Custom Reward",
+    "endpoint": "channel_points/custom_rewards",
+    "method": "PATCH",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#update-custom-reward",
+    "token_type": "OAuth",
+    "scope": "channel:manage:redemptions"
+  },
+  {
+    "description": "Update Redemption Status",
+    "endpoint": "channel_points/custom_rewards/redemptions",
+    "method": "PATCH",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#update-redemption-status",
+    "token_type": "OAuth",
+    "scope": "channel:manage:redemptions"
+  },
+  {
+    "description": "Get Channel Emotes",
+    "endpoint": "chat/emotes",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-channel-emotes",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Get Global Emotes",
+    "endpoint": "chat/emotes/global",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-global-emotes",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Get Emote Sets",
+    "endpoint": "chat/emotes/set",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-emote-sets",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Get Channel Chat Badges",
+    "endpoint": "chat/badges",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-channel-chat-badges",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Get Global Chat Badges",
+    "endpoint": "chat/badges/global",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-global-chat-badges",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Create Clip",
+    "endpoint": "clips",
+    "method": "POST",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#create-clip",
+    "token_type": "OAuth",
+    "scope": "clips:edit"
+  },
+  {
+    "description": "Get Clips",
+    "endpoint": "clips",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-clips",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Create EventSub Subscription",
+    "endpoint": "eventsub/subscriptions",
+    "method": "POST",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#create-eventsub-subscription",
+    "token_type": "AppAccess",
+    "scope": null
+  },
+  {
+    "description": "Delete EventSub Subscription",
+    "endpoint": "eventsub/subscriptions",
+    "method": "DELETE",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#delete-eventsub-subscription",
+    "token_type": "AppAccess",
+    "scope": null
+  },
+  {
+    "description": "Get EventSub Subscriptions",
+    "endpoint": "eventsub/subscriptions",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-eventsub-subscriptions",
+    "token_type": "AppAccess",
+    "scope": null
+  },
+  {
+    "description": "Get Top Games",
+    "endpoint": "games/top",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-top-games",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Get Games",
+    "endpoint": "games",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-games",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Get Creator Goals",
+    "endpoint": "goals",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-creator-goals",
+    "token_type": "OAuth",
+    "scope": "channel:read:goals"
+  },
+  {
+    "description": "Get Hype Train Events",
+    "endpoint": "hypetrain/events",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-hype-train-events",
+    "token_type": "OAuth",
+    "scope": "channel:read:hype_train"
+  },
+  {
+    "description": "Check AutoMod Status",
+    "endpoint": "moderation/enforcements/status",
+    "method": "POST",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#check-automod-status",
+    "token_type": "OAuth",
+    "scope": "moderation:read"
+  },
+  {
+    "description": "Manage Held AutoMod Messages",
+    "endpoint": "moderation/automod/message",
+    "method": "POST",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#manage-held-automod-messages",
+    "token_type": "OAuth",
+    "scope": "moderator:manage:automod"
+  },
+  {
+    "description": "Get Banned Events",
+    "endpoint": "moderation/banned/events",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-banned-events",
+    "token_type": "OAuth",
+    "scope": "moderation:read"
+  },
+  {
+    "description": "Get Banned Users",
+    "endpoint": "moderation/banned",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-banned-users",
+    "token_type": "OAuth",
+    "scope": "moderation:read"
+  },
+  {
+    "description": "Get Moderators",
+    "endpoint": "moderation/moderators",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-moderators",
+    "token_type": "OAuth",
+    "scope": "moderation:read"
+  },
+  {
+    "description": "Get Moderator Events",
+    "endpoint": "moderation/moderators/events",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-moderator-events",
+    "token_type": "OAuth",
+    "scope": "moderation:read"
+  },
+  {
+    "description": "Get Polls",
+    "endpoint": "polls",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-polls",
+    "token_type": "OAuth",
+    "scope": "channel:read:polls"
+  },
+  {
+    "description": "Create Poll",
+    "endpoint": "polls",
+    "method": "POST",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#create-poll",
+    "token_type": "OAuth",
+    "scope": "channel:manage:polls"
+  },
+  {
+    "description": "End Poll",
+    "endpoint": "polls",
+    "method": "PATCH",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#end-poll",
+    "token_type": "OAuth",
+    "scope": "channel:manage:polls"
+  },
+  {
+    "description": "Get Predictions",
+    "endpoint": "predictions",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-predictions",
+    "token_type": "OAuth",
+    "scope": "channel:read:predictions"
+  },
+  {
+    "description": "Create Prediction",
+    "endpoint": "predictions",
+    "method": "POST",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#create-prediction",
+    "token_type": "OAuth",
+    "scope": "channel:manage:predictions"
+  },
+  {
+    "description": "End Prediction",
+    "endpoint": "predictions",
+    "method": "PATCH",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#end-prediction",
+    "token_type": "OAuth",
+    "scope": "channel:manage:predictions"
+  },
+  {
+    "description": "Get Channel Stream Schedule",
+    "endpoint": "schedule",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-channel-stream-schedule",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Get Channel iCalendar",
+    "endpoint": "schedule/icalendar",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-channel-icalendar",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Update Channel Stream Schedule",
+    "endpoint": "schedule/settings",
+    "method": "PATCH",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#update-channel-stream-schedule",
+    "token_type": "OAuth",
+    "scope": "channel:manage:schedule"
+  },
+  {
+    "description": "Create Channel Stream Schedule Segment",
+    "endpoint": "schedule/segment",
+    "method": "POST",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#create-channel-stream-schedule-segment",
+    "token_type": "OAuth",
+    "scope": "channel:manage:schedule"
+  },
+  {
+    "description": "Update Channel Stream Schedule Segment",
+    "endpoint": "schedule/segment",
+    "method": "PATCH",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#update-channel-stream-schedule-segment",
+    "token_type": "OAuth",
+    "scope": "channel:manage:schedule"
+  },
+  {
+    "description": "Delete Channel Stream Schedule Segment",
+    "endpoint": "schedule/segment",
+    "method": "DELETE",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#delete-channel-stream-schedule-segment",
+    "token_type": "OAuth",
+    "scope": "channel:manage:schedule"
+  },
+  {
+    "description": "Search Categories",
+    "endpoint": "search/categories",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#search-categories",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Search Channels",
+    "endpoint": "search/channels",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#search-channels",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Get Stream Key",
+    "endpoint": "streams/key",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-stream-key",
+    "token_type": "OAuth",
+    "scope": "channel:read:stream_key"
+  },
+  {
+    "description": "Get Streams",
+    "endpoint": "streams",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-streams",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Get Followed Streams",
+    "endpoint": "streams/followed",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-followed-streams",
+    "token_type": "OAuth",
+    "scope": "user:read:follows"
+  },
+  {
+    "description": "Create Stream Marker",
+    "endpoint": "streams/markers",
+    "method": "POST",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#create-stream-marker",
+    "token_type": "OAuth",
+    "scope": "channel:manage:broadcast"
+  },
+  {
+    "description": "Get Stream Markers",
+    "endpoint": "streams/markers",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-stream-markers",
+    "token_type": "OAuth",
+    "scope": "user:read:broadcast"
+  },
+  {
+    "description": "Get Broadcaster Subscriptions",
+    "endpoint": "subscriptions",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-broadcaster-subscriptions",
+    "token_type": "OAuth",
+    "scope": "channel:read:subscriptions"
+  },
+  {
+    "description": "Check User Subscription",
+    "endpoint": "subscriptions/user",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#check-user-subscription",
+    "token_type": "OAuth",
+    "scope": "user:read:subscriptions"
+  },
+  {
+    "description": "Get All Stream Tags",
+    "endpoint": "tags/streams",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-all-stream-tags",
+    "token_type": "AppAccess",
+    "scope": null
+  },
+  {
+    "description": "Get Stream Tags",
+    "endpoint": "streams/tags",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-stream-tags",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Replace Stream Tags",
+    "endpoint": "streams/tags",
+    "method": "PUT",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#replace-stream-tags",
+    "token_type": "OAuth",
+    "scope": "channel:manage:broadcast"
+  },
+  {
+    "description": "Get Channel Teams",
+    "endpoint": "teams/channel",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-channel-teams",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Get Teams",
+    "endpoint": "teams",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-teams",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Get Users",
+    "endpoint": "users",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-users",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Update User",
+    "endpoint": "users",
+    "method": "PUT",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#update-user",
+    "token_type": "OAuth",
+    "scope": "user:edit"
+  },
+  {
+    "description": "Get Users Follows",
+    "endpoint": "users/follows",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-users-follows",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Create User Follows",
+    "endpoint": "users/follows",
+    "method": "POST",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#create-user-follows",
+    "token_type": "OAuth",
+    "scope": "user:edit:follows"
+  },
+  {
+    "description": "Delete User Follows",
+    "endpoint": "users/follows",
+    "method": "DELETE",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#delete-user-follows",
+    "token_type": "OAuth",
+    "scope": "user:edit:follows"
+  },
+  {
+    "description": "Get User Block List",
+    "endpoint": "users/blocks",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-user-block-list",
+    "token_type": "OAuth",
+    "scope": "user:read:blocked_users"
+  },
+  {
+    "description": "Block User",
+    "endpoint": "users/blocks",
+    "method": "PUT",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#block-user",
+    "token_type": "OAuth",
+    "scope": "user:manage:blocked_users"
+  },
+  {
+    "description": "Unblock User",
+    "endpoint": "users/blocks",
+    "method": "DELETE",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#unblock-user",
+    "token_type": "OAuth",
+    "scope": "user:manage:blocked_users"
+  },
+  {
+    "description": "Get User Extensions",
+    "endpoint": "users/extensions/list",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-user-extensions",
+    "token_type": "OAuth",
+    "scope": "user:read:broadcast"
+  },
+  {
+    "description": "Get User Active Extensions",
+    "endpoint": "users/extensions",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-user-active-extensions",
+    "token_type": "OAuth",
+    "scope": "user:read:broadcast"
+  },
+  {
+    "description": "Update User Extensions",
+    "endpoint": "users/extensions",
+    "method": "PUT",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#update-user-extensions",
+    "token_type": "OAuth",
+    "scope": "user:edit:broadcast"
+  },
+  {
+    "description": "Get Videos",
+    "endpoint": "videos",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-videos",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Delete Videos",
+    "endpoint": "videos",
+    "method": "DELETE",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#delete-videos",
+    "token_type": "OAuth",
+    "scope": "channel:manage:videos"
+  },
+  {
+    "description": "Get Webhook Subscriptions",
+    "endpoint": "webhooks/subscriptions",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-webhook-subscriptions",
+    "token_type": "AppAccess",
+    "scope": null
+  }
 ]

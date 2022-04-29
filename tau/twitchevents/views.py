@@ -71,7 +71,10 @@ class TwitchEventViewSet(viewsets.ViewSet):
                     sub_instance = TwitchEventSubSubscription.objects.get(
                         lookup_name=pk
                     )
-                    sub_instance.subscription = data['subscription']
+                    if sub_instance.subscription == None:
+                        sub_instance.subscription = [data['subscription']]
+                    else:
+                        sub_instance.subscription.append(data['subscription'])
                     sub_instance.status = 'CON'
                     sub_instance.save()
                 else:
@@ -119,6 +122,7 @@ class TwitchEventModelViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['post', 'get'])
     def replay(self, request, pk=None):
+        instance = TwitchEvent.objects.get(pk=pk)
         instance = self.get_object()
         serializer = TwitchEventSerializer(instance, many=False)
         ws_payload = serializer.data

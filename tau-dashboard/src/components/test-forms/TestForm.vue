@@ -8,6 +8,9 @@ import { useStore } from 'vuex';
 import ChannelUpdate from './ChannelUpdate.vue';
 import ChannelFollow from './ChannelFollow.vue';
 import ChannelCheer from './ChannelCheer.vue';
+import ChannelGoalBegin from './ChannelGoalBegin.vue';
+import ChannelGoalEnd from './ChannelGoalEnd.vue';
+import ChannelGoalProgress from './ChannelGoalProgress.vue';
 import ChannelSubscriptionMessage from './ChannelSubscriptionMessage.vue';
 import ChannelBan from './ChannelBan.vue';
 import ChannelUnban from './ChannelUnban.vue';
@@ -24,6 +27,9 @@ export default defineComponent({
     ChannelBan,
     ChannelFollow,
     ChannelCheer,
+    ChannelGoalBegin,
+    ChannelGoalEnd,
+    ChannelGoalProgress,
     ChannelRaid,
     ChannelChannelPointsCustomRewardRedemptionAdd,
     ChannelChannelPointsCustomRewardRedemptionUpdate,

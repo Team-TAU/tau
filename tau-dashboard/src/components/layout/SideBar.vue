@@ -7,7 +7,7 @@
         <strong>U</strong>nifier</span
       >
       <br />
-      <p>mark</p>
+      <p>{{ username }}</p>
     </div>
     <ul class="layout-side-bar-menu">
       <li v-for="item in items" :key="item.label">
@@ -29,6 +29,7 @@ export default defineComponent({
   setup(props, context) {
     const store = useStore();
     const router = useRouter();
+    const username = ref(localStorage.getItem('tau-username'));
     const items = ref([
       {
         label: 'Dashboard',
@@ -58,6 +59,7 @@ export default defineComponent({
     ]);
     return {
       items,
+      username,
     };
   },
 });
