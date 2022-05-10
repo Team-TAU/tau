@@ -66,6 +66,13 @@
               v-if="te.origin === 'twitch' || te.origin === 'replay'"
               @click="replay(te)"
             />
+            <Button
+              label="Replay Test"
+              type="button"
+              class="p-button-raised p-button-primary"
+              v-if="te.origin === 'test'"
+              @click="replayTest(te)"
+            />
           </AccordionTab>
         </Accordion>
       </Panel>
@@ -97,6 +104,8 @@ import {
 import { TwitchEvent, eventTitleMap } from '@/models/twitch-event';
 import { EventSubscription } from '@/models/event-subscription';
 import { Broadcaster } from '@/models/broadcaster';
+
+import api$ from '@/services/tau-apis';
 
 export default defineComponent({
   name: 'Dashboard',
@@ -162,6 +171,13 @@ export default defineComponent({
       store.dispatch('twitchEvents/replay', twitchEvent);
     }
 
+    function replayTest(twitchEvent: TwitchEvent) {
+      api$.tau.post(
+        `twitch-events/${twitchEvent.event_type}/test`,
+        twitchEvent.event_data,
+      );
+    }
+
     return {
       data,
       broadcaster,
@@ -169,6 +185,7 @@ export default defineComponent({
       twitchEventTitle,
       componentExists,
       replay,
+      replayTest,
       openTestDialog,
     };
   },
