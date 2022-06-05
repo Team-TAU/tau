@@ -1,6 +1,8 @@
 import { Module, createStore } from 'vuex-smart-module';
 import auth from './modules/auth';
 import broadcaster from './modules/broadcaster';
+import chatBots from './modules/chat-bots';
+import chatBotChannels from './modules/chat-bot-channels';
 import eventSubscriptions from './modules/event-subscriptions';
 import twitchEvents from './modules/twitch-events';
 import twitchHelixEndpoints from './modules/twitch-helix-endpoints';
@@ -12,6 +14,8 @@ const root = new Module({
   modules: {
     auth,
     broadcaster,
+    chatBots,
+    chatBotChannels,
     eventSubscriptions,
     streamers,
     twitchEvents,

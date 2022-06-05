@@ -42,6 +42,11 @@ export default defineComponent({
         routeTo: '/dashboard/streamers',
       },
       {
+        label: 'ChatBots',
+        icon: 'pi pi-android',
+        routeTo: '/dashboard/chat-bots',
+      },
+      {
         label: 'Config',
         icon: 'pi pi-cog',
         routeTo: '/dashboard/config',

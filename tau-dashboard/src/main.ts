@@ -27,6 +27,9 @@ import OverlayPanel from 'primevue/overlaypanel';
 import TextArea from 'primevue/textarea';
 import InputNumber from 'primevue/inputnumber';
 import SelectButton from 'primevue/selectbutton';
+import Chip from 'primevue/chip';
+import ToastService from 'primevue/toastservice';
+import Toast from 'primevue/toast';
 
 import App from './App.vue';
 import router from './router';
@@ -36,7 +39,8 @@ const app = createApp(App);
 app
   .use(store)
   .use(router)
-  .use(PrimeVue, { ripple: true, inputStyle: 'filled' });
+  .use(PrimeVue, { ripple: true, inputStyle: 'filled' })
+  .use(ToastService);
 
 app.component('InputText', InputText);
 app.component('InputNumber', InputNumber);
@@ -56,5 +60,7 @@ app.component('AutoComplete', AutoComplete);
 app.component('OverlayPanel', OverlayPanel);
 app.component('TextArea', TextArea);
 app.component('SelectButton', SelectButton);
+app.component('Toast', Toast);
+app.component('Chip', Chip);
 
 app.mount('#app');

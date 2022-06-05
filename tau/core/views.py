@@ -1,4 +1,5 @@
 import os
+from django.shortcuts import get_object_or_404
 import requests
 import datetime
 
@@ -21,20 +22,28 @@ from asgiref.sync import async_to_sync
 
 from constance import config
 import constance.settings
+from tau.chatbots.models import ChatBot
 
 from tau.twitch.models import TwitchAPIScope, TwitchEventSubSubscription
 from tau.users.models import User
 from .forms import ChannelNameForm, FirstRunForm
-from  .utils import cleanup_remote_webhooks, cleanup_webhooks, log_request, check_access_token_expired, refresh_access_token, teardown_all_acct_webhooks, teardown_webhooks
+from .utils import cleanup_remote_webhooks, cleanup_webhooks, handle_tau_bot_token, handle_tau_streamer_token, log_request, check_access_token_expired, refresh_access_token, teardown_all_acct_webhooks, teardown_webhooks
 from tau.twitch.models import TwitchHelixEndpoint
 
 @api_view(['POST'])
 def irc_message_view(request):
+    payload = request.data
+    bot_user_login = payload.get("irc_username", "")
+
+    # bot = ChatBot.objects.get(user_login=bot_user_login)
     channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)('twitchchat', {
-        'type': 'twitchchat.event',
-        'data': request.data
-    })
+    async_to_sync(channel_layer.group_send)(
+        f'chat_bot__{bot_user_login}',
+        {
+            'type': 'chatbot.event',
+            'data': request.data
+        }
+    )
     return Response({}, status=status.HTTP_201_CREATED)
 
 @api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
@@ -58,7 +67,7 @@ def helix_view(request, helix_path=None):
         'Authorization': 'Bearer {}'.format(token),
         'Client-Id': client_id
     }
-    
+
     url = f'https://api.twitch.tv/helix/' \
           f'{helix_path}'
     uri = request.build_absolute_uri()
@@ -67,7 +76,7 @@ def helix_view(request, helix_path=None):
         url_params = uri.split('?', 1)[1]
     if url_params != '':
         url += f'?{url_params}'
-    
+
     if request.method == 'GET':
         data = requests.get(
             url,
@@ -132,8 +141,8 @@ def first_run_view(request):
                 form.cleaned_data['username'],
                 password=form.cleaned_data['password1']
             )
-            user.is_superuser=True
-            user.is_staff=True
+            user.is_superuser = True
+            user.is_staff = True
             user.save()
             login(request, user)
             return HttpResponseRedirect('/')
@@ -151,7 +160,7 @@ def get_channel_name_view(request):
         if form.is_valid():
             # Process the data
             config.CHANNEL = form.cleaned_data['channel_name']
-            scope=' '.join(settings.TOKEN_SCOPES)
+            scope = ' '.join(settings.TOKEN_SCOPES)
             client_id = os.environ.get('TWITCH_APP_ID', None)
             url = f'https://id.twitch.tv/oauth2/authorize?' \
                   f'client_id={client_id}&' \
@@ -182,7 +191,7 @@ def refresh_token_scope(request):
     )
     scopes = list(set(settings.TOKEN_SCOPES + eventsub_scopes + helix_scopes))
     scopes = list(filter(lambda x: (x is not None), scopes))
-    scope=' '.join(scopes)
+    scope = ' '.join(scopes)
 
     url = f'https://id.twitch.tv/oauth2/authorize?' \
         f'client_id={client_id}&' \
@@ -237,13 +246,31 @@ def reset_webhooks(request):
     config.FORCE_WEBHOOK_REFRESH = True
     return JsonResponse({'webhooks_reset': True})
 
+def authenticate_bot(request):
+    params = request.GET
+    bot_id = params['bot']
+    client_id = os.environ.get('TWITCH_APP_ID', None)
+    bot = get_object_or_404(ChatBot, pk=bot_id)
+    scope = 'chat:read chat:edit'
+
+    url = f'https://id.twitch.tv/oauth2/authorize?' \
+        f'client_id={client_id}&' \
+        f'redirect_uri={settings.BASE_URL}/twitch-callback/&' \
+        f'response_type=code&' \
+        f'scope={scope}&' \
+        f'state={bot_id}&' \
+        f'force_verify=true'
+
+    return HttpResponseRedirect(url)
+
 def process_twitch_callback_view(request):
     port = os.environ.get('PORT', 8000)
     params = request.GET
     auth_code = params['code']
+    bot_id = params.get('state', None)
     client_id = os.environ.get('TWITCH_APP_ID', None)
     client_secret = os.environ.get('TWITCH_CLIENT_SECRET', None)
-    auth_r = requests.post('https://id.twitch.tv/oauth2/token', data = {
+    auth_r = requests.post('https://id.twitch.tv/oauth2/token', data={
         'client_id': client_id,
         'client_secret': client_secret,
         'code': auth_code,
@@ -253,35 +280,16 @@ def process_twitch_callback_view(request):
     response_data = auth_r.json()
     if(settings.DEBUG_TWITCH_CALLS):
         log_request(auth_r)
-    config.TWITCH_ACCESS_TOKEN = response_data['access_token']
-    config.TWITCH_REFRESH_TOKEN = response_data['refresh_token']
-    expiration = timezone.now() + datetime.timedelta(seconds=response_data['expires_in'])
-    config.TWITCH_ACCESS_TOKEN_EXPIRATION = expiration
-    scope=' '.join(settings.TOKEN_SCOPES)
-    app_auth_r = requests.post('https://id.twitch.tv/oauth2/token', data = {
-        'client_id': client_id,
-        'client_secret': client_secret,
-        'grant_type': 'client_credentials',
-        'scope': scope
-    })
-    if(settings.DEBUG_TWITCH_CALLS):
-        log_request(app_auth_r)
-    app_auth_data = app_auth_r.json()
-    config.TWITCH_APP_ACCESS_TOKEN = app_auth_data['access_token']
-    config.SCOPE_UPDATED_NEEDED = False
-    config.SCOPES_REFRESHED = True
-    headers = {
-        'Authorization': 'Bearer {}'.format(config.TWITCH_ACCESS_TOKEN),
-        'Client-Id': client_id
-    }
-    user_r = requests.get('https://api.twitch.tv/helix/users', headers=headers)
-    if(settings.DEBUG_TWITCH_CALLS):
-        log_request(user_r)
-    user_data = user_r.json()
-    channel_id = user_data['data'][0]['id']
-    config.CHANNEL_ID = channel_id
-    return HttpResponseRedirect('/')
 
+    if bot_id is None:
+        # We are setting up/refreshing the initial streamer and app
+        # tokens
+        handle_tau_streamer_token(response_data, client_id, client_secret)
+        return HttpResponseRedirect('/')
+
+    # We are setting up a bot token.
+    handle_tau_bot_token(bot_id, response_data)
+    return HttpResponseRedirect('/dashboard/chat-bots')
 
 class HeartbeatViewSet(viewsets.ViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly, )

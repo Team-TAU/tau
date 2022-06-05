@@ -8,6 +8,7 @@ import { defineComponent, provide } from 'vue';
 import {
   TauStatusWsService,
   TauTwitchEventWsService,
+  ChatBotStatusWsService,
 } from './services/tau-api-ws';
 
 export default defineComponent({
@@ -17,8 +18,10 @@ export default defineComponent({
 
     const tauStatusWs = new TauStatusWsService(store);
     const twitchEventWs = new TauTwitchEventWsService(store);
+    const chatBotStatusWs = new ChatBotStatusWsService(store);
     provide('tauStatusWs', tauStatusWs);
     provide('twitchEventWs', twitchEventWs);
+    provide('chatBotStatusWs', chatBotStatusWs);
 
     return {};
   },

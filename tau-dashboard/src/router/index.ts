@@ -3,6 +3,7 @@ import store from '../store/index';
 import Login from '../components/views/Login.vue';
 import DashboardBase from '../components/DashboardBase.vue';
 import Dashboard from '../components/views/Dashboard.vue';
+import ChatBots from '../components/views/ChatBots.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -39,6 +40,11 @@ const routes: Array<RouteRecordRaw> = [
         path: 'streamers',
         name: 'Streamers',
         component: () => import('../components/views/Streamers.vue'),
+      },
+      {
+        path: 'chat-bots',
+        name: 'Chat Bots',
+        component: () => import('../components/views/ChatBots.vue'),
       },
       {
         path: 'user',

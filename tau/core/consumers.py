@@ -76,7 +76,7 @@ class ServerWorkerConsumer(AsyncJsonWebsocketConsumer):
 
     async def receive(self, text_data=None, bytes_data=None, **kwargs):
         print(text_data)
-    
+
     async def serverworker_event(self, event):
         print("Sending to listeners")
         print(event)

@@ -111,3 +111,17 @@ export class TauStatusWsService extends BaseWsService {
     this.store.dispatch('eventSubscriptions/updateOne', msg);
   }
 }
+
+export class ChatBotStatusWsService extends BaseWsService {
+  constructor(private store: Store<any>) {
+    super('ws/chat-bots/status/');
+  }
+
+  handle(msg: any) {
+    if (msg.event === 'Created') {
+      this.store.dispatch('chatBots/addOne', msg.chatBot);
+    } else {
+      console.log('update not yet implemented');
+    }
+  }
+}
