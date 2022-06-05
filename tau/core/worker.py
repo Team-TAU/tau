@@ -1,25 +1,18 @@
-from os import truncate
-import time
-import datetime
 import json
-
-import requests
-
-from pyngrok import ngrok
-
-import websockets
 import asyncio
 
-from django.utils import timezone
+import requests
+from pyngrok import ngrok
+import websockets
+
 from django.conf import settings
 
 from constance import config
 from channels.db import database_sync_to_async
+
+from tau.core.worker_irc import WorkerIrc
 from tau.streamers.utils import update_all_streamers
-
-from tau.twitchevents.models import TwitchEvent
-from tau.twitchevents.serializers import TwitchEventSerializer
-
+from tau.chatbots.models import ChatBot
 from .utils import (
     setup_ngrok,
     init_webhooks,
@@ -27,7 +20,6 @@ from .utils import (
     teardown_all_acct_webhooks,
     teardown_webhooks,
     get_active_event_sub_ids,
-    get_active_streamer_sub_ids
 )
 
 class Worker:
@@ -39,25 +31,31 @@ class Worker:
     tasks = []
     server_connected = False
     irc_connected = False
+    public_url = ''
     wh_delay = 15
     irc_delay = 2
     active_event_sub_ids = []
     active_streamer_sub_ids = []
     ngrok_tunnel = None
     token_refreshed = False
+    token = ''
+    username = ''
+    streamer_irc = None
+    irc_bots = {}
 
     def __init__(self, token):
         self.tau_token = token
+        config.TWITCH_APP_TOKEN_REFRESHED = False
 
     def setup_webhooks(self):
         twitch_access_token = config.TWITCH_APP_ACCESS_TOKEN
         if twitch_access_token != '':
-            print(f'---- Establishing IRC and Webhook Connections ----')
+            print('---- Establishing IRC and Webhook Connections ----')
             refresh_access_token()  # refresh the access token
             self.token_refreshed = True
+            self.streamer_irc.set_token_refreshed()
             print('     [Access tokens refreshed]')
             if not config.RESET_ALL_WEBHOOKS:
-                
                 teardown_webhooks(self.tau_token)
                 print('     [Old WebHooks torn down]')
             else:
@@ -65,7 +63,8 @@ class Worker:
                 teardown_webhooks(self.tau_token)
                 teardown_all_acct_webhooks()
                 config.RESET_ALL_WEBHOOKS = False
-            self.active_event_sub_ids, self.active_streamer_sub_ids = init_webhooks(self.public_url, self.tau_token)
+            self.active_event_sub_ids, self.active_streamer_sub_ids = init_webhooks(
+                self.public_url, self.tau_token)
             print('     [New WebHooks Initialized]')
             update_all_streamers()
             print('     [All streamer statuses updated]\n')
@@ -74,25 +73,6 @@ class Worker:
                 'You have not yet set up a username, or authorized TAU to connect '
                 'to your twitch account.  Webhooks will be set up after you do so.'
             )
-
-    async def connect(self):
-        delay = 1
-        while True:
-            if self.token_refreshed:
-                self.connection = await websockets.client.connect(self.irc_url)
-                if self.connection.open:
-                    print('     [Opening IRC Connection]')
-                    await self.initial_connect()
-                    print('     [Connected to IRC]')
-                    self.irc_connected = True
-                    break
-                else:
-                    print(f'---- Could not connect, waiting {delay}s to reconnect ----')
-                    await asyncio.sleep(delay)
-                    if delay < 120:
-                        delay = max(delay*2, 120)
-            else:
-                await asyncio.sleep(delay)
 
     async def open_server_connection(self):
         delay = 1
@@ -112,18 +92,11 @@ class Worker:
         self.tasks = [
             asyncio.ensure_future(self.manage_server_loop()),
             asyncio.ensure_future(self.manage_webhooks()),
-            asyncio.ensure_future(self.manage_irc_loop()),
-            asyncio.ensure_future(self.check_irc_settings()),
+            asyncio.ensure_future(self.streamer_irc.manage_irc_loop()),
         ]
+        for bot in self.irc_bots.values():
+            self.tasks.append(asyncio.ensure_future(bot.manage_irc_loop()))
         self.loop.run_until_complete(asyncio.wait(self.tasks))
-
-    async def manage_irc_loop(self):
-        while True:
-            use_irc = await database_sync_to_async(self.lookup_setting)('USE_IRC')
-            if use_irc and not self.irc_connected:
-                await self.connect_irc()
-
-            await asyncio.sleep(self.irc_delay)
 
     async def manage_server_loop(self):
         while True:
@@ -136,23 +109,38 @@ class Worker:
         await self.recieve_server()
 
     async def recieve_server(self):
-        print('receieve server')
         while True:
             try:
-                print("waiting for message...")
-                message =  json.loads(await self.server_connection.recv())
-                await self.connection.send(f'PRIVMSG #{self.username.lower()} :{message["data"]}')
+                message = json.loads(await self.server_connection.recv())
+                action = message.get("action", "")
+                if action == "irc-send":
+                    await self.irc_send(message)
+                elif action == "irc-subscribe":
+                    await self.irc_subscribe(message)
+                elif action == "irc-unsubscribe":
+                    await self.irc_unsubscribe(message)
             except websockets.exceptions.ConnectionClosed:
-                print('Websocket to twitch irc unexpectedly closed... reconnecting')
+                print('Internal websocket to tau server unexpectedly closed... reconnecting')
                 await self.open_server_connection()
 
+    async def irc_subscribe(self, message):
+        bot_username = message.get("irc_username")
+        self.irc_bots[bot_username].subscribe()
 
-    async def connect_irc(self):
-        await self.connect()
-        await self.recieve()
+    async def irc_unsubscribe(self, message):
+        bot_username = message.get("irc_username")
+        await self.irc_bots[bot_username].unsubscribe()
 
-    def disconnect_irc(self):
-        pass
+    async def irc_send(self, message):
+        bot_username = message.get("irc_username", "")
+        irc_channel = message.get("irc_channel", "")
+        message = message.get("message", "")
+        await self.irc_bots[bot_username].send(
+            channel=irc_channel, message=message
+        )
+
+    async def send_server(self, message):
+        await self.server_connection.send(message)
 
     async def manage_webhooks(self):
         refresh_webhooks = True
@@ -185,7 +173,7 @@ class Worker:
             if refresh_webhooks or refreshed_ngrok:
                 await database_sync_to_async(self.setup_webhooks)()
                 refresh_webhooks = False
-            
+
             force_refresh_webhooks = await database_sync_to_async(self.lookup_setting)('FORCE_WEBHOOK_REFRESH')
 
             if force_refresh_webhooks:
@@ -197,46 +185,14 @@ class Worker:
     def run(self):
         self.token = config.TWITCH_ACCESS_TOKEN
         self.username = config.CHANNEL
+
+        self.streamer_irc = WorkerIrc(tau_token=self.tau_token, streamer=self.username)
+        self.irc_bots = {bot.user_login: WorkerIrc(tau_token=self.tau_token, bot=bot)
+                         for bot in ChatBot.objects.all()}
+
         self.create_event_loop()
 
-    async def initial_connect(self):
-        token = await database_sync_to_async(self.lookup_setting)('TWITCH_ACCESS_TOKEN')
-        caps = 'twitch.tv/tags twitch.tv/commands twitch.tv/membership'
-        await self.connection.send(f'CAP REQ :{caps}')
-        await self.connection.send(f'PASS oauth:{token}')
-        await self.connection.send(f'NICK {self.username}')
-        await self.connection.send(f'JOIN #{self.username.lower()}')
-
-    async def recieve(self):
-        while True:
-            try:
-                message = await self.connection.recv()
-                data = self.parse_message(message)
-                # pp.pprint(data)
-                if 'custom-reward-id' in data['tags']:
-                    await database_sync_to_async(self.handle_channel_points)(data)
-                elif data['command'] == "PRIVMSG":
-                    headers = {
-                        'Authorization': f'Token {self.tau_token}',
-                        'Content-type': 'application/json'
-                    }
-                    requests.post(
-                        f'{settings.LOCAL_URL}/api/v1/irc',
-                        data=json.dumps(data),
-                        headers=headers
-                    )
-                elif data['prefix'] is None and data['command'] == 'PING':
-                    await self.connection.send('PONG')
-                
-            except websockets.exceptions.ConnectionClosed:
-                use_irc = await database_sync_to_async(self.lookup_setting)('USE_IRC')
-                if use_irc:
-                    print('Websocket to twitch irc unexpectedly closed... reconnecting')
-                    await self.connect()
-                else:
-                    break
-
-    async def check_irc_settings(self): 
+    async def check_irc_settings(self):
         while True:
             await asyncio.sleep(self.irc_delay)
             use_irc = await database_sync_to_async(self.lookup_setting)('USE_IRC')
@@ -250,125 +206,3 @@ class Worker:
 
     def set_setting(self, setting, value):
         setattr(config, setting, value)
-
-    def handle_channel_points(self, data):
-        start_time = timezone.now() - datetime.timedelta(seconds=2)
-
-        time.sleep(1)
-        redemption = TwitchEvent.objects.filter(
-            event_type='channel-channel_points_custom_reward_redemption-add',
-            created__gte=start_time,
-            event_data__user_login=data['tags']['display-name'].lower()
-        )
-        if redemption.exists():
-            redemption = redemption.first()
-            redemption.event_data['user_input_emotes'] = data['tags']['emotes']
-            serializer = TwitchEventSerializer(redemption, many=False)
-            headers = {
-                'Authorization': f'Token {self.tau_token}',
-                'Content-type': 'application/json'
-            }
-            requests.put(
-                f'{settings.LOCAL_URL}/api/v1/twitch-events/{redemption.id}',
-                data=json.dumps(serializer.data),
-                headers=headers
-            )
-
-        return
-
-    def parse_message(self, data):
-        message = {
-            'raw': data,
-            'tags': {},
-            'prefix': None,
-            'command': None,
-            'params': [],
-            'message-text': None
-        }
-
-        position = 0
-        nextspace = 0
-
-        if data[0] == '@':
-            nextspace = data.find(' ')
-            if(nextspace == -1):
-                return None
-
-            rawTags = data[1:nextspace].split(';')
-            for tag in rawTags:
-                pair = tag.split('=')
-                if len(pair) == 1:
-                    value = True
-                else:
-                    value = pair[1]
-                message['tags'][pair[0]] = value
-            position = nextspace + 1
-
-            while data[position] == ' ':
-                position += 1
-            
-        if data[position] == ':':
-            nextspace = data.find(' ', position)
-
-            if nextspace == -1:
-                return None
-            
-            message['prefix'] = data[position:nextspace]
-
-            position = nextspace + 1
-
-            while data[position] == ' ':
-                position += 1
-
-        nextspace = data.find(' ', position)
-
-        if nextspace == -1:
-            if len(data) > position:
-                message['command'] = data[position:]
-            else:
-                message['command'] = None
-            return message
-        
-        message['command'] = data[position:nextspace]
-
-        while data[position] == ' ':
-            position+=1
-        
-        while position < len(data):
-            nextspace = data.find(' ', position)
-            if data[position] == ':':
-                message['params'].append(data[position:])
-                break
-
-            if nextspace != -1:
-                message['params'].append(data[position:nextspace])
-                position = nextspace + 1
-
-                while data[position] == ' ':
-                    position += 1
-                
-                continue
-        
-            if nextspace == -1:
-                message['params'].append(data[position:])
-                break
-        
-        if message['command'] == 'PRIVMSG':
-            message['message-text'] = message['params'][2][1:].replace("\n", "").replace("\r", "")
-
-        if 'emotes' in message['tags']:
-            emotes = message['tags']['emotes']
-            emote_list = []
-            if emotes != '':
-                for emote_txt in emotes.split('/'):
-                    emote_data=emote_txt.split(':')
-                    emote_list.append({
-                        'id': emote_data[0],
-                        'positions': [
-                            [int(val) for val in position.split('-')]
-                            for position in emote_data[1].split(',')
-                        ]
-                    })
-            message['tags']['emotes'] = emote_list
-
-        return message
