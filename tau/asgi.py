@@ -1,19 +1,23 @@
-import tau.chatbots.consumers as chatbotconsumers
-import tau.core.consumers as coreconsumers
-import tau.twitchevents.consumers as twitcheventsconsumers
-from django.conf.urls import url
-from django.urls import path
-from django.core.asgi import get_asgi_application
-from channels.routing import ProtocolTypeRouter, URLRouter
-from channels.auth import AuthMiddlewareStack
-import configurations
 import os
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "tau.config")
 os.environ.setdefault("DJANGO_CONFIGURATION", "Local")
 
+# We must import configurations then immediately run configurations.setup() in order
+# to properly load everything in for django
+import configurations
 configurations.setup()
 
+from django.conf.urls import url
+from django.urls import path
+from django.core.asgi import get_asgi_application
+
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
+
+import tau.chatbots.consumers as chatbotconsumers
+import tau.core.consumers as coreconsumers
+import tau.twitchevents.consumers as twitcheventsconsumers
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
