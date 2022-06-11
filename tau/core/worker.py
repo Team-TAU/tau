@@ -119,9 +119,31 @@ class Worker:
                     await self.irc_subscribe(message)
                 elif action == "irc-unsubscribe":
                     await self.irc_unsubscribe(message)
+                elif action == "add-bot":
+                    await self.add_bot(message.get("bot_id", ""))
+                elif action == "add-bot-channel":
+                    await self.add_bot_channel(message.get("bot", ""), message.get("channel", ""))
+                elif action == "remove-bot-channel":
+                    await self.remove_bot_channel(message.get("bot", ""), message.get("channel", ""))
+
             except websockets.exceptions.ConnectionClosed:
                 print('Internal websocket to tau server unexpectedly closed... reconnecting')
                 await self.open_server_connection()
+
+    async def add_bot_channel(self, bot, channel):
+        bot = self.irc_bots[bot]
+        await bot.add_channel(channel)
+
+    async def remove_bot_channel(self, bot, channel):
+        bot = self.irc_bots[bot]
+        await bot.remove_channel(channel)
+
+    async def add_bot(self, bot_id):
+        await asyncio.sleep(1)
+        bot = await database_sync_to_async(self.get_bot)(bot_id)
+        self.irc_bots[bot.user_login] = await database_sync_to_async(self.create_irc_worker)(bot)
+        event_loop = self.loop
+        asyncio.ensure_future(self.irc_bots[bot.user_login].manage_irc_loop(), loop=event_loop)
 
     async def irc_subscribe(self, message):
         bot_username = message.get("irc_username")
@@ -206,3 +228,12 @@ class Worker:
 
     def set_setting(self, setting, value):
         setattr(config, setting, value)
+
+    def get_bot(self, bot_id):
+        bot = ChatBot.objects.get(pk=bot_id)
+        print(f'Got bot: {bot}')
+        return bot
+
+    def create_irc_worker(self, bot):
+        irc_worker = WorkerIrc(tau_token=self.tau_token, bot=bot)
+        return irc_worker
