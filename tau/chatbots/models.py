@@ -20,6 +20,9 @@ class ChatBot(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return f'Chat Bot({self.id}): {self.user_name}'
+
     def is_token_expired(self):
         return timezone.now() > self.token_expiration
 

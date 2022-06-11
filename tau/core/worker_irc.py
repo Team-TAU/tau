@@ -42,6 +42,12 @@ class WorkerIrc:
             self.user_login = streamer.lower()
             self.channels = [f'#{self.username.lower()}']
 
+    def get_channels(self):
+        if self.streamer is None:
+            return [channel.channel for channel in self.bot.channels.all()]
+        else:
+            return [f'#{self.username.lower()}']
+
     def subscribe(self):
         self.subscribers += 1
 
@@ -140,8 +146,25 @@ class WorkerIrc:
         await self.connection.send(f'PASS oauth:{token}')
         await self.connection.send(f'NICK {self.user_login}')
         for channel in self.channels:
-            await self.connection.send(f'JOIN {channel}')
-            await self.connection.send(f'PRIVMSG {channel} :Hello Chat!  I am alive!')
+            await self.join_channel(channel)
+
+    async def add_channel(self, channel):
+        self.channels.append(channel)
+        if self.connected:
+            await self.join_channel(channel)
+
+    async def remove_channel(self, channel):
+        if self.connected:
+            await self.part_channel(channel)
+        self.channels.remove(channel)
+
+    async def part_channel(self, channel):
+        await self.connection.send(f'PRIVMSG {channel} :Goodbye!  I am leaving.')
+        await self.connection.send(f'PART {channel}')
+
+    async def join_channel(self, channel):
+        await self.connection.send(f'JOIN {channel}')
+        await self.connection.send(f'PRIVMSG {channel} :Hello Chat!  I am alive!')
 
     def handle_channel_points(self, data):
         start_time = timezone.now() - datetime.timedelta(seconds=2)
