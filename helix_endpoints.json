@@ -160,6 +160,22 @@
     "scope": null
   },
   {
+    "description": "Get Chat Settings",
+    "endpoint": "chat/settings",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-chat-settings",
+    "token_type": "OAuth",
+    "scope": "moderator:read:chat_settings"
+  },
+  {
+    "description": "Update Chat Settings",
+    "endpoint": "chat/settings",
+    "method": "PATCH",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#update-chat-settings",
+    "token_type": "OAuth",
+    "scope": "moderator:manage:chat_settings"
+  },
+  {
     "description": "Create Clip",
     "endpoint": "clips",
     "method": "POST",
@@ -248,12 +264,20 @@
     "scope": "moderator:manage:automod"
   },
   {
-    "description": "Get Banned Events",
-    "endpoint": "moderation/banned/events",
+    "description": "Get AutoMod Settings",
+    "endpoint": "moderation/automod/settings",
     "method": "GET",
-    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-banned-events",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-automod-settings",
     "token_type": "OAuth",
-    "scope": "moderation:read"
+    "scope": "moderator:read:automod_settings"
+  },
+  {
+    "description": "Update AutoMod Settings",
+    "endpoint": "moderation/automod/settings",
+    "method": "PUT",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#update-automod-settings",
+    "token_type": "OAuth",
+    "scope": "moderator:manage:automod_settings"
   },
   {
     "description": "Get Banned Users",
@@ -264,18 +288,50 @@
     "scope": "moderation:read"
   },
   {
+    "description": "Ban User",
+    "endpoint": "moderation/bans",
+    "method": "POST",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#ban-user",
+    "token_type": "OAuth",
+    "scope": "moderator:manage:banned_users"
+  },
+  {
+    "description": "Unban User",
+    "endpoint": "moderation/bans",
+    "method": "DELETE",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#unban-user",
+    "token_type": "OAuth",
+    "scope": "moderator:manage:banned_users"
+  },
+  {
+    "description": "Get Blocked Terms",
+    "endpoint": "moderation/blocked_terms",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-blocked-terms",
+    "token_type": "OAuth",
+    "scope": "moderator:read:blocked_terms"
+  },
+  {
+    "description": "Add Blocked Term",
+    "endpoint": "moderation/blocked_terms",
+    "method": "POST",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#add-blocked-term",
+    "token_type": "OAuth",
+    "scope": "moderator:manage:blocked_terms"
+  },
+  {
+    "description": "Remove Blocked Term",
+    "endpoint": "moderation/blocked_terms",
+    "method": "DELETE",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#remove-blocked-term",
+    "token_type": "OAuth",
+    "scope": "moderator:manage:blocked_terms"
+  },
+  {
     "description": "Get Moderators",
     "endpoint": "moderation/moderators",
     "method": "GET",
     "reference_url": "https://dev.twitch.tv/docs/api/reference#get-moderators",
-    "token_type": "OAuth",
-    "scope": "moderation:read"
-  },
-  {
-    "description": "Get Moderator Events",
-    "endpoint": "moderation/moderators/events",
-    "method": "GET",
-    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-moderator-events",
     "token_type": "OAuth",
     "scope": "moderation:read"
   },
@@ -326,6 +382,22 @@
     "reference_url": "https://dev.twitch.tv/docs/api/reference#end-prediction",
     "token_type": "OAuth",
     "scope": "channel:manage:predictions"
+  },
+  {
+    "description": "Start a raid",
+    "endpoint": "raids",
+    "method": "POST",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#start-a-raid",
+    "token_type": "OAuth",
+    "scope": "channel:manage:raids"
+  },
+  {
+    "description": "Cancel a raid",
+    "endpoint": "raids",
+    "method": "DELETE",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#cancel-a-raid",
+    "token_type": "OAuth",
+    "scope": "channel:manage:raids"
   },
   {
     "description": "Get Channel Stream Schedule",
@@ -388,6 +460,30 @@
     "endpoint": "search/channels",
     "method": "GET",
     "reference_url": "https://dev.twitch.tv/docs/api/reference#search-channels",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Get Soundtrack Current Track",
+    "endpoint": "soundtrack/current_track",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-soundtrack-current-track",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Get Soundtrack Playlist",
+    "endpoint": "soundtrack/playlist",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-soundtrack-playlist",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Get Soundtrack Playlists",
+    "endpoint": "soundtrack/playlists",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-soundtrack-playlists",
     "token_type": "OAuth",
     "scope": null
   },
