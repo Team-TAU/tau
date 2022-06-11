@@ -3,6 +3,8 @@ import json
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 
+from constance import config
+
 from rest_framework.authtoken.models import Token
 
 from .models import ChatBot
@@ -16,7 +18,9 @@ class ChatBotConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         self.chat_bot_name = self.scope['url_route']['kwargs']['chat_bot']
         try:
-            await database_sync_to_async(self.get_bot)()
+            streamer = await database_sync_to_async(self.get_streamer)()
+            if streamer != self.chat_bot_name:
+                await database_sync_to_async(self.get_bot)()
         except ChatBot.DoesNotExist:
             await self.close()
 
@@ -31,6 +35,9 @@ class ChatBotConsumer(AsyncJsonWebsocketConsumer):
 
     def get_bot(self):
         self.chat_bot = ChatBot.objects.get(user_login__iexact=self.chat_bot_name)
+
+    def get_streamer(self):
+        return config.CHANNEL.lower()
 
     async def disconnect(self, code):
         await self.channel_layer.group_discard(

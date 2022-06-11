@@ -40,12 +40,13 @@ class Worker:
     token_refreshed = False
     token = ''
     username = ''
-    streamer_irc = None
     irc_bots = {}
+    streamer_login = ''
 
     def __init__(self, token):
         self.tau_token = token
         config.TWITCH_APP_TOKEN_REFRESHED = False
+        self.streamer_login = config.CHANNEL.lower()
 
     def setup_webhooks(self):
         twitch_access_token = config.TWITCH_APP_ACCESS_TOKEN
@@ -53,7 +54,8 @@ class Worker:
             print('---- Establishing IRC and Webhook Connections ----')
             refresh_access_token()  # refresh the access token
             self.token_refreshed = True
-            self.streamer_irc.set_token_refreshed()
+            self.irc_bots[self.streamer_login].set_token_refreshed()
+            # self.streamer_irc.set_token_refreshed()
             print('     [Access tokens refreshed]')
             if not config.RESET_ALL_WEBHOOKS:
                 teardown_webhooks(self.tau_token)
@@ -92,7 +94,7 @@ class Worker:
         self.tasks = [
             asyncio.ensure_future(self.manage_server_loop()),
             asyncio.ensure_future(self.manage_webhooks()),
-            asyncio.ensure_future(self.streamer_irc.manage_irc_loop()),
+            # asyncio.ensure_future(self.streamer_irc.manage_irc_loop()),
         ]
         for bot in self.irc_bots.values():
             self.tasks.append(asyncio.ensure_future(bot.manage_irc_loop()))
@@ -208,9 +210,10 @@ class Worker:
         self.token = config.TWITCH_ACCESS_TOKEN
         self.username = config.CHANNEL
 
-        self.streamer_irc = WorkerIrc(tau_token=self.tau_token, streamer=self.username)
+        # self.streamer_irc = WorkerIrc(tau_token=self.tau_token, streamer=self.username)
         self.irc_bots = {bot.user_login: WorkerIrc(tau_token=self.tau_token, bot=bot)
                          for bot in ChatBot.objects.all()}
+        self.irc_bots[self.username.lower()] = WorkerIrc(tau_token=self.tau_token, streamer=self.username)
 
         self.create_event_loop()
 
