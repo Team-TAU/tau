@@ -159,12 +159,12 @@ class WorkerIrc:
         self.channels.remove(channel)
 
     async def part_channel(self, channel):
-        await self.connection.send(f'PRIVMSG {channel} :Goodbye!  I am leaving.')
+        # await self.connection.send(f'PRIVMSG {channel} :Goodbye!  I am leaving.')
         await self.connection.send(f'PART {channel}')
 
     async def join_channel(self, channel):
         await self.connection.send(f'JOIN {channel}')
-        await self.connection.send(f'PRIVMSG {channel} :Hello Chat!  I am alive!')
+        # await self.connection.send(f'PRIVMSG {channel} :Hello Chat!  I am alive!')
 
     def handle_channel_points(self, data):
         start_time = timezone.now() - datetime.timedelta(seconds=2)
