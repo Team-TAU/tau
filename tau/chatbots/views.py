@@ -12,6 +12,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action
 
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
 from constance import config
 
 from .models import ChatBot, ChatBotChannel
@@ -22,6 +25,18 @@ class ChatBotViewSet(viewsets.ModelViewSet):
     queryset = ChatBot.objects.all()
     serializer_class = ChatBotSerializer
     permission_classes = (IsAuthenticated, )
+
+    @action(methods=['POST'], detail=False, url_path='status-keep-alive')
+    def status_keep_alive(self, request):
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            'chatbotstatus',
+            {
+                'type': 'chatbotstatus.keepalive',
+                'data': None
+            }
+        )
+        return Response({"sent": True})
 
     @action(methods=['GET'], detail=False, url_path='twitch-auth-link')
     def twitch_auth_link(self, request):

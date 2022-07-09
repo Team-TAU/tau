@@ -16,6 +16,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework import viewsets, status
+from rest_framework.decorators import action
 
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
@@ -26,9 +27,19 @@ from tau.chatbots.models import ChatBot
 
 from tau.twitch.models import TwitchAPIScope, TwitchEventSubSubscription
 from tau.users.models import User
-from .forms import ChannelNameForm, FirstRunForm
-from .utils import cleanup_remote_webhooks, cleanup_webhooks, handle_tau_bot_token, handle_tau_streamer_token, log_request, check_access_token_expired, refresh_access_token, teardown_all_acct_webhooks, teardown_webhooks
 from tau.twitch.models import TwitchHelixEndpoint
+
+from .forms import ChannelNameForm, FirstRunForm
+from .utils import (
+    cleanup_remote_webhooks,
+    cleanup_webhooks,
+    handle_tau_bot_token,
+    handle_tau_streamer_token,
+    log_request,
+    check_access_token_expired,
+    refresh_access_token,
+    teardown_all_acct_webhooks,
+)
 
 @api_view(['POST'])
 def irc_message_view(request):
@@ -37,13 +48,24 @@ def irc_message_view(request):
 
     # bot = ChatBot.objects.get(user_login=bot_user_login)
     channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)(
-        f'chat_bot__{bot_user_login}',
-        {
-            'type': 'chatbot.event',
-            'data': request.data
-        }
-    )
+    print(request.data)
+    if request.data['data'].get('command', None) == 'keep_alive':
+        print("Sending keepalive!")
+        async_to_sync(channel_layer.group_send)(
+            f'chat_bot__{bot_user_login}',
+            {
+                'type': 'chatbot.keepalive',
+                'data': None
+            }
+        )
+    else:
+        async_to_sync(channel_layer.group_send)(
+            f'chat_bot__{bot_user_login}',
+            {
+                'type': 'chatbot.event',
+                'data': request.data
+            }
+        )
     return Response({}, status=status.HTTP_201_CREATED)
 
 @api_view(['GET', 'POST', 'PUT', 'PATCH', 'DELETE'])
@@ -325,6 +347,18 @@ class TAUSettingsViewSet(viewsets.ViewSet):
 
 class ServiceStatusViewSet(viewsets.ViewSet):
     permission_classes = (IsAuthenticated, )
+
+    @action(methods=['post'], detail=False, url_path='keep-alive')
+    def keep_alive(self, request):
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            'taustatus',
+            {
+                'type': 'taustatus.keepalive',
+                'data': None
+            }
+        )
+        return Response({"sent": True})
 
     def update(self, request, pk=None):
         if pk.startswith('STATUS_') and hasattr(config, pk):

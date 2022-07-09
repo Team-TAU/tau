@@ -57,6 +57,9 @@ class TauStatusConsumer(AsyncJsonWebsocketConsumer):
         if self.scope['user'].id:
             await self.send_json(event['data'])
 
+    async def taustatus_keepalive(self, _):
+        await self.send_json({"event": "keep_alive"})
+
 
 class ServerWorkerConsumer(AsyncJsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):

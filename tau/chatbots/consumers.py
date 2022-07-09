@@ -100,6 +100,9 @@ class ChatBotConsumer(AsyncJsonWebsocketConsumer):
     async def chatbot_event(self, event):
         await self.send_json(event['data'])
 
+    async def chatbot_keepalive(self, _):
+        await self.send_json({"event": "keep_alive"})
+
     def get_user_from_token(self, token):
         user = Token.objects.get(key=token).user
         return user
@@ -140,6 +143,9 @@ class ChatBotStatusConsumer(AsyncJsonWebsocketConsumer):
 
     async def chatbotstatus_event(self, event):
         await self.send_json(event['data'])
+
+    async def chatbotstatus_keepalive(self, _):
+        await self.send_json({"event": "keep_alive"})
 
     def get_user_from_token(self, token):
         user = Token.objects.get(key=token).user

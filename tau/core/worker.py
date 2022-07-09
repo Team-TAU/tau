@@ -1,5 +1,6 @@
 import json
 import asyncio
+import os
 
 import requests
 from pyngrok import ngrok
@@ -94,11 +95,36 @@ class Worker:
         self.tasks = [
             asyncio.ensure_future(self.manage_server_loop()),
             asyncio.ensure_future(self.manage_webhooks()),
-            # asyncio.ensure_future(self.streamer_irc.manage_irc_loop()),
+            asyncio.ensure_future(self.manage_keep_alive()),
         ]
         for bot in self.irc_bots.values():
             self.tasks.append(asyncio.ensure_future(bot.manage_irc_loop()))
         self.loop.run_until_complete(asyncio.wait(self.tasks))
+
+    async def manage_keep_alive(self):
+        keep_alive_delay = os.environ.get("KEEP_ALIVE_DELAY", 120)
+        while True:
+            await asyncio.sleep(keep_alive_delay)
+            await self.keep_alive()
+
+    async def keep_alive(self):
+        for _, bot in self.irc_bots.items():
+            await bot.keep_alive()
+        payload = {}
+        headers = {
+            'Authorization': f'Token {self.tau_token}',
+            'Content-type': 'application/json'
+        }
+        for endpoint in [
+            'twitch-events/keep-alive',
+            'service-status/keep-alive',
+            'chat-bots/status-keep-alive'
+        ]:
+            requests.post(
+                f'{settings.LOCAL_URL}/api/v1/{endpoint}',
+                json=payload,
+                headers=headers
+            )
 
     async def manage_server_loop(self):
         while True:

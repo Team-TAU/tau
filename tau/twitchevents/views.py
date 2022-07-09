@@ -42,7 +42,7 @@ class TwitchEventViewSet(viewsets.ViewSet):
             event_id = str(uuid.uuid4())
         else:
             event_id = None
-        
+
         ws_payload = {
             'id': id_,
             'event_id': event_id,
@@ -78,7 +78,8 @@ class TwitchEventViewSet(viewsets.ViewSet):
                     sub_instance.status = 'CON'
                     sub_instance.save()
                 else:
-                    streamer = Streamer.objects.get(twitch_id=data['subscription']['condition']['broadcaster_user_id'])
+                    streamer = Streamer.objects.get(
+                        twitch_id=data['subscription']['condition']['broadcaster_user_id'])
                     if pk == 'stream-online':
                         streamer.online_subscription = data['subscription']
                     else:
@@ -119,6 +120,18 @@ class TwitchEventModelViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, )
     filter_backends = [DjangoFilterBackend]
     filterset_class = TwitchEventFilter
+
+    @action(detail=False, methods=['post'], url_path='keep-alive')
+    def keepalive(self, request):
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            'twitchevents',
+            {
+                'type': 'twitchevent.keepalive',
+                'data': None
+            }
+        )
+        return Response({"sent": True})
 
     @action(detail=True, methods=['post', 'get'])
     def replay(self, request, pk=None):

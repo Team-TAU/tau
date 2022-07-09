@@ -39,6 +39,9 @@ class TwitchEventConsumer(AsyncJsonWebsocketConsumer):
         if self.scope['user'].id:
             await self.send_json(event['data'])
 
+    async def twitchevent_keepalive(self, _):
+        await self.send_json({"event": "keep_alive"})
+
     def get_user_from_token(self, token):
         user = Token.objects.get(key=token).user
         return user
