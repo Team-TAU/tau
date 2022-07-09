@@ -14,6 +14,7 @@ class ChatBotConsumer(AsyncJsonWebsocketConsumer):
     chat_bot_name = ''
     group_name = ''
     subscribed = False
+    streamer = False
 
     async def connect(self):
         self.chat_bot_name = self.scope['url_route']['kwargs']['chat_bot']
@@ -21,6 +22,8 @@ class ChatBotConsumer(AsyncJsonWebsocketConsumer):
             streamer = await database_sync_to_async(self.get_streamer)()
             if streamer != self.chat_bot_name:
                 await database_sync_to_async(self.get_bot)()
+            else:
+                self.streamer = True
         except ChatBot.DoesNotExist:
             await self.close()
 
@@ -44,7 +47,7 @@ class ChatBotConsumer(AsyncJsonWebsocketConsumer):
             self.group_name,
             self.channel_name
         )
-        if self.subscribed:
+        if self.subscribed and not self.streamer:
             await self.subscription('unsubscribe')
 
     async def receive(self, text_data=None, bytes_data=None, **kwargs):
