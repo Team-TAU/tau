@@ -10,7 +10,7 @@ from rest_framework.authtoken.models import Token
 class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     can_login = models.BooleanField(default=True)
-    
+
     def __str__(self):
         return self.username
 

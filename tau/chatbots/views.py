@@ -1,7 +1,8 @@
 import os
+import datetime
+
 from uuid import uuid4
 import requests
-import datetime
 
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseForbidden
@@ -55,9 +56,12 @@ class ChatBotViewSet(viewsets.ModelViewSet):
             'url': url
         })
 
-    @action(methods=['GET'], detail=False, url_path='twitch-callback/', permission_classes=[AllowAny])
+    @action(methods=['GET'],
+            detail=False,
+            url_path='twitch-callback/',
+            permission_classes=[AllowAny]
+            )
     def twitch_callback(self, request):
-        port = os.environ.get('PORT', 8000)
         params = request.GET
         auth_code = params['code']
         state = params.get('state', None)
@@ -97,7 +101,7 @@ class ChatBotViewSet(viewsets.ModelViewSet):
         #       with the existing token/refresh token.  For now, simply overwrite
         #       the old token.  I think this is the right thing to do.
 
-        instance, created = ChatBot.objects.update_or_create(
+        ChatBot.objects.update_or_create(
             user_name=user_data['display_name'],
             user_id=user_data['id'],
             user_login=user_data['login'],
@@ -106,7 +110,10 @@ class ChatBotViewSet(viewsets.ModelViewSet):
             token_expiration=expiration
         )
 
-        return HttpResponse(f'The bot named {user_data["display_name"]} is now authorized.  You may close this window.')
+        return HttpResponse(
+            (f'The bot named {user_data["display_name"]} is now ',
+             'authorized.  You may close this window.')
+        )
 
 
 class ChatBotChannelViewSet(viewsets.ModelViewSet):

@@ -1,4 +1,3 @@
-from tau.twitch.models import TwitchEventSubSubscription
 import uuid
 
 from django.http import HttpResponse, HttpResponseForbidden
@@ -8,24 +7,17 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import action
-from rest_framework import filters
 from django_filters.rest_framework import DjangoFilterBackend
 
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
-from constance import config
-
+from tau.twitch.models import TwitchEventSubSubscription
 from tau.streamers.models import Streamer
 
 from .filters import TwitchEventFilter
-
-from .models import (
-    TwitchEvent
-)
-from .serializers import (
-    TwitchEventSerializer,
-)
+from .models import TwitchEvent
+from .serializers import TwitchEventSerializer
 from .utils import valid_webhook_request
 
 class TwitchEventViewSet(viewsets.ViewSet):
@@ -71,7 +63,7 @@ class TwitchEventViewSet(viewsets.ViewSet):
                     sub_instance = TwitchEventSubSubscription.objects.get(
                         lookup_name=pk
                     )
-                    if sub_instance.subscription == None:
+                    if sub_instance.subscription is None:
                         sub_instance.subscription = [data['subscription']]
                     else:
                         sub_instance.subscription.append(data['subscription'])

@@ -4,6 +4,7 @@ import os
 
 import requests
 from pyngrok import ngrok
+from pyngrok.exception import PyngrokError
 import websockets
 
 from django.conf import settings
@@ -152,7 +153,9 @@ class Worker:
                 elif action == "add-bot-channel":
                     await self.add_bot_channel(message.get("bot", ""), message.get("channel", ""))
                 elif action == "remove-bot-channel":
-                    await self.remove_bot_channel(message.get("bot", ""), message.get("channel", ""))
+                    await self.remove_bot_channel(
+                        message.get("bot", ""), message.get("channel", "")
+                    )
 
             except websockets.exceptions.ConnectionClosed:
                 print('Internal websocket to tau server unexpectedly closed... reconnecting')
@@ -205,7 +208,7 @@ class Worker:
                 if r.status_code != 200:
                     try:
                         ngrok.disconnect(self.ngrok_tunnel.public_url)
-                    except:
+                    except PyngrokError:
                         pass
 
                     self.public_url, self.ngrok_tunnel = await database_sync_to_async(setup_ngrok)()
@@ -224,7 +227,9 @@ class Worker:
                 await database_sync_to_async(self.setup_webhooks)()
                 refresh_webhooks = False
 
-            force_refresh_webhooks = await database_sync_to_async(self.lookup_setting)('FORCE_WEBHOOK_REFRESH')
+            force_refresh_webhooks = await database_sync_to_async(
+                self.lookup_setting
+            )('FORCE_WEBHOOK_REFRESH')
 
             if force_refresh_webhooks:
                 await database_sync_to_async(self.setup_webhooks)()
@@ -239,7 +244,9 @@ class Worker:
         # self.streamer_irc = WorkerIrc(tau_token=self.tau_token, streamer=self.username)
         self.irc_bots = {bot.user_login: WorkerIrc(tau_token=self.tau_token, bot=bot)
                          for bot in ChatBot.objects.all()}
-        self.irc_bots[self.username.lower()] = WorkerIrc(tau_token=self.tau_token, streamer=self.username)
+        self.irc_bots[self.username.lower()] = WorkerIrc(
+            tau_token=self.tau_token, streamer=self.username
+        )
 
         self.create_event_loop()
 

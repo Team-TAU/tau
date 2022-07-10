@@ -78,7 +78,7 @@ class ChatBotConsumer(AsyncJsonWebsocketConsumer):
                     if user is not None:
                         self.scope['user'] = user
                         await self.subscription('subscribe')
-            except Exception as err:
+            except json.JSONDecodeError as err:
                 print(err)
         if not self.scope['user'].id:
             await self.send_json({'error': 'the provided token does not match any users.'})
@@ -135,7 +135,7 @@ class ChatBotStatusConsumer(AsyncJsonWebsocketConsumer):
                     user = await database_sync_to_async(self.get_user_from_token)(token)
                     if user is not None:
                         self.scope['user'] = user
-            except Exception as err:
+            except json.JSONDecodeError as err:
                 print(err)
         if not self.scope['user'].id:
             await self.send_json({'error': 'the provided token does not match any users.'})

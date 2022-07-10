@@ -249,8 +249,9 @@ def teardown_webhooks(worker_token):
         disabled=False, online_subscription__isnull=False
     )
     for streamer in active_streamers_online:
+        sub_id = streamer.online_subscription["id"]
         req = requests.delete(
-            f'https://api.twitch.tv/helix/eventsub/subscriptions?id={streamer.online_subscription["id"]}',
+            f'https://api.twitch.tv/helix/eventsub/subscriptions?id={sub_id}',
             headers=headers
         )
         if settings.DEBUG_TWITCH_CALLS:
@@ -260,8 +261,9 @@ def teardown_webhooks(worker_token):
         disabled=False, offline_subscription__isnull=False
     )
     for streamer in active_streamers_offline:
+        sub_id = streamer.offline_subscription["id"]
         req = requests.delete(
-            f'https://api.twitch.tv/helix/eventsub/subscriptions?id={streamer.offline_subscription["id"]}',
+            f'https://api.twitch.tv/helix/eventsub/subscriptions?id={sub_id}',
             headers=headers
         )
         if settings.DEBUG_TWITCH_CALLS:

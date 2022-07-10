@@ -1,7 +1,6 @@
 import uuid
 
 from django.db import models
-from django.conf import settings
 
 from constance import config
 
@@ -23,7 +22,7 @@ class Streamer(models.Model):
         print('initing webhooks')
         url = config.PUBLIC_URL
         init_webhook(
-           streamer_payload(url, 'online', self.twitch_id),
+            streamer_payload(url, 'online', self.twitch_id),
         )
         init_webhook(
             streamer_payload(url, 'offline', self.twitch_id),

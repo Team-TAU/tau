@@ -29,7 +29,7 @@ class TwitchEventConsumer(AsyncJsonWebsocketConsumer):
                     token = data['token']
                     user = await database_sync_to_async(self.get_user_from_token)(token)
                     self.scope['user'] = user
-            except Exception as err:
+            except json.JSONDecodeError as err:
                 print(err)
         if not self.scope['user'].id:
             print('No user found with submitted token.  Closing connection.')

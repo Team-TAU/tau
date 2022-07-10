@@ -1,7 +1,8 @@
-import uuid
-import requests
 import os
 import datetime
+
+import uuid
+import requests
 
 from django.db import models
 from django.utils import timezone
@@ -42,7 +43,9 @@ class ChatBot(models.Model):
         if 'access_token' in data:
             self.refresh_token = data['refresh_token']
             self.access_token = data['access_token']
-            self.token_expiration = timezone.now() + datetime.timedelta(seconds=(data['expires_in']-60))
+            self.token_expiration = timezone.now() + datetime.timedelta(
+                seconds=(data['expires_in']-60)
+            )
             self.save()
         else:
             print('[ERROR] Could not refresh access token.')

@@ -1,20 +1,21 @@
 import os
-from django.shortcuts import get_object_or_404
-import requests
-import datetime
 
-from django.http import HttpResponseRedirect, HttpResponse, JsonResponse, Http404
+import requests
+
+from django.http import (
+    HttpResponseRedirect,
+    HttpResponse,
+    JsonResponse,
+    Http404
+)
 from django.template import loader
 from django.contrib.auth import login
 from django.conf import settings
-from django.http import Http404
-from django.utils import timezone
-from requests import status_codes
 
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 
@@ -23,7 +24,6 @@ from asgiref.sync import async_to_sync
 
 from constance import config
 import constance.settings
-from tau.chatbots.models import ChatBot
 
 from tau.twitch.models import TwitchAPIScope, TwitchEventSubSubscription
 from tau.users.models import User
@@ -86,7 +86,7 @@ def helix_view(request, helix_path=None):
     body = request.data
     client_id = os.environ.get('TWITCH_APP_ID', None)
     headers = {
-        'Authorization': 'Bearer {}'.format(token),
+        'Authorization': f'Bearer {token}',
         'Client-Id': client_id
     }
 
@@ -128,7 +128,7 @@ def helix_view(request, helix_path=None):
             headers=headers
         )
     try:
-        if(settings.DEBUG_TWITCH_CALLS):
+        if settings.DEBUG_TWITCH_CALLS:
             log_request(data)
         stream_data = data.json()
     except ValueError:
@@ -177,7 +177,6 @@ def first_run_view(request):
 
 def get_channel_name_view(request):
     if request.method == 'POST':
-        port = os.environ.get('PORT', 8000)
         form = ChannelNameForm(request.POST)
         if form.is_valid():
             # Process the data
@@ -258,10 +257,8 @@ def reset_webhooks(request):
     if data['type'] == 'all':
         teardown_all_acct_webhooks()
     elif data['type'] == 'remote':
-        token = Token.objects.get(user=request.user)
         cleanup_remote_webhooks()
     elif data['type'] == 'broken':
-        token = Token.objects.get(user=request.user)
         cleanup_webhooks()
     else:
         return JsonResponse({'webhooks_reset': False, 'error': 'Proper type not found.'})
@@ -272,7 +269,6 @@ def authenticate_bot(request):
     params = request.GET
     bot_id = params['bot']
     client_id = os.environ.get('TWITCH_APP_ID', None)
-    bot = get_object_or_404(ChatBot, pk=bot_id)
     scope = 'chat:read chat:edit'
 
     url = f'https://id.twitch.tv/oauth2/authorize?' \
@@ -286,7 +282,6 @@ def authenticate_bot(request):
     return HttpResponseRedirect(url)
 
 def process_twitch_callback_view(request):
-    port = os.environ.get('PORT', 8000)
     params = request.GET
     auth_code = params['code']
     bot_id = params.get('state', None)
@@ -300,7 +295,7 @@ def process_twitch_callback_view(request):
         'redirect_uri': f'{settings.BASE_URL}/twitch-callback/'
     })
     response_data = auth_r.json()
-    if(settings.DEBUG_TWITCH_CALLS):
+    if settings.DEBUG_TWITCH_CALLS:
         log_request(auth_r)
 
     if bot_id is None:
