@@ -11,9 +11,10 @@
 1. Click "+ New" in the upper right, and select "Database" --> "Add Redis"
 1. Click "+ New" in the upper right, and select "Empty Service"
 1. Click on the new empty service which was just created.
-1. Click the "Settings" tab under "Environment > Service Domains", edit the production domain to a url that you want (e.g.- tau-twitchname.up.railway.app). Note this domain, as it will be required in your environment variables, and when setting up TAU in the twitch dev dashboard.
-1. [Get a Twitch Client ID and Client Secret](./twitch_dev.md). NOTE- rather than `http://localhost:PORT/twitch-callback/` as your OAuth redirect URL, you must use https, the domain you set up in the prior step, and no port. E.g.: `https://tau-twitchname.up.railway.app`.
-1. To add environment variables to the new Empty Service, copy the sample `.env` data below. Back in the Empty Service you created, under the `Variables` section, click `RAW Editor`, and paste in the sample `.env` data and fill out with required information, then click `Add`. Then close the service panel (x in the upper right corner of the panel)
+1. Click the "Settings" tab, then under "Service" change the "Service Name" to something similar to `tau-twitchusername` using your Twitch username
+1. In the same "Settings" tab under the "Environment > Domains", click the "Generate Domain" button. A new URL will be generated for you. You can edit this URL as you'd like. Note this domain, as it will be required in your environment variables, used when setting up TAU in the twitch dev dashboard, and the URL you will access the TAU Dashboard from.
+1. [Get a Twitch Client ID and Client Secret](./twitch_dev.md). NOTE- rather than `http://localhost:PORT/twitch-callback/` as your OAuth redirect URL, you must use https and the domain you set up in the prior step without a port. E.g.: `https://tau-twitchname.up.railway.app/twitch-callback/`.
+1. To add environment variables to the new Empty Service, copy the sample `.env` data below. Back in the Empty Service you created, under the "Variables" section, click "RAW Editor", and paste in the sample `.env` data and fill out with required information and save. After, close the service panel (x in the upper right corner of the panel)
 1. Open a local terminal, navigate to your TAU root directory, and install the railway CLI using npm: `npm i -g @railway/cli` then login to railway: `railway login`
 1. In your railway project dashboard, click on "Set up your project locally" in the lower left. Copy the link command with your projects UUID (something like: `railway link SOME-UUID-HERE`)
 1. Back in the terminal paste/run the link command.
