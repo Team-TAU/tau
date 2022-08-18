@@ -11,20 +11,20 @@
 1. Click "+ New" in the upper right, and select "Database" --> "Add Redis"
 1. Click "+ New" in the upper right, and select "Empty Service"
 1. Click on the new empty service which was just created.
-1. Click the "Settings" tab under "Environment > Service Domains", edit the production domain to a url that you want (e.g.- tau-twitchname.up.railway.app). Note this domain, as it will be required in your environment variables, and when setting up TAU in the twitch dev dashboard.
-1. [Get a Twitch Client ID and Client Secret](./twitch_dev.md). NOTE- rather than `http://localhost:PORT/twitch-callback/` as your OAuth redirect URL, you must use https, the domain you set up in the prior step, and no port. E.g.: `https://tau-twitchname.up.railway.app`.
-1. Copy the sample `.env` data below, and paste in a text editor. Add values for the first six enviornment variables as explained below.
-1. Back in the `Variables` section of your railway projects empty service, click `Bulk Import`, and paste in your edited .env data, and click `Add`. Then close the service panel (x in the upper right corner of the panel)
-1. In a terminal install the railway CLI using npm: `npm i -g @railway/cli` then login to railway: `railway login`
+1. Click the "Settings" tab, then under "Service" change the "Service Name" to something similar to `tau-twitchusername` using your Twitch username
+1. In the same "Settings" tab under the "Environment > Domains", click the "Generate Domain" button. A new URL will be generated for you. You can edit this URL as you'd like. Note this domain, as it will be required in your environment variables, used when setting up TAU in the twitch dev dashboard, and the URL you will access the TAU Dashboard from.
+1. [Get a Twitch Client ID and Client Secret](./twitch_dev.md). NOTE- rather than `http://localhost:PORT/twitch-callback/` as your OAuth redirect URL, you must use https and the domain you set up in the prior step without a port. E.g.: `https://tau-twitchname.up.railway.app/twitch-callback/`.
+1. To add environment variables to the new Empty Service, copy the sample `.env` data below. Back in the Empty Service you created, under the "Variables" section, click "RAW Editor", and paste in the sample `.env` data and fill out with required information and save. After, close the service panel (x in the upper right corner of the panel)
+1. Open a local terminal, navigate to your TAU root directory, and install the railway CLI using npm: `npm i -g @railway/cli` then login to railway: `railway login`
 1. In your railway project dashboard, click on "Set up your project locally" in the lower left. Copy the link command with your projects UUID (something like: `railway link SOME-UUID-HERE`)
-1. In the terminal, navigate to the TAU root directory, and paste/run the link command.
+1. Back in the terminal paste/run the link command.
 1. In the terminal, spin up your railway TAU instance (from the root TAU directory) with the command: `railway up`.
-1. After the container spins up, navigate to your projects url, and complete the setup wizard. Note- it can take a few minutes for everything to spin up. When you navigate to your project url, you may see a warning that the project is spinning up or isnt connecting properly. Be patient, and it should start working in a couple minutes.
-1. You're now running TAU!
+1. After the container spins up, navigate to your projects url, and complete the setup wizard. Note- it can take a few minutes for everything to spin up. When you navigate to your project url, you may see a warning that the project is spinning up or isn't connecting properly. Be patient, and it should start working in a couple minutes.
+1. You're now running TAU on Railway!
 
 ## Sample .env data.
 
-The first 6 values must be set. `TWITCH_APP_ID` and `TWITCH_CLIENT_SECRET` come from the Twitch developer settings above, `TWITCH_WEBHOOK_SECRET` should be a random string of characters 10-100 characters long. `DJANGO_DB_PW` can be any password you want to set for the Django databse user, `DJANGO_SECRET_KEY` should be a different random string of characters 10-100 characters long, and `PUBLIC_URL` should be the deployment domain, e.g.- `tau-twitchname.up.railway.app`. The last two values (`DJANGO_CONFIGURATION` and `PORT`) should use the provided values below.
+All `.env` data should come from your local install of TAU (see your existing `.env`). The first 6 values must be set. `TWITCH_APP_ID` and `TWITCH_CLIENT_SECRET` come from the Twitch developer settings above, `TWITCH_WEBHOOK_SECRET` should be a random string of characters 10-100 characters long. `DJANGO_DB_PW` can be any password you want to set for the Django databse user, `DJANGO_SECRET_KEY` should be a different random string of characters 10-100 characters long, and `PUBLIC_URL` should be the deployment domain, e.g.- `tau-twitchname.up.railway.app`. The last two values (`DJANGO_CONFIGURATION` and `PORT`) should use the provided values below.
 
 ```
 TWITCH_APP_ID=
@@ -39,4 +39,4 @@ PORT=443
 
 ## Connecting to Websockets
 
-Now that TAU is deployed, you can connect to it via websockets at `wss://tau-twitchname.up.railway.app:443/ws/twitch-events/` using your new deployment domain.
+Now that TAU is deployed, you can connect to it via websockets at `wss://tau-twitchname.up.railway.app:443/ws/twitch-events/` using your new deployment domain. Also note that `wss` times out after about 10 minutes, so you will need to add a disconnect listener in your consuming application to reconnect each time the websocket times out.
