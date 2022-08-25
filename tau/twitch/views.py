@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
 
@@ -62,7 +61,7 @@ class TwitchAPIScopeViewSet(viewsets.ModelViewSet):
     serializer_class = TwitchAPIScopeSerializer
     permission_classes = (IsAuthenticated, )
     pagination_class = None
-    
+
     @action(methods=['PUT'], detail=False, url_path='bulk')
     def bulk(self, request):
         data = request.data

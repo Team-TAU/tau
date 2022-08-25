@@ -5,7 +5,6 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
-from rest_framework.pagination import LimitOffsetPagination
 
 from .models import Streamer, Stream
 from .serializers import StreamerSerializer, StreamSerializer
@@ -43,4 +42,3 @@ class StreamerViewSet(viewsets.ModelViewSet):
             return Response(serializer.data)
         except Stream.DoesNotExist:
             return Response({})
-        

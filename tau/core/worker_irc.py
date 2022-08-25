@@ -133,6 +133,21 @@ class WorkerIrc:
                 else:
                     break
 
+    async def keep_alive(self):
+        payload = {
+            "irc_username": self.user_login,
+            "data": {'command': 'keep_alive'}
+        }
+        headers = {
+            'Authorization': f'Token {self.tau_token}',
+            'Content-type': 'application/json'
+        }
+        requests.post(
+            f'{settings.LOCAL_URL}/api/v1/irc',
+            json=payload,
+            headers=headers
+        )
+
     async def initial_connect(self):
         if self.streamer:
             token = await database_sync_to_async(lookup_setting)('TWITCH_ACCESS_TOKEN')

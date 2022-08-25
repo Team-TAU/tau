@@ -6,9 +6,9 @@ from constance import config
 from .models import Streamer
 
 def update_all_streamers():
-    #TODO- Update to handle more than 100 streamers in db
+    # TODO- Update to handle more than 100 streamers in db
 
-    #TODO- I am currently calling the twitch API 2x for each active streamer.Streamer
+    # TODO- I am currently calling the twitch API 2x for each active streamer.Streamer
     #      refeactor to use returned stream data.
 
     streamers = Streamer.objects.all()
@@ -17,7 +17,7 @@ def update_all_streamers():
 
     client_id = os.environ.get('TWITCH_APP_ID', None)
     headers = {
-        'Authorization': 'Bearer {}'.format(config.TWITCH_ACCESS_TOKEN),
+        'Authorization': f'Bearer {config.TWITCH_ACCESS_TOKEN}',
         'Client-Id': client_id
     }
     url = f'https://api.twitch.tv/helix/' \

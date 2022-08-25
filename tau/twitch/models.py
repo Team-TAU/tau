@@ -46,11 +46,11 @@ class TwitchEventSubSubscription(models.Model):
     active = models.BooleanField(default=False)
     version = models.CharField(max_length=16)
     scope_required = models.CharField(max_length=255, null=True, blank=True)
-    status =  models.CharField(max_length=3, choices=Statuses.choices, blank=True, null=True)
+    status = models.CharField(max_length=3, choices=Statuses.choices, blank=True, null=True)
     base_url = models.CharField(max_length=255, blank=True, null=True)
     subscription = models.JSONField(blank=True, null=True)
     event_schema = models.JSONField()
     condition_schema = models.JSONField()
-    
+
     class Meta:
         ordering = ('name', )

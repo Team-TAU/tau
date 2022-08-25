@@ -14,6 +14,10 @@ interface TwitchEventMessage {
   origin: string;
 }
 
+interface KeepAliveMessage {
+  event: 'keep_alive';
+}
+
 abstract class BaseWsService {
   private ws: WebSocketSubject<unknown> | null = null;
 
@@ -86,7 +90,10 @@ export class TauTwitchEventWsService extends BaseWsService {
     super('ws/twitch-events/');
   }
 
-  handle(msg: TwitchEventMessage) {
+  handle(msg: TwitchEventMessage | KeepAliveMessage) {
+    if ('event' in msg) {
+      return;
+    }
     this.store.dispatch('twitchEvents/createOne', msg);
     if (msg.event_type === 'stream-online') {
       this.store.dispatch(
@@ -108,6 +115,9 @@ export class TauStatusWsService extends BaseWsService {
   }
 
   handle(msg: any) {
+    if ('event' in msg) {
+      return;
+    }
     this.store.dispatch('eventSubscriptions/updateOne', msg);
   }
 }
@@ -118,6 +128,9 @@ export class ChatBotStatusWsService extends BaseWsService {
   }
 
   handle(msg: any) {
+    if ('event' in msg) {
+      return;
+    }
     if (msg.event === 'Created') {
       this.store.dispatch('chatBots/addOne', msg.chatBot);
     } else {

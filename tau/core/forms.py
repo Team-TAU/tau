@@ -1,4 +1,3 @@
-from tau.users.models import User
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 
@@ -25,7 +24,7 @@ class FirstRunForm(forms.Form):
 class CustomAuthenticationForm(AuthenticationForm):
     def __init__(self, request=None, *args, **kwargs):
         super(CustomAuthenticationForm, self).__init__(request=None, *args, **kwargs)
-    
+
     def confirm_login_allowed(self, user):
         if not user.can_login:
             raise forms.ValidationError('Invalid user.  This user account can not be logged in.')

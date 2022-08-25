@@ -1,8 +1,10 @@
 import json
 import asyncio
+import os
 
 import requests
 from pyngrok import ngrok
+from pyngrok.exception import PyngrokError
 import websockets
 
 from django.conf import settings
@@ -94,11 +96,36 @@ class Worker:
         self.tasks = [
             asyncio.ensure_future(self.manage_server_loop()),
             asyncio.ensure_future(self.manage_webhooks()),
-            # asyncio.ensure_future(self.streamer_irc.manage_irc_loop()),
+            asyncio.ensure_future(self.manage_keep_alive()),
         ]
         for bot in self.irc_bots.values():
             self.tasks.append(asyncio.ensure_future(bot.manage_irc_loop()))
         self.loop.run_until_complete(asyncio.wait(self.tasks))
+
+    async def manage_keep_alive(self):
+        keep_alive_delay = os.environ.get("KEEP_ALIVE_DELAY", 120)
+        while True:
+            await asyncio.sleep(keep_alive_delay)
+            await self.keep_alive()
+
+    async def keep_alive(self):
+        for _, bot in self.irc_bots.items():
+            await bot.keep_alive()
+        payload = {}
+        headers = {
+            'Authorization': f'Token {self.tau_token}',
+            'Content-type': 'application/json'
+        }
+        for endpoint in [
+            'twitch-events/keep-alive',
+            'service-status/keep-alive',
+            'chat-bots/status-keep-alive'
+        ]:
+            requests.post(
+                f'{settings.LOCAL_URL}/api/v1/{endpoint}',
+                json=payload,
+                headers=headers
+            )
 
     async def manage_server_loop(self):
         while True:
@@ -126,7 +153,9 @@ class Worker:
                 elif action == "add-bot-channel":
                     await self.add_bot_channel(message.get("bot", ""), message.get("channel", ""))
                 elif action == "remove-bot-channel":
-                    await self.remove_bot_channel(message.get("bot", ""), message.get("channel", ""))
+                    await self.remove_bot_channel(
+                        message.get("bot", ""), message.get("channel", "")
+                    )
 
             except websockets.exceptions.ConnectionClosed:
                 print('Internal websocket to tau server unexpectedly closed... reconnecting')
@@ -179,7 +208,7 @@ class Worker:
                 if r.status_code != 200:
                     try:
                         ngrok.disconnect(self.ngrok_tunnel.public_url)
-                    except:
+                    except PyngrokError:
                         pass
 
                     self.public_url, self.ngrok_tunnel = await database_sync_to_async(setup_ngrok)()
@@ -198,7 +227,9 @@ class Worker:
                 await database_sync_to_async(self.setup_webhooks)()
                 refresh_webhooks = False
 
-            force_refresh_webhooks = await database_sync_to_async(self.lookup_setting)('FORCE_WEBHOOK_REFRESH')
+            force_refresh_webhooks = await database_sync_to_async(
+                self.lookup_setting
+            )('FORCE_WEBHOOK_REFRESH')
 
             if force_refresh_webhooks:
                 await database_sync_to_async(self.setup_webhooks)()
@@ -213,7 +244,9 @@ class Worker:
         # self.streamer_irc = WorkerIrc(tau_token=self.tau_token, streamer=self.username)
         self.irc_bots = {bot.user_login: WorkerIrc(tau_token=self.tau_token, bot=bot)
                          for bot in ChatBot.objects.all()}
-        self.irc_bots[self.username.lower()] = WorkerIrc(tau_token=self.tau_token, streamer=self.username)
+        self.irc_bots[self.username.lower()] = WorkerIrc(
+            tau_token=self.tau_token, streamer=self.username
+        )
 
         self.create_event_loop()
 
