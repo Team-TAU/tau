@@ -43,7 +43,7 @@ class ChatBotViewSet(viewsets.ModelViewSet):
     def twitch_auth_link(self, request):
         state = uuid4()
         config.TWITCH_AUTH_STATE = str(state)
-        client_id = os.environ.get('TWITCH_APP_ID', None)
+        client_id = settings.TWITCH_CLIENT_ID
         scope = 'chat:read chat:edit channel:moderate'
         url = f'https://id.twitch.tv/oauth2/authorize?' \
             f'client_id={client_id}&' \
@@ -69,7 +69,7 @@ class ChatBotViewSet(viewsets.ModelViewSet):
         print(f'stored: {config.TWITCH_AUTH_STATE}')
         if state != config.TWITCH_AUTH_STATE:
             return HttpResponseForbidden()
-        client_id = os.environ.get('TWITCH_APP_ID', None)
+        client_id = settings.TWITCH_CLIENT_ID
         client_secret = os.environ.get('TWITCH_CLIENT_SECRET', None)
         auth_r = requests.post('https://id.twitch.tv/oauth2/token', data={
             'client_id': client_id,

@@ -84,7 +84,7 @@ def helix_view(request, helix_path=None):
     except TwitchHelixEndpoint.DoesNotExist:
         token = config.TWITCH_ACCESS_TOKEN
     body = request.data
-    client_id = os.environ.get('TWITCH_APP_ID', None)
+    client_id = settings.TWITCH_CLIENT_ID
     headers = {
         'Authorization': f'Bearer {token}',
         'Client-Id': client_id
@@ -182,7 +182,7 @@ def get_channel_name_view(request):
             # Process the data
             config.CHANNEL = form.cleaned_data['channel_name']
             scope = ' '.join(settings.TOKEN_SCOPES)
-            client_id = os.environ.get('TWITCH_APP_ID', None)
+            client_id = settings.TWITCH_CLIENT_ID
             url = f'https://id.twitch.tv/oauth2/authorize?' \
                   f'client_id={client_id}&' \
                   f'redirect_uri={settings.BASE_URL}/twitch-callback/&' \
@@ -198,7 +198,7 @@ def get_channel_name_view(request):
         return HttpResponse(template.render({}, request))
 
 def refresh_token_scope(request):
-    client_id = os.environ.get('TWITCH_APP_ID', None)
+    client_id = settings.TWITCH_CLIENT_ID
 
     helix_scopes = list(
         TwitchAPIScope.objects.filter(
@@ -268,7 +268,7 @@ def reset_webhooks(request):
 def authenticate_bot(request):
     params = request.GET
     bot_id = params['bot']
-    client_id = os.environ.get('TWITCH_APP_ID', None)
+    client_id = settings.TWITCH_CLIENT_ID
     scope = 'chat:read chat:edit'
 
     url = f'https://id.twitch.tv/oauth2/authorize?' \
@@ -285,7 +285,7 @@ def process_twitch_callback_view(request):
     params = request.GET
     auth_code = params['code']
     bot_id = params.get('state', None)
-    client_id = os.environ.get('TWITCH_APP_ID', None)
+    client_id = settings.TWITCH_CLIENT_ID
     client_secret = os.environ.get('TWITCH_CLIENT_SECRET', None)
     auth_r = requests.post('https://id.twitch.tv/oauth2/token', data={
         'client_id': client_id,

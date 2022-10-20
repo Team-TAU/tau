@@ -36,7 +36,7 @@ def check_access_token_expired():
 
 def refresh_access_token():
     refresh_token = config.TWITCH_REFRESH_TOKEN
-    client_id = os.environ.get('TWITCH_APP_ID', None)
+    client_id = settings.TWITCH_CLIENT_ID
     client_secret = os.environ.get('TWITCH_CLIENT_SECRET', None)
     req = requests.post('https://id.twitch.tv/oauth2/token', data={
         'client_id': client_id,
@@ -141,7 +141,7 @@ def streamer_payload(base_url, status, streamer_id):
 
 def init_webhook(payload, url=None, worker_token=None, instance_id=None):
     webhook_headers = {
-        'Client-ID': os.environ.get('TWITCH_APP_ID', None),
+        'Client-ID': settings.TWITCH_CLIENT_ID,
         'Authorization': f'Bearer {config.TWITCH_APP_ACCESS_TOKEN}',
     }
     if instance_id is not None:
@@ -213,7 +213,7 @@ def teardown_webhooks(worker_token):
     active_subs = TwitchEventSubSubscription.objects.filter(subscription__isnull=False)
     # Get subscriptions
     headers = {
-        'Client-ID': os.environ.get('TWITCH_APP_ID', None),
+        'Client-ID': settings.TWITCH_CLIENT_ID,
         'Authorization': f'Bearer {config.TWITCH_APP_ACCESS_TOKEN}',
     }
 
@@ -271,7 +271,7 @@ def teardown_webhooks(worker_token):
 
 def cleanup_webhooks():
     headers = {
-        'Client-ID': os.environ.get('TWITCH_APP_ID', None),
+        'Client-ID': settings.TWITCH_CLIENT_ID,
         'Authorization': f'Bearer {config.TWITCH_APP_ACCESS_TOKEN}',
     }
 
@@ -295,7 +295,7 @@ def cleanup_webhooks():
 
 def cleanup_remote_webhooks():
     headers = {
-        'Client-ID': os.environ.get('TWITCH_APP_ID', None),
+        'Client-ID': settings.TWITCH_CLIENT_ID,
         'Authorization': f'Bearer {config.TWITCH_APP_ACCESS_TOKEN}',
     }
 
@@ -321,7 +321,7 @@ def cleanup_remote_webhooks():
 
 def teardown_all_acct_webhooks():
     headers = {
-        'Client-ID': os.environ.get('TWITCH_APP_ID', None),
+        'Client-ID': settings.TWITCH_CLIENT_ID,
         'Authorization': f'Bearer {config.TWITCH_APP_ACCESS_TOKEN}',
     }
 

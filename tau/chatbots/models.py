@@ -6,6 +6,7 @@ import requests
 
 from django.db import models
 from django.utils import timezone
+from django.conf import settings
 
 
 # Create your models here.
@@ -29,7 +30,7 @@ class ChatBot(models.Model):
 
     def renew_token(self):
         refresh_token = self.refresh_token
-        client_id = os.environ.get('TWITCH_APP_ID', None)
+        client_id = settings.TWITCH_CLIENT_ID
         client_secret = os.environ.get('TWITCH_CLIENT_SECRET', None)
         req = requests.post('https://id.twitch.tv/oauth2/token', data={
             'client_id': client_id,

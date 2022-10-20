@@ -3,6 +3,8 @@ import requests
 
 from constance import config
 
+from django.conf import settings
+
 from .models import Streamer
 
 def update_all_streamers():
@@ -15,7 +17,7 @@ def update_all_streamers():
     streamer_ids = [streamer.twitch_id for streamer in streamers]
     streamer_ids_param = '&'.join([f'user_id={id}' for id in streamer_ids])
 
-    client_id = os.environ.get('TWITCH_APP_ID', None)
+    client_id = settings.TWITCH_CLIENT_ID
     headers = {
         'Authorization': f'Bearer {config.TWITCH_ACCESS_TOKEN}',
         'Client-Id': client_id

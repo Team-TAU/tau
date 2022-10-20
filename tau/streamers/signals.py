@@ -16,7 +16,7 @@ from .models import Streamer, Stream
 def streamer_deleted(sender, instance, **kwargs):
     if instance.online_subscription is not None:
         headers = {
-            'Client-ID': os.environ.get('TWITCH_APP_ID', None),
+            'Client-ID': settings.TWITCH_CLIENT_ID,
             'Authorization': f'Bearer {config.TWITCH_APP_ACCESS_TOKEN}',
         }
         sub_id = instance.online_subscription['id']
@@ -40,7 +40,7 @@ def streamer_deleted(sender, instance, **kwargs):
 @receiver(post_save, sender=Streamer)
 def streamer_saved(sender, instance, created, **kwargs):
     if created:
-        client_id = os.environ.get('TWITCH_APP_ID', None)
+        client_id = settings.TWITCH_CLIENT_ID
         headers = {
             'Authorization': f'Bearer {config.TWITCH_ACCESS_TOKEN}',
             'Client-Id': client_id
@@ -63,7 +63,7 @@ def streamer_saved(sender, instance, created, **kwargs):
         elif not instance.streams.filter(ended_at__isnull=True).exists():
             # create new stream object
             # 1. Fetch stream data from twitch
-            client_id = os.environ.get('TWITCH_APP_ID', None)
+            client_id = settings.TWITCH_CLIENT_ID
             headers = {
                 'Authorization': f'Bearer {config.TWITCH_ACCESS_TOKEN}',
                 'Client-Id': client_id
