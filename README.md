@@ -2,9 +2,8 @@
 
 Making integrations with Twitch API easier than ever!
 
-# Recent breaking changes
-
-If you have been running the original version of TAU (the dashboard has a monotone grey UI), and you are upgrading to the current version, there are some breaking changes to be aware of. Make sure you [read about them here](docs/new_tau_changes.md).
+# Recent Changes
+We have just added IRC bots to TAU.  In order to use this feature properly, you will need to add the IRC Bot Redirect URI, `http://localhost:PORT/api/v1/chat-bots/twitch-callback/` to your Twitch dev dashboard.  See details in the Twitch Setup section below.
 
 # Table of Contents
 
@@ -77,6 +76,7 @@ Because TAU depends heavily on Twitch, it is necessary to obtain a Twitch Client
 1. Click "+ Register Your Application".
 1. Fill in a name for TAU. I recommend TAU- YourTwitchName.
 1. Add `http://localhost:PORT/twitch-callback/` as an OAuth Redirect URL. (Note the trailing slash, this is required)
+1. Add `http://localhost:PORT/api/v1/chat-bots/twitch-callback/` as a second OAuth Redirect URL. (Note the trailing slash, this is required)
 1. Select a category for what you'll be using TAU for. Chat Bot is what I've used.
 1. Click "Create"
 1. Click "Manage" for the TAU app.
