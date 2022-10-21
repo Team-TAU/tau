@@ -15,6 +15,8 @@ class Common(Configuration):  # pylint: disable=no-init
     BEHIND_PROXY = (os.environ.get("BEHIND_PROXY", "false").lower() == "true")
     BASE_DIR = BASE_DIR
 
+    TWITCH_CLIENT_ID = os.environ.get("TWITCH_APP_ID", os.environ.get("TWITCH_CLIENT_ID", None))
+
     if BASE_PORT not in [80, 443] and not BEHIND_PROXY:
         BASE_URL = BASE_URL + f":{BASE_PORT}"
 
@@ -50,6 +52,7 @@ class Common(Configuration):  # pylint: disable=no-init
 
         # Your apps
         'tau.users',
+        'tau.chatbots.apps.ChatBotsConfig',
         'tau.core.apps.CoreConfig',
         'tau.twitch.apps.TwitchConfig',
         'tau.twitchevents.apps.TwitcheventsConfig',
@@ -290,6 +293,8 @@ class Common(Configuration):  # pylint: disable=no-init
         'TWITCH_APP_ACCESS_TOKEN': ('', 'Twitch API App Access Token', str),
         'TWITCH_APP_ACCESS_TOKEN_EXPIRATION': ('', 'Expiration time for Twitch API App Access Token', datetime),
         'TWITCH_APP_REFRESH_TOKEN': ('', 'Twitch API App Refresh Token', str),
+        'TWITCH_APP_TOKEN_REFRESHED': (False, 'Twitch API App token was refreshed', bool),
+        'TWITCH_AUTH_STATE': ('', 'Random Twitch Authentication string', str),
         'STATUS_WEBSOCKET': ('INACTIVE', 'Twitch WS Connection Status', str),
         'STATUS_CHANNEL_UPDATE': ('INACTIVE', 'Channel Update Connection Status', str),
         'STATUS_CHANNEL_FOLLOW': ('INACTIVE', 'Channel Follow Connection Status', str),

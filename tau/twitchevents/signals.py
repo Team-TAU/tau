@@ -32,7 +32,7 @@ def constance_updated(sender, key, old_value, new_value, **kwargs):
             'old_value': old_value,
             'new_value': new_value
         }]
-        
+
         channel_layer = get_channel_layer()
         async_to_sync(channel_layer.group_send)('taustatus', {
             'type': 'taustatus.event',

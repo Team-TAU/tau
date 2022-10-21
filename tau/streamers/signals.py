@@ -16,31 +16,33 @@ from .models import Streamer, Stream
 def streamer_deleted(sender, instance, **kwargs):
     if instance.online_subscription is not None:
         headers = {
-            'Client-ID': os.environ.get('TWITCH_APP_ID', None),
-            'Authorization': 'Bearer {}'.format(config.TWITCH_APP_ACCESS_TOKEN),
+            'Client-ID': settings.TWITCH_CLIENT_ID,
+            'Authorization': f'Bearer {config.TWITCH_APP_ACCESS_TOKEN}',
         }
+        sub_id = instance.online_subscription['id']
         req = requests.delete(
-            f'https://api.twitch.tv/helix/eventsub/subscriptions?id={instance.online_subscription["id"]}',
+            f'https://api.twitch.tv/helix/eventsub/subscriptions?id={sub_id}',
             headers=headers
         )
-        if(settings.DEBUG_TWITCH_CALLS):
+        if settings.DEBUG_TWITCH_CALLS:
             log_request(req)
-            
+
     if instance.offline_subscription is not None:
+        sub_id = instance.offline_subscription['id']
         req = requests.delete(
-            f'https://api.twitch.tv/helix/eventsub/subscriptions?id={instance.offline_subscription["id"]}',
+            f'https://api.twitch.tv/helix/eventsub/subscriptions?id={sub_id}',
             headers=headers
         )
-        if(settings.DEBUG_TWITCH_CALLS):
+        if settings.DEBUG_TWITCH_CALLS:
             log_request(req)
 
 
 @receiver(post_save, sender=Streamer)
 def streamer_saved(sender, instance, created, **kwargs):
     if created:
-        client_id = os.environ.get('TWITCH_APP_ID', None)
+        client_id = settings.TWITCH_CLIENT_ID
         headers = {
-            'Authorization': 'Bearer {}'.format(config.TWITCH_ACCESS_TOKEN),
+            'Authorization': f'Bearer {config.TWITCH_ACCESS_TOKEN}',
             'Client-Id': client_id
         }
         login = instance.twitch_username
@@ -60,10 +62,10 @@ def streamer_saved(sender, instance, created, **kwargs):
             )
         elif not instance.streams.filter(ended_at__isnull=True).exists():
             # create new stream object
-            #1. Fetch stream data from twitch
-            client_id = os.environ.get('TWITCH_APP_ID', None)
+            # 1. Fetch stream data from twitch
+            client_id = settings.TWITCH_CLIENT_ID
             headers = {
-                'Authorization': 'Bearer {}'.format(config.TWITCH_ACCESS_TOKEN),
+                'Authorization': f'Bearer {config.TWITCH_ACCESS_TOKEN}',
                 'Client-Id': client_id
             }
             url = f'https://api.twitch.tv/helix/' \

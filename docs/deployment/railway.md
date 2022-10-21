@@ -2,7 +2,7 @@
 
 [Railway](https://railway.app/) is a cost effective way to run TAU 24/7 in the cloud. The following steps should get you started! These instructions assume you have cloned the TAU repo to your local drive, and that you have npm installed (the railway CLI app requires npm).
 
-<!-- [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https%3A%2F%2Fgithub.com%2FTeam-TAU%2Ftau%2Ftree%2Fdocumentation-railway-docs&plugins=postgresql%2Credis&envs=TWITCH_APP_ID%2CTWITCH_CLIENT_SECRET%2CTWITCH_WEBHOOK_SECRET%2CDJANGO_DB_PW%2CDJANGO_SECRET_KEY%2CDJANGO_CONFIGURATION%2CPORT&TWITCH_APP_IDDesc=Your+Twitch+TAU+app+id.&TWITCH_CLIENT_SECRETDesc=Your+Twitch+TAU+client+secret.&TWITCH_WEBHOOK_SECRETDesc=Random+string+of+10-100+characters.&DJANGO_DB_PWDesc=A+password+you+would+like+to+use+for+your+TAU+postgres+database.&DJANGO_SECRET_KEYDesc=Random+string+of+10-100+characters.&DJANGO_CONFIGURATIONDesc=DO+NOT+CHANGE&PORTDesc=DO+NOT+CHANGE&DJANGO_CONFIGURATIONDefault=Railway&PORTDefault=443&referralCode=TAU) -->
+<!-- [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=https%3A%2F%2Fgithub.com%2FTeam-TAU%2Ftau%2Ftree%2Fdocumentation-railway-docs&plugins=postgresql%2Credis&envs=TWITCH_CLIENT_ID%2CTWITCH_CLIENT_SECRET%2CTWITCH_WEBHOOK_SECRET%2CDJANGO_DB_PW%2CDJANGO_SECRET_KEY%2CDJANGO_CONFIGURATION%2CPORT&TWITCH_CLIENT_IDDesc=Your+Twitch+TAU+app+id.&TWITCH_CLIENT_SECRETDesc=Your+Twitch+TAU+client+secret.&TWITCH_WEBHOOK_SECRETDesc=Random+string+of+10-100+characters.&DJANGO_DB_PWDesc=A+password+you+would+like+to+use+for+your+TAU+postgres+database.&DJANGO_SECRET_KEYDesc=Random+string+of+10-100+characters.&DJANGO_CONFIGURATIONDesc=DO+NOT+CHANGE&PORTDesc=DO+NOT+CHANGE&DJANGO_CONFIGURATIONDefault=Railway&PORTDefault=443&referralCode=TAU) -->
 
 1. [Create a railway account/login](https://railway.app/login)
 1. [Go to your railway dashboard](https://railway.app/dashboard)
@@ -24,10 +24,10 @@
 
 ## Sample .env data.
 
-All `.env` data should come from your local install of TAU (see your existing `.env`). The first 6 values must be set. `TWITCH_APP_ID` and `TWITCH_CLIENT_SECRET` come from the Twitch developer settings above, `TWITCH_WEBHOOK_SECRET` should be a random string of characters 10-100 characters long. `DJANGO_DB_PW` can be any password you want to set for the Django databse user, `DJANGO_SECRET_KEY` should be a different random string of characters 10-100 characters long, and `PUBLIC_URL` should be the deployment domain, e.g.- `tau-twitchname.up.railway.app`. The last two values (`DJANGO_CONFIGURATION` and `PORT`) should use the provided values below.
+All `.env` data should come from your local install of TAU (see your existing `.env`). The first 6 values must be set. `TWITCH_CLIENT_ID` and `TWITCH_CLIENT_SECRET` come from the Twitch developer settings above, `TWITCH_WEBHOOK_SECRET` should be a random string of characters 10-100 characters long. `DJANGO_DB_PW` can be any password you want to set for the Django databse user, `DJANGO_SECRET_KEY` should be a different random string of characters 10-100 characters long, and `PUBLIC_URL` should be the deployment domain, e.g.- `tau-twitchname.up.railway.app`. The last two values (`DJANGO_CONFIGURATION` and `PORT`) should use the provided values below.
 
 ```
-TWITCH_APP_ID=
+TWITCH_CLIENT_ID=
 TWITCH_CLIENT_SECRET=
 TWITCH_WEBHOOK_SECRET=
 DJANGO_DB_PW=
