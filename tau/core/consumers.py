@@ -2,8 +2,6 @@ import json
 
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
 
 from rest_framework.authtoken.models import Token
 
@@ -38,7 +36,7 @@ class TauStatusConsumer(AsyncJsonWebsocketConsumer):
                     user = await database_sync_to_async(self.get_user_from_token)(token)
                     if user is not None:
                         self.scope['user'] = user
-            except Exception as err:
+            except json.JSONDecodeError as err:
                 print(err)
         if not self.scope['user'].id:
             self.close()
@@ -48,14 +46,17 @@ class TauStatusConsumer(AsyncJsonWebsocketConsumer):
 
     def get_user_from_token(self, token):
         try:
-            tokenObj = Token.objects.get(key=token)
-            return tokenObj.user
+            token_obj = Token.objects.get(key=token)
+            return token_obj.user
         except Token.DoesNotExist:
             return None
 
     async def taustatus_event(self, event):
         if self.scope['user'].id:
             await self.send_json(event['data'])
+
+    async def taustatus_keepalive(self, _):
+        await self.send_json({"event": "keep_alive"})
 
 
 class ServerWorkerConsumer(AsyncJsonWebsocketConsumer):
@@ -76,7 +77,7 @@ class ServerWorkerConsumer(AsyncJsonWebsocketConsumer):
 
     async def receive(self, text_data=None, bytes_data=None, **kwargs):
         print(text_data)
-    
+
     async def serverworker_event(self, event):
         print("Sending to listeners")
         print(event)
@@ -121,15 +122,15 @@ class TwitchChatConsumer(AsyncJsonWebsocketConsumer):
                     user = await database_sync_to_async(self.get_user_from_token)(token)
                     if user is not None:
                         self.scope['user'] = user
-            except Exception as err:
+            except json.JSONDecodeError as err:
                 print(err)
         if not self.scope['user'].id:
             self.close()
 
     def get_user_from_token(self, token):
         try:
-            tokenObj = Token.objects.get(key=token)
-            return tokenObj.user
+            token_obj = Token.objects.get(key=token)
+            return token_obj.user
         except Token.DoesNotExist:
             return None
 

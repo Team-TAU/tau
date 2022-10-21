@@ -19,6 +19,6 @@ The following environment variables can be used to manipulate your Tau install.
 | DJANGO_DB_PW          | Password for the `DJANGO_DB_USER`                                                | ''            |
 | DJANGO_CONFIGURATION  | Configuration django uses                                                        | Local         |
 | DJANGO_SECRET_KEY     | Key used by Django for keeping your data stored securely                         | None          |
-| TWITCH_APP_ID         | Application ID for connecting to twitch                                          | ''            |
+| TWITCH_CLIENT_ID         | Application ID for connecting to twitch                                          | ''            |
 | TWITCH_CLIENT_SECRET  | Used for communicating with the twitch API                                       | ''            |
 | TWITCH_WEBHOOK_SECRET | Used for signing the webhooks from twitch to validate they are legitimate        | ''            |

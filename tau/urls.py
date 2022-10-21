@@ -1,3 +1,4 @@
+from tau.chatbots.views import ChatBotChannelViewSet, ChatBotViewSet
 from tau.dashboard.views import dashboard_view
 from tau.core.forms import CustomAuthenticationForm
 from django.conf import settings
@@ -30,6 +31,7 @@ from .streamers.views import (
 )
 
 from .core.views import (
+    authenticate_bot,
     first_run_view,
     get_channel_name_view,
     process_twitch_callback_view,
@@ -48,6 +50,8 @@ from .core.views import (
 
 router = OptionalSlashRouter()
 router.register(r'settings', TAUSettingsViewSet, basename='tau-settings')
+router.register(r'chat-bots/channels', ChatBotChannelViewSet)
+router.register(r'chat-bots', ChatBotViewSet)
 router.register(r'twitch-events', TwitchEventViewSet, basename='twitch-events')
 router.register(r'twitch-events', TwitchEventModelViewSet)
 router.register(r'service-status', ServiceStatusViewSet, basename='service-status')
@@ -59,13 +63,13 @@ router.register(r'twitch/eventsub-subscriptions', TwitchEventSubSubcriptionsView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/login/', 
-        auth_views.LoginView.as_view(
-            template_name='registration/login.html',
-            authentication_form=CustomAuthenticationForm
-        ),
-        name='login'
-    ),
+    path('accounts/login/',
+         auth_views.LoginView.as_view(
+             template_name='registration/login.html',
+             authentication_form=CustomAuthenticationForm
+         ),
+         name='login'
+         ),
     path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('api/v1/tau-user-token/', get_tau_token),
     path('api/v1/tau-user-token/refresh/', refresh_tau_token),
@@ -79,6 +83,7 @@ urlpatterns = [
     path('set-channel/', get_channel_name_view),
     path('refresh-token-scope/', refresh_token_scope),
     path('twitch-callback/', process_twitch_callback_view),
+    path('bot-auth/', authenticate_bot),
     path('first-run/', first_run_view),
     path('streamers/', streamer_page_view),
     path('settings/', twitch_token_page_view),

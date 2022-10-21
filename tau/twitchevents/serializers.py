@@ -1,7 +1,5 @@
 from rest_framework import serializers
-from .models import (
-    TwitchEvent
-)
+from .models import TwitchEvent
 
 class TwitchEventSerializer(serializers.ModelSerializer):
     origin = serializers.SerializerMethodField()

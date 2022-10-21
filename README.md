@@ -2,9 +2,8 @@
 
 Making integrations with Twitch API easier than ever!
 
-# Recent breaking changes
-
-If you have been running the original version of TAU (the dashboard has a monotone grey UI), and you are upgrading to the current version, there are some breaking changes to be aware of. Make sure you [read about them here](docs/new_tau_changes.md).
+# Recent Changes
+We have just added IRC bots to TAU.  In order to use this feature properly, you will need to add the IRC Bot Redirect URI, `http://localhost:PORT/api/v1/chat-bots/twitch-callback/` to your Twitch dev dashboard.  See details in the Twitch Setup section below.
 
 # Table of Contents
 
@@ -37,6 +36,16 @@ will help TAU become more stable and secure. Use at your own risk._
 _Note 2- TAU is written using django/python, however, acting as an
 API proxy, you can connect any codebase to its websockets._
 
+_Note 3- If when starting up TAU, you see the error:
+```
+ bash: ./scripts/start.sh: /bin/bash^M: bad interpreter: No such file or directory
+```
+This is due to windows git changing your line endings from `lf` to `crlf`.  Use the command:
+```
+git config --global core.autocrlf input
+```
+Turn off autoclrf, and re-clone the repository.
+
 # :star: Features
 
 - Easy to use UI to manage Twitch events
@@ -58,8 +67,7 @@ First thing you'll need to do is to clone or download this repo to a local folde
 
 ## Twitch Setup
 
-Because TAU depends heavily on Twitch, it is necessary to obtain a Twitch App ID and
-secret. The steps below will help you do this.
+Because TAU depends heavily on Twitch, it is necessary to obtain a Twitch Client ID and Client Secret. The steps below will help you do this.
 
 1. Determine the port you want to run TAU on. By default this is port 8000. Use this value for `PORT` in the following steps.
 1. Visit the [Twitch Developer Applications Console](https://dev.twitch.tv/console/apps).
@@ -68,6 +76,7 @@ secret. The steps below will help you do this.
 1. Click "+ Register Your Application".
 1. Fill in a name for TAU. I recommend TAU- YourTwitchName.
 1. Add `http://localhost:PORT/twitch-callback/` as an OAuth Redirect URL. (Note the trailing slash, this is required)
+1. Add `http://localhost:PORT/api/v1/chat-bots/twitch-callback/` as a second OAuth Redirect URL. (Note the trailing slash, this is required)
 1. Select a category for what you'll be using TAU for. Chat Bot is what I've used.
 1. Click "Create"
 1. Click "Manage" for the TAU app.
@@ -79,7 +88,7 @@ Now that you've obtained your Client ID and Client Secret, it is time to set up 
 
 Fill in values for:
 
-- TWITCH_APP_ID (The Twitch Client ID you just generated)
+- TWITCH_CLIENT_ID (The Twitch Client ID you just generated)
 - TWITCH_CLIENT_SECRET (The Twitch Client Secret you just generated)
 - TWITCH_WEBHOOK_SECRET (a random string)
 - POSTGRES_PW Root Password
