@@ -15,6 +15,8 @@ class Common(Configuration):  # pylint: disable=no-init
     BEHIND_PROXY = (os.environ.get("BEHIND_PROXY", "false").lower() == "true")
     BASE_DIR = BASE_DIR
 
+    TWITCH_CLIENT_ID = os.environ.get("TWITCH_APP_ID", os.environ.get("TWITCH_CLIENT_ID", None))
+
     if BASE_PORT not in [80, 443] and not BEHIND_PROXY:
         BASE_URL = BASE_URL + f":{BASE_PORT}"
 
