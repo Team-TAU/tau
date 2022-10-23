@@ -120,6 +120,22 @@
     "scope": "channel:manage:redemptions"
   },
   {
+    "description": "Get Charity Campaign",
+    "endpoint": "charity/campaigns",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-charity-campaign",
+    "token_type": "OAuth",
+    "scope": "channel:read:charity"
+  },
+  {
+    "description": "Get chatters",
+    "endpoint": "chat/chatters",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-chatters",
+    "token_type": "OAuth",
+    "scope": "moderator:read:chatters"
+  },
+  {
     "description": "Get Channel Emotes",
     "endpoint": "chat/emotes",
     "method": "GET",
@@ -174,6 +190,30 @@
     "reference_url": "https://dev.twitch.tv/docs/api/reference#update-chat-settings",
     "token_type": "OAuth",
     "scope": "moderator:manage:chat_settings"
+  },
+  {
+    "description": "Send Chat Announcement",
+    "endpoint": "chat/announcements",
+    "method": "POST",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#send-chat-announcement",
+    "token_type": "OAuth",
+    "scope": "moderator:manage:announcements"
+  },
+  {
+    "description": "Get User Chat Color",
+    "endpoint": "chat/color",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-user-chat-color",
+    "token_type": "OAuth",
+    "scope": null
+  },
+  {
+    "description": "Update User Chat Color",
+    "endpoint": "chat/color",
+    "method": "PUT",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#update-user-chat-color",
+    "token_type": "OAuth",
+    "scope": "user:manage:chat_color"
   },
   {
     "description": "Create Clip",
@@ -328,12 +368,60 @@
     "scope": "moderator:manage:blocked_terms"
   },
   {
+    "description": "Delete Chat Messages",
+    "endpoint": "moderation/chat",
+    "method": "DELETE",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#delete-chat-messages",
+    "token_type": "OAuth",
+    "scope": "moderator:manage:chat_messages"
+  },
+  {
     "description": "Get Moderators",
     "endpoint": "moderation/moderators",
     "method": "GET",
     "reference_url": "https://dev.twitch.tv/docs/api/reference#get-moderators",
     "token_type": "OAuth",
     "scope": "moderation:read"
+  },
+  {
+    "description": "Add Channel Moderator",
+    "endpoint": "moderation/moderators",
+    "method": "POST",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#add-channel-moderator",
+    "token_type": "OAuth",
+    "scope": "channel:manage:moderators"
+  },
+  {
+    "description": "Remove Channel Moderator",
+    "endpoint": "moderation/moderators",
+    "method": "DELETE",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#remove-channel-moderator",
+    "token_type": "OAuth",
+    "scope": "channel:manage:moderators"
+  },
+  {
+    "description": "Get VIPs",
+    "endpoint": "channels/vips",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-vips",
+    "token_type": "OAuth",
+    "scope": "channel:read:vips"
+  },
+  {
+    "description": "Add Channel VIP",
+    "endpoint": "channels/vips",
+    "method": "POST",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#add-channel-vip",
+    "token_type": "OAuth",
+    "scope": "channel:manage:vips"
+  },
+  {
+    "description": "Remove Channel VIP",
+    "endpoint": "channels/vips",
+    "method": "DELETE",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#remove-channel-vip",
+    "token_type": "OAuth",
+    "scope": "channel:manage:vips"
   },
   {
     "description": "Get Polls",
@@ -694,5 +782,13 @@
     "reference_url": "https://dev.twitch.tv/docs/api/reference#get-webhook-subscriptions",
     "token_type": "AppAccess",
     "scope": null
+  },
+  {
+    "description": "Send Whisper",
+    "endpoint": "helix/whispers",
+    "method": "POST",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#send-whisper",
+    "token_type": "OAuth",
+    "scope": "user:manage:whispers"
   }
 ]

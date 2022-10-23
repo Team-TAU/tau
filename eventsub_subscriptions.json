@@ -3282,5 +3282,92 @@
       },
       "required": ["broadcaster_user_id"]
     }
+  },
+  {
+    "subscription_type": "Charity Donation",
+    "name": "channel.charity_campaign.donate",
+    "version": "beta",
+    "description": "Sends an event notification when a user donates to the broadcaster's charity campaign.\nThe event data does not include information about the charity such as its name, description, and logo. To get information about the charity, use the Get Charity Campaign endpoint",
+    "scope_required": "channel:read:charity",
+    "event_schema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": null,
+      "title": "Charity Donation",
+      "description": "A viewer donated to the charity campaign",
+      "type": "object",
+      "properties": {
+        "campaign_id": {
+          "description": "The Campaign ID.",
+          "type": "string"
+        },
+        "broadcaster_id": {
+          "description": "An ID that uniquely identifies the broadcaster that's running the campaign.",
+          "type": "string"
+        },
+        "broadcaster_login": {
+          "description": "The broadcaster's login name.",
+          "type": "string"
+        },
+        "broadcaster_name": {
+          "description": "The broadcaster's display name.",
+          "type": "string"
+        },
+        "user_id": {
+          "description": "An ID that uniquely identifies the user that donated to the campaign.",
+          "type": "string"
+        },
+        "user_login": {
+          "description": "The user's login name.",
+          "type": "string"
+        },
+        "user_name": {
+          "description": "The user's display name.",
+          "type": "string"
+        },
+        "amount": {
+          "description": "An object that contains the amount of the user's donation.",
+          "type": "object",
+          "properties": {
+            "value": {
+              "description": "The monetary amount. The amount is specified in the currency's minor unit. For example, the minor units for USD is cents, so if the amount is $5.50 USD, value is set to 550.",
+              "type": "integer"
+            },
+            "decimal_places": {
+              "description": "The number of decimal places used by the currency. For example, USD uses two decimal places. Use this number to translate value from minor units to major units by using the formula:\n\nvalue / 10^decimal_places",
+              "type": "integer"
+            },
+            "currency": {
+              "description": "The ISO-4217 three-letter currency code that identifies the type of currency in value.",
+              "type": "string"
+            }
+          },
+          "required": ["value", "decimal_places", "currency"]
+        }
+      },
+      "required": [
+        "campaign_id",
+        "broadcaster_id",
+        "broadcaster_login",
+        "broadcaster_name",
+        "user_id",
+        "user_login",
+        "user_name",
+        "amount"
+      ]
+    },
+    "condition_schema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": null,
+      "title": "Charity Donation request arguments",
+      "description": "Required and optional query parameters for requesting a Charity Donations event subscription",
+      "type": "object",
+      "properties": {
+        "broadcaster_user_id": {
+          "description": "The broadcaster user ID for the channel you want to Charity Donations notifications for.",
+          "type": "string"
+        }
+      },
+      "required": ["broadcaster_user_id"]
+    }
   }
 ]
