@@ -72,6 +72,22 @@
     "scope": "channel:read:editors"
   },
   {
+    "description": "Get Followed Channels",
+    "endpoint": "channels/followed",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference/#get-followed-channels",
+    "token_type": "OAuth",
+    "scope": "user:read:follows"
+  },
+  {
+    "description": "Get Channel Followers",
+    "endpoint": "channels/followers",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference/#get-channel-followers",
+    "token_type": "OAuth",
+    "scope": "moderator:read:followers"
+  },
+  {
     "description": "Create Custom Rewards",
     "endpoint": "channel_points/custom_rewards",
     "method": "POST",
@@ -128,7 +144,7 @@
     "scope": "channel:read:charity"
   },
   {
-    "description": "Get chatters",
+    "description": "Get Chatters",
     "endpoint": "chat/chatters",
     "method": "GET",
     "reference_url": "https://dev.twitch.tv/docs/api/reference#get-chatters",
@@ -198,6 +214,14 @@
     "reference_url": "https://dev.twitch.tv/docs/api/reference#send-chat-announcement",
     "token_type": "OAuth",
     "scope": "moderator:manage:announcements"
+  },
+  {
+    "description": "Send a Shoutout",
+    "endpoint": "chat/shoutouts",
+    "method": "POST",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference/#send-a-shoutout",
+    "token_type": "OAuth",
+    "scope": "moderator:manage:shoutouts"
   },
   {
     "description": "Get User Chat Color",
@@ -422,6 +446,22 @@
     "reference_url": "https://dev.twitch.tv/docs/api/reference#remove-channel-vip",
     "token_type": "OAuth",
     "scope": "channel:manage:vips"
+  },
+  {
+    "description": "Update Shield Mode Status",
+    "endpoint": "moderation/shield_mode",
+    "method": "PUT",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference/#update-shield-mode-status",
+    "token_type": "OAuth",
+    "scope": "moderator:manage:shield_mode"
+  },
+  {
+    "description": "Get Shield Mode Status",
+    "endpoint": "moderation/shield_mode",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference/#get-shield-mode-statuss",
+    "token_type": "OAuth",
+    "scope": "moderator:read:shield_mode"
   },
   {
     "description": "Get Polls",
