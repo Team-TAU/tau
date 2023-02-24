@@ -169,7 +169,7 @@ def get_conditions(instance):
         ]
     else:
         return [{
-            key: config.CHANNEL_ID for key in instance.condition_schema['properties'].keys()
+            key: config.CHANNEL_ID for key in instance.condition_schema['required']
         }]
 
 def init_webhooks(base_url, worker_token):
