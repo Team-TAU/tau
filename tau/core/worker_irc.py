@@ -98,7 +98,8 @@ class WorkerIrc:
                     delay = max(delay*2, 120)
 
     async def send(self, channel, message):
-        await self.connection.send(f'PRIVMSG #{channel} :{message}')
+        if self.connection is not None and self.connection.open:
+            await self.connection.send(f'PRIVMSG #{channel} :{message}')
 
     async def receive(self):
         while True:
