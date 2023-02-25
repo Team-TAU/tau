@@ -107,14 +107,14 @@ def log_request(req):
     else:
         print('    NO RESPONSE DATA')
 
-def eventsub_payload(instance, base_url, broadcaster_key='broadcaster_user_id'):
+def eventsub_payload(instance, base_url, condition=None):
     callback_url = f'{base_url}/api/v1/twitch-events/{instance.lookup_name}/webhook/'
+    if condition is None:
+        condition = {"broadcaster_user_id": config.CHANNEL_ID}
     data = {
         "type": instance.name,
         "version": instance.version,
-        "condition": {
-            broadcaster_key: config.CHANNEL_ID
-        },
+        "condition": condition,
         "transport": {
             "method": "webhook",
             "callback": callback_url,
@@ -161,6 +161,17 @@ def init_webhook(payload, url=None, worker_token=None, instance_id=None):
         log_request(req)
     # TODO Add code to handle bad response from initial sub handshake
 
+def get_conditions(instance):
+    if instance.name == 'channel.raid':
+        return [
+            {'to_broadcaster_user_id': config.CHANNEL_ID},
+            {'from_broadcaster_user_id': config.CHANNEL_ID}
+        ]
+    else:
+        return [{
+            key: config.CHANNEL_ID for key in instance.condition_schema['required']
+        }]
+
 def init_webhooks(base_url, worker_token):
     # from tau.streamers.models import Streamer
     Streamer = apps.get_model('streamers.Streamer')
@@ -171,14 +182,10 @@ def init_webhooks(base_url, worker_token):
     active_streamer_sub_ids = []
 
     for instance in TwitchEventSubSubscription.objects.filter(active=True):
-        # if instance.name == 'channel.raid':
-        #     broadcaster_key = 'to_broadcaster_user_id'
-        # else:
-        #     broadcaster_key = 'broadcaster_user_id'
-
-        for broadcaster_key in instance.condition_schema['properties'].keys():
+        conditions = get_conditions(instance)
+        for properties in conditions:
             init_webhook(
-                eventsub_payload(instance, base_url, broadcaster_key),
+                eventsub_payload(instance, base_url, properties),
                 url,
                 worker_token,
                 instance.lookup_name

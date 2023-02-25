@@ -46,7 +46,7 @@ def get_type_dict(soup, id):
                 'description': cols[2].text.strip(),
                 'type': cols[1].text.strip(),
             }
-        
+
     return data
 
 
