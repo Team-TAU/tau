@@ -74,7 +74,7 @@
   {
     "subscription_type": "Channel Follow",
     "name": "channel.follow",
-    "version": "1",
+    "version": "2",
     "description": "A specified channel receives a follow.",
     "scope_required": null,
     "event_schema": {
@@ -94,6 +94,10 @@
         },
         "user_name": {
           "description": "The user display name for the user now following the specified channel.",
+          "type": "string"
+        },
+        "moderator_user_id": {
+          "description": "The requested broadcaster ID.",
           "type": "string"
         },
         "broadcaster_user_id": {
@@ -119,6 +123,7 @@
         "user_name",
         "broadcaster_user_id",
         "broadcaster_user_login",
+        "moderator_user_id",
         "broadcaster_user_name",
         "followed_at"
       ]
@@ -130,12 +135,19 @@
       "description": "Required and optional query parameters for requesting a Channel Follow event subscription",
       "type": "object",
       "properties": {
+        "moderator_user_id": {
+          "description": "The broadcaster user ID for the channel you want to get follow notifications for.",
+          "type": "string"
+        },
         "broadcaster_user_id": {
           "description": "The broadcaster user ID for the channel you want to get follow notifications for.",
           "type": "string"
         }
       },
-      "required": ["broadcaster_user_id"]
+      "required": [
+        "broadcaster_user_id",
+        "moderator_user_id"
+      ]
     }
   },
   {
