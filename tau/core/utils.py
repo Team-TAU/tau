@@ -167,6 +167,11 @@ def get_conditions(instance):
             {'to_broadcaster_user_id': config.CHANNEL_ID},
             {'from_broadcaster_user_id': config.CHANNEL_ID}
         ]
+    if instance.name == 'channel-follow':
+        return [
+            {'moderator_user_id': config.CHANNEL_ID},
+            {'broadcaster_user_id': config.CHANNEL_ID}
+        ]
     else:
         return [{
             key: config.CHANNEL_ID for key in instance.condition_schema['required']
