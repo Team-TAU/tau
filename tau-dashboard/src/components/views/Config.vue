@@ -86,7 +86,8 @@ export default defineComponent({
         active: true,
         setting: 'Use IRC',
         description:
-          'Use IRC for grabbing emote data for Channel Point Redemptions',
+          "❗️ Leave this on!! If it's off, chat will break for streamer."
+          // 'Use IRC for grabbing emote data for Channel Point Redemptions',
       },
     ]);
 
