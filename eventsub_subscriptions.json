@@ -3772,7 +3772,7 @@
     }
   },
   {
-    "subscription_type": "Sheld Mode Begin",
+    "subscription_type": "Shield Mode Begin",
     "name": "channel.shield_mode.begin",
     "version": "1",
     "description": "Sends a notification when the broadcaster activates Shield Mode.",
@@ -3843,7 +3843,7 @@
     }
   },
   {
-    "subscription_type": "Sheld Mode End",
+    "subscription_type": "Shield Mode End",
     "name": "channel.shield_mode.end",
     "version": "1",
     "description": "Sends a notification when the broadcaster deactivates Shield Mode.",
