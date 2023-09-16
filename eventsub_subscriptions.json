@@ -74,9 +74,9 @@
   {
     "subscription_type": "Channel Follow",
     "name": "channel.follow",
-    "version": "1",
+    "version": "2",
     "description": "A specified channel receives a follow.",
-    "scope_required": null,
+    "scope_required": "moderator:read:followers",
     "event_schema": {
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": null,
@@ -133,9 +133,13 @@
         "broadcaster_user_id": {
           "description": "The broadcaster user ID for the channel you want to get follow notifications for.",
           "type": "string"
+        },
+        "moderator_user_id": {
+          "description": "The ID of the moderator of the channel you want to get follow notifications for. If you have authorization from the broadcaster rather than a moderator, specify the broadcaster’s user ID here.",
+          "type": "string"
         }
       },
-      "required": ["broadcaster_user_id"]
+      "required": ["broadcaster_user_id", "moderator_user_id"]
     }
   },
   {
