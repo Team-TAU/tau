@@ -13,6 +13,7 @@ We have just added IRC bots to TAU.  In order to use this feature properly, you 
 - [Getting Started](#gear-getting-started)
 - [Updating](#hourglass_flowing_sand-updating)
 - [Todo/Issues](#thought_balloon-todoissues)
+- [Windows Users](#windows-users)
 
 # :microphone: Introduction
 
@@ -135,3 +136,34 @@ In order to update TAU, pull/download the latest code from github. You will then
 # :thought_balloon: Todo/Issues
 
 Currently, while hypetrain events are forwarded on to any local clients connected to the TAU websocket connection, they are not shown in the TAU dashboard, nor do they have test events available.
+
+# Windows Users
+
+There are a few extra steps that will need to be taken if you want to run TAU natively on a Windows system.
+
+1. Docker commands are slightly different
+
+Any command written above noting `docker compose` will be available in PowerShell as `docker-compose-v1.exe` so those commands will look like this:
+```bash
+> docker-compose-v1.exe up
+> docker-compose-v1.exe down
+> docker-compose-v1.exe up --build
+```
+
+2. Checking out code from Git may change line endings
+
+If you check out code using Git on Windows, it may change linefeed characters (`\n`) with a carriage return / linefeed combination (`\r\n`). If you run `docker-compose-v1.exe up` and see messages that look like the following output, you will need to make some changes to three files listed below.
+```bash
+bash: ./scripts/start.sh: /bin/bash^M: bad interpreter: No such file or directory
+```
+
+You can convert the line endings using PowerShell using the following command. Substitute `filename` below for the file you want to modify:
+```sh
+> ((Get-Content filename) -join "`n") + "`n" | Set-Content -NoNewline filename
+```
+
+You will want to modify the following three files:
+
+- ./scripts/start.sh
+- ./manage.py
+- ./wait_for_postgres.py
