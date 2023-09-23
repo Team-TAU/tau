@@ -1,0 +1,33 @@
+name: nightly
+
+on:
+  schedule:
+    - cron: 7 3 * * *
+
+env:
+  PYTHON_VERSION: '3.8'
+
+jobs:
+  generate-endpoint-data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Generate Endpoint Docs
+        id: update_endpoints
+        run: |
+          pip install -r requirements.txt
+          python3 scripts/scrape_helix_docs.py
+
+      - name: Create PR if applicable
+        uses: peter-evans/create-pull-request@v3
+        with:
+          commit-message: "[Automated] Update to endpoint data"
+          branch: automation/helix-endpoint-update
+          delete-branch: true
+          title: Updated helix endpoint data
+          body: A change was detected in twitches documentation regarding helix endpoints.
