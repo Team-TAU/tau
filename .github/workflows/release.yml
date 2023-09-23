@@ -1,0 +1,45 @@
+---
+name: release
+on:
+  push:
+    tags:
+      - v*
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Run pylint
+        run: |
+          pip install -r requirements.txt
+          pylint **/*.py
+
+  license-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: License check
+        run: |
+          pip install -r requirements.txt
+          pip install -U pip-licenses
+          pip-licenses --order=license
+
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Run tests
+        run: |
+          echo "TODO: Implement"
