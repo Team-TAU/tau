@@ -1,5 +1,21 @@
 [
   {
+    "description": "Snooze Next Ad",
+    "endpoint": "channels/ads/schedule/snooze",
+    "method": "POST",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#snooze-next-ad",
+    "token_type": "OAuth",
+    "scope": "channel:manage:ads"
+  },
+  {
+    "description": "Get Ad Schedule",
+    "endpoint": "channels/ads",
+    "method": "GET",
+    "reference_url": "https://dev.twitch.tv/docs/api/reference#get-ad-schedule",
+    "token_type": "OAuth",
+    "scope": "channel:read:ads"
+  },
+  {
     "description": "Start Commercial",
     "endpoint": "channels/commercial",
     "method": "POST",
