@@ -113,8 +113,7 @@ mod auth {
     #[utoipa::path(post, path = "/token",
         responses(
         (status = OK, body = TokenResponse),
-        (status = FORBIDDEN, body = ()),
-        (status = 500, body = ())
+        (status = FORBIDDEN, body = ())
     ), tag = super::AUTH_TAG)]
     async fn post_token_auth(
         State(state): State<crate::RouterState>,
