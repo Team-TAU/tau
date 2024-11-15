@@ -1,0 +1,16 @@
+[package]
+name = "tau"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = "0.7.7"
+serde = "1.0.215"
+serde_json = "1.0.132"
+tokio = { version = "1.41.1", features = ["full"] }
+tower = "0.5.1"
+utoipa = { version = "5.2.0", features = ["axum_extras", "debug"] }
+utoipa-axum = "0.1.2"
+utoipa-swagger-ui = { version = "8.0.3", features = ["axum"] }
+sqlx = { version = "0.8", features = [ "runtime-tokio", "postgres" ] }
+anyhow = "1.0.93"
