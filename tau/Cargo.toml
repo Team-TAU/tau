@@ -16,3 +16,10 @@ sqlx = { version = "0.8", features = [ "runtime-tokio", "postgres", "uuid" ] }
 anyhow = "1.0.93"
 axum-macros = "0.4.2"
 thiserror = "2.0.3"
+twitch_oauth2 = {version = "0.14", features = [ "reqwest" ] }
+reqwest = { version = "0.12.9", features = ["json"] }
+twitch_api = {version="0.7.0-rc.8", features=["helix", "reqwest", "twitch_oauth2", "client"] }
+lazy_static = "1.4.0"
+dotenvy = "0.15.7"
+base64 = "0.22.1"
+chrono = { version = "0.4.39", features = ["serde"] }
