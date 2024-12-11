@@ -1,5 +1,4 @@
 import { Module, createStore } from 'vuex-smart-module';
-import auth from './modules/auth';
 import broadcaster from './modules/broadcaster';
 import chatBots from './modules/chat-bots';
 import chatBotChannels from './modules/chat-bot-channels';
@@ -12,7 +11,6 @@ import UI from './modules/ui';
 
 const root = new Module({
   modules: {
-    auth,
     broadcaster,
     chatBots,
     chatBotChannels,

@@ -1,9 +1,10 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
-import store from "../store/index";
 import Login from "../components/views/Login.vue";
+import TwitchCallback from "../components/views/TwitchCallback.vue";
 import DashboardBase from "../components/DashboardBase.vue";
 import Dashboard from "../components/views/Dashboard.vue";
 import ChatBots from "../components/views/ChatBots.vue";
+import { useAuthStore } from "@/stores/auth";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -14,6 +15,10 @@ const routes: Array<RouteRecordRaw> = [
     path: "/login",
     component: Login,
     meta: { reqUnauth: true },
+  },
+  {
+    path: "/twitch-callback",
+    component: TwitchCallback,
   },
   {
     path: "/dashboard",
@@ -66,9 +71,10 @@ const router = createRouter({
 });
 
 router.beforeEach(function (to, from, next) {
-  if (to.meta.reqAuth && !store.getters["auth/isAuthenticated"]) {
+  const userStore = useAuthStore();
+  if (to.meta.reqAuth && !userStore.isAuthenticated) {
     next("/login");
-  } else if (to.meta.reqUnauth && store.getters["auth/isAuthenticated"]) {
+  } else if (to.meta.reqUnauth && userStore.isAuthenticated) {
     next("/");
   } else {
     next();

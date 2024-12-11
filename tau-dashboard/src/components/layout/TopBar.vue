@@ -1,26 +1,23 @@
 <template>
   <div class="layout-top-bar">
-    <Button
-      label="Logout"
-      type="button"
-      class="p-button-raised p-button-secondary"
-      @click="logout()"
-    />
+    <Button label="Logout" type="button" class="p-button-raised p-button-secondary" @click="logout()" />
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue';
+import { useAuthStore } from '@/stores/auth';
+import { defineComponent } from 'vue';
 import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+
 export default defineComponent({
   name: 'TopBar',
   setup(props, context) {
-    const store = useStore();
+    const userStore = useAuthStore();
     const router = useRouter();
 
     function logout() {
-      context.emit('logout');
+      userStore.logout();
+      router.replace("/login");
     }
 
     return {

@@ -2,25 +2,10 @@
   <div class="container">
     <div class="login-panel">
       <img src="../../assets/img/logo-grey.png" class="logo" />
-      <p v-if="error !== null">{{ error }}</p>
+      <p v-if="error">Error logging in: {{ error }}</p>
       <div class="p-fluid">
         <form @submit.prevent="login()">
-          <span class="p-float-label mb-2">
-            <InputText
-              id="username"
-              v-model="username"
-              placeholder="Username"
-              type="text"
-            />
-          </span>
-          <span class="p-float-label">
-            <Password
-              v-model="password"
-              placeholder="Password"
-              :feedback="false"
-            />
-          </span>
-          <Button label="Login" class="mt-3" type="submit" />
+          <Button label="Login via Twitch" class="mt-3" type="submit" />
         </form>
       </div>
     </div>
@@ -28,36 +13,22 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import { useAuthStore } from "@/stores/auth";
+import { storeToRefs } from "pinia";
+import { defineComponent } from "vue";
 
 export default defineComponent({
-  name: 'Login',
+  name: "Login",
   setup() {
-    const store = useStore();
-    const router = useRouter();
+    const authStore = useAuthStore();
 
-    const username = ref();
-    const password = ref();
-
-    const error = computed(function () {
-      return store.getters['auth/error'];
-    });
+    const { error } = storeToRefs(authStore);
 
     async function login() {
-      const success = await store.dispatch('auth/login', {
-        username: username.value,
-        password: password.value,
-      });
-      if (success) {
-        router.replace('/');
-      }
+      (window as any).location = "/api/v1/auth/login";
     }
 
     return {
-      username,
-      password,
       login,
       error,
     };
