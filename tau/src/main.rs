@@ -2,6 +2,7 @@ use axum::extract::ws::{Message, WebSocket};
 use axum::extract::{State, WebSocketUpgrade};
 use axum::http::StatusCode;
 use axum::response::Response;
+use eventsub_ws::eventsub_websocket;
 use futures_util::StreamExt;
 use futures_util::{FutureExt, SinkExt};
 use serde::{Deserialize, Serialize};
@@ -23,6 +24,7 @@ use utoipa_axum::router::OpenApiRouter;
 use utoipa_axum::routes;
 use utoipa_swagger_ui::SwaggerUi;
 
+mod eventsub_ws;
 mod kv_store;
 mod settings;
 
@@ -191,7 +193,7 @@ async fn main() -> Result<(), anyhow::Error> {
 
     // TODO: check if '_sqlx_migrations' table exists;
     // if not, run a pgdump to a backup file
-    let initial_migration = true;
+    let initial_migration = false;
     if initial_migration {
         kv.migrate(&pool).await?;
     } else {
@@ -208,7 +210,7 @@ async fn main() -> Result<(), anyhow::Error> {
     sqlx::migrate!().run(&pool).await?;
     kv.save(&pool).await?;
 
-    let state = RouterState {
+    let state = Arc::new(RouterState {
         broadcast_event: tx,
         pool,
         oauth_state: HashMap::new().into(),
@@ -218,8 +220,7 @@ async fn main() -> Result<(), anyhow::Error> {
             superuser: "badcop_".to_string(),
         },
         kv: kv.into(),
-    };
-
+    });
     let (router, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
         .routes(routes!(health))
         .routes(routes!(ws_events))
@@ -229,10 +230,13 @@ async fn main() -> Result<(), anyhow::Error> {
             inner::secret_handlers::get_secret,
             inner::secret_handlers::post_secret
         ))
-        .with_state(Arc::new(state))
+        .with_state(state.clone())
         .split_for_parts();
 
     let router = router.merge(SwaggerUi::new("/swagger-ui").url("/apidoc/openapi.json", api));
+
+    let state = state.clone();
+    tokio::spawn(eventsub_websocket(state));
 
     let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, 3000)).await?;
     axum::serve(listener, router).await?;

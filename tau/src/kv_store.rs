@@ -1,4 +1,5 @@
 use crate::settings::Settings;
+use anyhow::Context as _;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
@@ -6,9 +7,10 @@ use std::io::{Read, Write};
 use std::mem::drop;
 use std::process::{Command, Stdio};
 use tokio::sync::{broadcast, Mutex};
+use twitch_oauth2::AccessToken;
 
 #[derive(Default, Serialize, Deserialize)]
-pub struct KVInner {
+pub struct KVStoreData {
     pub channel: String,
     pub twitch_app_access_token: String,
     pub channel_id: String,
@@ -19,8 +21,8 @@ pub struct KVInner {
 }
 
 pub struct KVStore {
-    data: std::sync::RwLock<KVInner>,
-    refresh_handle: Mutex<Option<broadcast::Sender<()>>>,
+    data: std::sync::RwLock<KVStoreData>,
+    refresh_handle: Mutex<Option<broadcast::Sender<AccessToken>>>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -33,13 +35,32 @@ struct MigrationRow {
 impl KVStore {
     pub fn new() -> Self {
         return KVStore {
-            data: std::sync::RwLock::new(KVInner::default()),
+            data: std::sync::RwLock::new(KVStoreData::default()),
             refresh_handle: Mutex::new(None),
         };
     }
 
-    pub async fn refresh_access_token(&self, config: &Settings, pool: &Pool<Postgres>) {
-        // TODO: check if we need to refresh in the first place
+    pub fn get_channel_id(&self) -> String {
+        return self.data.read().unwrap().channel_id.clone();
+    }
+
+    pub async fn refresh_access_token(
+        &self,
+        config: &Settings,
+        pool: &Pool<Postgres>,
+    ) -> anyhow::Result<AccessToken> {
+        {
+            let data = self.data.read().unwrap();
+            if data.twitch_access_token_expiration
+                > chrono::offset::Utc::now() + chrono::Duration::minutes(5)
+            {
+                // expires in the future
+                return Ok(data.twitch_access_token.clone().into());
+            } else {
+                println!("Now: {}", chrono::offset::Utc::now());
+                println!("Expires: {}", data.twitch_access_token_expiration);
+            }
+        }
         let mut handle = self.refresh_handle.lock().await;
         if handle.is_some() {
             // if the token is already being refreshed, we
@@ -47,9 +68,9 @@ impl KVStore {
             let tx = handle.as_mut().unwrap();
             let mut rx = tx.subscribe();
             drop(handle);
-            let _ = rx.recv().await;
+            rx.recv().await.context("hi")
         } else {
-            let (tx, _rx) = broadcast::channel(1);
+            let (tx, _rx) = broadcast::channel::<AccessToken>(1);
             *handle = Some(tx);
             drop(handle);
             // ok fine, let's start an async task to refresh the token
@@ -69,22 +90,25 @@ impl KVStore {
             })
             .await;
             if let Ok(Ok((access_token, duration, Some(refresh)))) = res {
-                let mut data = self.data.write().unwrap();
-                data.twitch_refresh_token = refresh.secret().to_string();
-                data.twitch_access_token = access_token.secret().to_string();
-                data.twitch_access_token_expiration = chrono::offset::Utc::now() + duration;
-                drop(data);
+                {
+                    let mut data = self.data.write().unwrap();
+                    data.twitch_refresh_token = refresh.secret().to_string();
+                    data.twitch_access_token = access_token.secret().to_string();
+                    data.twitch_access_token_expiration = chrono::offset::Utc::now() + duration;
+                }
+                let mut handle = self.refresh_handle.lock().await;
+                if handle.is_some() {
+                    let _ = handle.as_mut().unwrap().send(access_token.clone());
+                }
+                *handle = None;
+                drop(handle);
+                let _ = self.save(pool).await;
+                Ok(access_token)
             } else {
-                println!("ERROR refreshing twitch token");
+                let mut handle = self.refresh_handle.lock().await;
+                *handle = None;
+                Err(anyhow::anyhow!("error refreshing twitch token"))
             }
-            println!(
-                "after token: {}",
-                self.data.read().unwrap().twitch_access_token
-            );
-            let mut handle = self.refresh_handle.lock().await;
-            *handle = None;
-            drop(handle);
-            let _ = self.save(pool).await;
         }
     }
 

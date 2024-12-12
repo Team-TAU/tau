@@ -2220,6 +2220,7 @@ dependencies = [
  "sqlx",
  "thiserror 2.0.3",
  "tokio",
+ "tokio-tungstenite",
  "tower 0.5.1",
  "twitch_api",
  "twitch_oauth2",
@@ -2375,7 +2376,9 @@ checksum = "edc5f74e248dc973e0dbb7b74c7e0d6fcc301c694ff50049504004ef4d0cdcd9"
 dependencies = [
  "futures-util",
  "log",
+ "native-tls",
  "tokio",
+ "tokio-native-tls",
  "tungstenite",
 ]
 
@@ -2481,6 +2484,7 @@ dependencies = [
  "http",
  "httparse",
  "log",
+ "native-tls",
  "rand",
  "sha1",
  "thiserror 1.0.69",
