@@ -9,15 +9,15 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import { defineComponent, ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { useStore } from "vuex";
 
-import TopBar from './layout/TopBar.vue';
-import SideBar from './layout/SideBar.vue';
+import TopBar from "./layout/TopBar.vue";
+import SideBar from "./layout/SideBar.vue";
 
 export default defineComponent({
-  name: 'Dashboard',
+  name: "Dashboard",
   components: {
     TopBar,
     SideBar,
@@ -27,15 +27,17 @@ export default defineComponent({
     const router = useRouter();
 
     async function logout() {
-      await store.dispatch('auth/logout');
-      router.replace('/login');
+      await store.dispatch("auth/logout");
+      router.replace("/login");
     }
 
+    /*
     async function fetchEventSubscriptions() {
       await store.dispatch('eventSubscriptions/loadAll');
     }
+    */
 
-    onMounted(fetchEventSubscriptions);
+    // onMounted(fetchEventSubscriptions);
 
     return {
       logout,

@@ -9,40 +9,17 @@
               <strong>{{ data.subscription_type }}</strong>
             </template>
           </Column>
-          <Column
-            field="status"
-            headerStyle="width: 6rem; text-align: center"
-            header="Status"
-            bodyClass="text-center"
-            headerClass="text-center"
-          >
+          <Column field="status" headerStyle="width: 6rem; text-align: center" header="Status" bodyClass="text-center"
+            headerClass="text-center">
             <template #body="{ data }">
-              <i
-                class="pi pi-check text-green-500"
-                v-if="data.status === 'CON'"
-              ></i>
-              <i
-                class="pi pi-times text-orange-600"
-                v-else-if="data.status === 'DIS'"
-              ></i>
-              <i
-                class="pi pi-spin pi-spinner"
-                v-else-if="data.status === 'CTG'"
-              ></i>
+              <i class="pi pi-check text-green-500" v-if="data.status === 'CON'"></i>
+              <i class="pi pi-times text-orange-600" v-else-if="data.status === 'DIS'"></i>
+              <i class="pi pi-spin pi-spinner" v-else-if="data.status === 'CTG'"></i>
             </template>
           </Column>
-          <Column
-            field="testing"
-            headerStyle="width: 4rem; text-align: center"
-            header=""
-          >
+          <Column field="testing" headerStyle="width: 4rem; text-align: center" header="">
             <template #body="{ data }">
-              <Button
-                class="p-button-sm"
-                v-if="componentExists(data)"
-                @click="openTestDialog(data)"
-                >Test</Button
-              >
+              <Button class="p-button-sm" v-if="componentExists(data)" @click="openTestDialog(data)">Test</Button>
             </template>
           </Column>
         </DataTable>
@@ -51,28 +28,14 @@
     <div class="col-6">
       <Panel class="dark-header" header="Websocket Stream">
         <Accordion :multiple="true">
-          <AccordionTab
-            v-for="te in twitchEvents"
-            :key="te.event_id"
-            :header="twitchEventTitle(te)"
-          >
+          <AccordionTab v-for="te in twitchEvents" :key="te.event_id" :header="twitchEventTitle(te)">
             <div class="prism-container">
               <Prism language="json">{{ te }}</Prism>
             </div>
-            <Button
-              label="Replay"
-              type="button"
-              class="p-button-raised p-button-primary"
-              v-if="te.origin === 'twitch' || te.origin === 'replay'"
-              @click="replay(te)"
-            />
-            <Button
-              label="Replay Test"
-              type="button"
-              class="p-button-raised p-button-primary"
-              v-if="te.origin === 'test'"
-              @click="replayTest(te)"
-            />
+            <Button label="Replay" type="button" class="p-button-raised p-button-primary"
+              v-if="te.origin === 'twitch' || te.origin === 'replay'" @click="replay(te)" />
+            <Button label="Replay Test" type="button" class="p-button-raised p-button-primary"
+              v-if="te.origin === 'test'" @click="replayTest(te)" />
           </AccordionTab>
         </Accordion>
       </Panel>
@@ -128,7 +91,7 @@ export default defineComponent({
     const fetchEventSubscriptions = async () => {
       await store.dispatch('twitchEvents/loadAll');
       await store.dispatch('broadcaster/load');
-      tauStatusWs.connect();
+      //  tauStatusWs.connect();
       twitchEventWs.connect();
     };
 
@@ -143,7 +106,7 @@ export default defineComponent({
       return formExists;
     };
 
-    const tauStatusWs = inject('tauStatusWs') as TauStatusWsService;
+    // const tauStatusWs = inject('tauStatusWs') as TauStatusWsService;
     const twitchEventWs = inject('twitchEventWs') as TauTwitchEventWsService;
 
     onMounted(fetchEventSubscriptions);
@@ -160,8 +123,8 @@ export default defineComponent({
         twitchEvent.origin === 'replay'
           ? '[Replay] '
           : twitchEvent.origin === 'test'
-          ? '[Test] '
-          : '';
+            ? '[Test] '
+            : '';
       return twitchEvent.event_type in eventTitleMap
         ? msgSource + eventTitleMap[twitchEvent.event_type](twitchEvent)
         : msgSource + eventTitleMap['default'](twitchEvent);

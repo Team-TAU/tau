@@ -4,15 +4,15 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-axum = { version = "0.7.7", features = ["macros"]}
+axum = { version = "0.7.7", features = ["macros", "ws"]}
 serde = "1.0.215"
 serde_json = "1.0.132"
 tokio = { version = "1.41.1", features = ["full"] }
 tower = "0.5.1"
-utoipa = { version = "5.2.0", features = ["axum_extras", "debug"] }
+utoipa = { version = "5.2.0", features = ["axum_extras", "debug", "chrono"] }
 utoipa-axum = "0.1.2"
 utoipa-swagger-ui = { version = "8.0.3", features = ["axum"] }
-sqlx = { version = "0.8", features = [ "runtime-tokio", "postgres", "uuid" ] }
+sqlx = { version = "0.8", features = [ "runtime-tokio", "postgres", "uuid", "chrono", "json" ] }
 anyhow = "1.0.93"
 axum-macros = "0.4.2"
 thiserror = "2.0.3"
@@ -23,3 +23,4 @@ lazy_static = "1.4.0"
 dotenvy = "0.15.7"
 base64 = "0.22.1"
 chrono = { version = "0.4.39", features = ["serde"] }
+futures-util = "0.3.31"
