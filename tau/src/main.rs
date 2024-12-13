@@ -2,8 +2,8 @@ use axum::extract::ws::{Message, WebSocket};
 use axum::extract::{State, WebSocketUpgrade};
 use axum::http::StatusCode;
 use axum::response::Response;
-use eventsub_ws::eventsub_websocket;
-use futures_util::StreamExt;
+use eventsub_ws::EventSubWebSocket;
+use futures_util::{pin_mut, StreamExt};
 use futures_util::{FutureExt, SinkExt};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -236,7 +236,10 @@ async fn main() -> Result<(), anyhow::Error> {
     let router = router.merge(SwaggerUi::new("/swagger-ui").url("/apidoc/openapi.json", api));
 
     let state = state.clone();
-    tokio::spawn(eventsub_websocket(state));
+    tokio::spawn(async {
+        let websocket = EventSubWebSocket::new(state);
+        websocket.run_loop().await;
+    });
 
     let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, 3000)).await?;
     axum::serve(listener, router).await?;
