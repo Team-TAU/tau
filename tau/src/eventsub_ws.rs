@@ -1,14 +1,16 @@
+use std::future::Future;
 use std::{sync::Arc, time::Duration};
 
 use chrono::{DateTime, Utc};
-use futures_util::{future, pin_mut, StreamExt};
+use futures_util::future::OptionFuture;
+use futures_util::{pin_mut, StreamExt};
+use serde::ser::Error;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::types::JsonValue;
-use tokio::{
-    io::{AsyncReadExt, AsyncWriteExt},
-    time::timeout,
-};
+use tokio::net::unix::pipe::Sender;
+use tokio::sync::mpsc;
+use tokio::time::timeout;
 
 use crate::RouterState;
 use tokio_tungstenite::connect_async;
@@ -56,14 +58,38 @@ impl EventSubWebSocket {
     }
 
     pub async fn run_loop(&self) {
+        let mut url: String = EVENTSUB_URL.to_string();
+        let (tx, mut rx) = mpsc::channel::<String>(10);
         loop {
-            let _ = self.connect_websocket(EVENTSUB_URL).await;
-            println!("Websocket closed. Retrying in 5 seconds...");
-            tokio::time::sleep(std::time::Duration::from_millis(5000)).await;
+            let thing2 = self.connect_websocket(url.clone(), tx.clone());
+            url = EVENTSUB_URL.to_string();
+            tokio::pin!(thing2);
+            loop {
+                tokio::select! {
+                    val = rx.recv() => {
+                        println!("we got a reconnect message");
+                        if let Some(val) = val {
+                            url = val;
+                        }
+                        println!("ok let's get rid of that old thing");
+                        break;
+                    }
+                    _ = &mut thing2 => {
+                        println!("our websocket died of natural causes");
+                        println!("Websocket closed. Retrying in 5 seconds...");
+                        tokio::time::sleep(std::time::Duration::from_millis(5000)).await;
+                        break;
+                    }
+                };
+            }
         }
     }
 
-    async fn connect_websocket(&self, url: &str) -> anyhow::Result<()> {
+    async fn connect_websocket(
+        &self,
+        url: String,
+        reconnect: mpsc::Sender<String>,
+    ) -> anyhow::Result<()> {
         println!("websocket thread");
         let http_client = reqwest::Client::new();
         let access_token = self
@@ -71,8 +97,8 @@ impl EventSubWebSocket {
             .kv
             .refresh_access_token(&self.state.config, &self.state.pool)
             .await?;
-        println!("Access token: {}", access_token.secret());
-        let (ws_stream, _) = connect_async(url).await?;
+        // println!("Access token: {}", access_token.secret());
+        let (ws_stream, _) = connect_async(url.as_str()).await?;
         println!("WebSocket handshake has been successfully completed");
         let (_write, read) = ws_stream.split();
         pin_mut!(read);
@@ -88,15 +114,24 @@ impl EventSubWebSocket {
                     if data.is_empty() {
                         continue;
                     }
-                    println!("Data: '{}'", String::from_utf8(data.clone()).unwrap());
+                    // println!("Data: '{}'", String::from_utf8(data.clone()).unwrap());
                     let Ok(msg) = serde_json::from_slice::<Message>(&data) else {
                         break;
                     };
                     match msg.metadata.message_type.as_str() {
                         "session_reconnect" => {
-                            // need to start a new connection and keep
-                            // this one alive until the new one is good...
-                            // yikes
+                            let reconnect_url = msg
+                                .payload
+                                .get("session")
+                                .ok_or(anyhow::anyhow!("twitch broke"))?
+                                .get("reconnect_url")
+                                .ok_or(anyhow::anyhow!("twitch broke"))?
+                                .as_str()
+                                .ok_or(anyhow::anyhow!("twitch broke"))?;
+                            let _ = reconnect.send(reconnect_url.to_string()).await;
+                        }
+                        "notification" => {
+                            println!("Data: '{}'", String::from_utf8(data.clone()).unwrap());
                         }
                         "session_keepalive" => {}
                         "session_welcome" => {
@@ -126,7 +161,13 @@ impl EventSubWebSocket {
                             //     .send()
                             //     .await?;
                             // println!("{:?}", req.text().await.unwrap());
-                            println!("{}\n", serde_json::to_string(&request).unwrap());
+                            // println!("{}\n", serde_json::to_string(&request).unwrap());
+
+                            // This means we are in a reconnect scenario;
+                            // no need to resubscribe to our events.
+                            if EVENTSUB_URL != url {
+                                continue;
+                            }
                             let req = http_client
                                 .post(ADDSUB_URL)
                                 .header(
@@ -138,14 +179,15 @@ impl EventSubWebSocket {
                                 .body(serde_json::to_string(&request).unwrap())
                                 .send()
                                 .await;
-                            println!("{:?}", req);
-                            println!("{:?}", req.unwrap().text().await.unwrap());
+                            // println!("{:?}", req);
+                            // println!("{:?}", req.unwrap().text().await.unwrap());
                         }
                         _ => {}
                     }
                 }
             }
         }
+        println!("i am dead now");
         Ok(())
     }
 }
