@@ -98,7 +98,7 @@ async fn handle_socket(stream: WebSocket, state: Arc<crate::RouterState>) {
     let mut send_task = tokio::spawn(async move {
         while let Ok(msg) = rx.recv().await {
             // In any websocket error, break loop.
-            println!("Sending {}", msg);
+            let msg = serde_json::to_string(&msg).unwrap();
             if sender.send(Message::Text(msg)).await.is_err() {
                 println!("ahhhhh");
                 break;
@@ -137,22 +137,33 @@ async fn health() -> &'static str {
     "ok"
 }
 
+pub struct TwitchApiSpec {
+    pub event_sub: Vec<EventSub>,
+    pub helix: Vec<HelixEndpoint>,
+}
 pub struct RouterState {
     pub pool: Pool<Postgres>,
     pub oauth_state: Mutex<HashMap<CsrfToken, UserTokenBuilder>>,
     pub kv: kv_store::KVStore,
     pub config: settings::Settings,
-    pub broadcast_event: broadcast::Sender<String>,
+    pub broadcast_event: broadcast::Sender<crate::events::Event>,
+    pub spec: TwitchApiSpec,
 }
 
 #[derive(Serialize, Deserialize)]
-struct EventSub {
-    subscription_type: String,
-    name: String,
-    version: String,
-    description: String,
-    scope_required: Option<String>,
-    event_schema: Value,
+pub struct ConditionSchema {
+    pub required: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct EventSub {
+    pub subscription_type: String,
+    pub name: String,
+    pub version: String,
+    pub description: String,
+    pub scope_required: Option<String>,
+    pub event_schema: Value,
+    pub condition_schema: ConditionSchema,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
@@ -164,17 +175,18 @@ pub enum TokenType {
 }
 
 #[derive(Serialize, Deserialize)]
-struct HelixEndpoint {
-    description: String,
-    endpoint: String,
-    method: String,
-    reference_url: String,
-    token_type: TokenType,
-    scope: Option<String>,
+pub struct HelixEndpoint {
+    pub description: String,
+    pub endpoint: String,
+    pub method: String,
+    pub reference_url: String,
+    pub token_type: TokenType,
+    pub scope: Option<String>,
 }
 
 #[tokio::main]
 async fn main() -> Result<(), anyhow::Error> {
+    colog::init();
     let eventsub_spec: Vec<EventSub> =
         serde_json::from_str(include_str!("../../eventsub_subscriptions.json")).unwrap();
     let helix_spec: Vec<HelixEndpoint> =
@@ -186,7 +198,7 @@ async fn main() -> Result<(), anyhow::Error> {
 
     let mut kv = kv_store::KVStore::new();
 
-    let (tx, _rx) = broadcast::channel::<String>(100);
+    let (tx, _rx) = broadcast::channel::<crate::events::Event>(100);
 
     dotenvy::dotenv()?;
 
@@ -217,6 +229,10 @@ async fn main() -> Result<(), anyhow::Error> {
             twitch_app_id: std::env::var("TWITCH_APP_ID").unwrap(),
             twitch_client_secret: std::env::var("TWITCH_CLIENT_SECRET").unwrap(),
             superuser: "badcop_".to_string(),
+        },
+        spec: TwitchApiSpec {
+            event_sub: eventsub_spec,
+            helix: helix_spec,
         },
         kv: kv.into(),
     });
@@ -397,6 +413,7 @@ mod events {
     use axum::Json;
     use chrono::{DateTime, Utc};
     use serde::{Deserialize, Serialize};
+    use sqlx::types::Uuid;
     use utoipa::ToSchema;
     use utoipa_axum::router::OpenApiRouter;
     use utoipa_axum::routes;
@@ -406,15 +423,15 @@ mod events {
         OpenApiRouter::new().routes(routes!(get_events))
     }
 
-    #[derive(ToSchema, Serialize, Deserialize)]
-    struct Event {
-        id: String,
-        event_id: Option<String>,
-        event_data: sqlx::types::JsonValue,
-        event_type: String,
-        event_source: String,
-        created: DateTime<Utc>,
-        origin: Option<String>,
+    #[derive(ToSchema, Serialize, Deserialize, Clone, Debug)]
+    pub struct Event {
+        pub id: Uuid,
+        pub event_id: Option<String>,
+        pub event_data: sqlx::types::JsonValue,
+        pub event_type: String,
+        pub event_source: String,
+        pub created: DateTime<Utc>,
+        pub origin: Option<String>,
     }
     type Events = Vec<Event>;
 
@@ -428,10 +445,23 @@ mod events {
     async fn get_events(
         State(state): State<Arc<crate::RouterState>>,
     ) -> Result<impl IntoResponse, crate::AppError> {
-        let mut rows = sqlx::query_as!(Event, "SELECT id, event_id, event_data, event_type, event_source, created, NULL as origin FROM twitchevents_twitchevent LIMIT 10")
-            .fetch_all(&state.pool)
-            .await
-            .context("")?;
+        let mut rows = sqlx::query_as!(
+            Event,
+            "SELECT
+                id,
+                event_id,
+                event_data,
+                event_type,
+                event_source,
+                created,
+                NULL as origin
+            FROM twitchevents_twitchevent
+            ORDER BY created DESC
+            LIMIT 10"
+        )
+        .fetch_all(&state.pool)
+        .await
+        .context("")?;
 
         for row in rows.iter_mut() {
             row.origin = Some("twitch".to_string());

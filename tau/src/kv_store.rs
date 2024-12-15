@@ -125,8 +125,8 @@ impl KVStore {
     pub async fn save(&self, pool: &Pool<Postgres>) -> anyhow::Result<()> {
         sqlx::query!(
             "INSERT INTO kv_store (data)
-VALUES ($1)
-ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data",
+            VALUES ($1)
+            ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data",
             serde_json::to_string(&self.data).unwrap()
         )
         .execute(pool)
