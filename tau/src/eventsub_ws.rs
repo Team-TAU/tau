@@ -1,3 +1,4 @@
+use futures_util::future::join_all;
 use log::{debug, error, info, trace, warn};
 use std::{sync::Arc, time::Duration};
 
@@ -6,7 +7,7 @@ use futures_util::{pin_mut, StreamExt};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::types::JsonValue;
-use tokio::sync::mpsc;
+use tokio::sync::{mpsc, Mutex, RwLock};
 use tokio::time::timeout;
 use twitch_oauth2::AccessToken;
 use uuid::Uuid;
@@ -49,6 +50,13 @@ struct SubscriptionRequest {
 pub struct EventSubWebSocket {
     state: Arc<RouterState>,
     http_client: reqwest::Client,
+    id: RwLock<Option<String>>,
+}
+
+#[derive(Debug)]
+pub enum EventSubWorkerMessage {
+    AddStreamer { id: String },
+    RemoveStreamer { id: String },
 }
 
 impl EventSubWebSocket {
@@ -56,10 +64,11 @@ impl EventSubWebSocket {
         Self {
             state: state.clone(),
             http_client: reqwest::Client::new(),
+            id: RwLock::new(None),
         }
     }
 
-    pub async fn run_loop(&self) {
+    pub async fn run_loop(self, mut receiver: mpsc::Receiver<EventSubWorkerMessage>) {
         let mut url: String = EVENTSUB_URL.to_string();
         let (tx, mut rx) = mpsc::channel::<String>(10);
         loop {
@@ -68,13 +77,54 @@ impl EventSubWebSocket {
             tokio::pin!(thing2);
             loop {
                 tokio::select! {
+                    val = receiver.recv() => {
+                        warn!("we got a message {:?}", val);
+                        match val {
+                            Some(val) => {
+                                    match val {
+                                        EventSubWorkerMessage::AddStreamer { id } => {
+                                            let user_token = self
+                                                .state
+                                                .kv
+                                                .refresh_user_token(&self.state.config, &self.state.pool)
+                                                .await.unwrap();
+                                            let access_token = user_token.access_token;
+                                            self.subscribe(
+                                                "stream.online",
+                                                "1",
+                                                json!({
+                                                    "broadcaster_user_id": id,
+                                                }),
+                                                &access_token,
+                                            )
+                                            .await;
+                                            self.subscribe(
+                                                "stream.offline",
+                                                "1",
+                                                json!({
+                                                    "broadcaster_user_id": id,
+                                                }),
+                                                &access_token,
+                                            )
+                                            .await;
+                                        },
+                                        EventSubWorkerMessage::RemoveStreamer { id } => {
+                                         // TODO
+                                        // we need to store a HashMap of subscriptions -> id
+                                        // in order for this to properly work.
+                                        }
+                                    }
+                            }
+                            None => {}
+                        }
+                    },
                     val = rx.recv() => {
                         warn!("we got a reconnect message");
                         if let Some(val) = val {
                             url = val;
                         }
                         break;
-                    }
+                    },
                     _ = &mut thing2 => {
                         warn!("Websocket closed. Retrying in 5 seconds...");
                         tokio::time::sleep(std::time::Duration::from_millis(5000)).await;
@@ -90,10 +140,10 @@ impl EventSubWebSocket {
         url: String,
         reconnect: mpsc::Sender<String>,
     ) -> anyhow::Result<()> {
-        let access_token = self
+        let user_token = self
             .state
             .kv
-            .refresh_access_token(&self.state.config, &self.state.pool)
+            .refresh_user_token(&self.state.config, &self.state.pool)
             .await?;
         let (ws_stream, _) = connect_async(url.as_str()).await?;
         info!("EventSub WebSocket opened");
@@ -114,7 +164,7 @@ impl EventSubWebSocket {
                     let Ok(msg) = serde_json::from_slice::<Message>(&data) else {
                         break;
                     };
-                    self.process_message(msg, &reconnect, &url, &access_token)
+                    self.process_message(msg, &reconnect, &url, &user_token.access_token)
                         .await?;
                 }
             }
@@ -143,12 +193,18 @@ impl EventSubWebSocket {
             }
             "notification" => {
                 use crate::events::Event;
+                let sub_type = msg.metadata.subscription_type.unwrap();
+                match sub_type.as_str() {
+                    "stream.online" => {}
+                    "stream.offline" => {}
+                    _ => {}
+                }
                 let event = Event {
                     id: Uuid::new_v4(),
                     event_id: Some(msg.metadata.message_id),
                     event_source: "EventSub".into(),
                     origin: Some("twitch".into()),
-                    event_type: msg.metadata.subscription_type.unwrap().replace(".", "-"),
+                    event_type: sub_type.replace(".", "-"),
                     created: chrono::offset::Utc::now(),
                     event_data: msg
                         .payload
@@ -185,11 +241,25 @@ impl EventSubWebSocket {
                     .as_str()
                     .ok_or(anyhow::anyhow!("twitch broke"))?;
 
+                {
+                    let mut write_id = self.id.write().await;
+                    *write_id = Some(id.to_string());
+                }
+
                 // This means we are in a reconnect scenario;
                 // no need to resubscribe to our events.
                 if EVENTSUB_URL != url {
                     return Ok(());
                 }
+
+                let streamers = sqlx::query!(
+                    "SELECT
+                        twitch_id
+                    FROM streamers_streamer"
+                )
+                .fetch_all(&self.state.pool)
+                .await?;
+
                 let subscriptions = sqlx::query!(
                     "SELECT
                         name,
@@ -200,83 +270,120 @@ impl EventSubWebSocket {
                 .fetch_all(&self.state.pool)
                 .await?;
 
-                for sub in subscriptions.iter() {
-                    let conditions = match sub.name.as_str() {
-                        // raids are a special case - the same event
-                        // is used for incoming and outgoing raids, so
-                        // we have to subscribe twice with different conditions
-                        // to capture all of the events.
-                        "channel.raid" => {
-                            vec![
-                                json!({
-                                    "from_broadcaster_user_id": self.state.kv.get_channel_id(),
-                                }),
-                                json!({
-                                    "to_broadcaster_user_id": self.state.kv.get_channel_id(),
-                                }),
-                            ]
-                        }
-                        _ => {
-                            let mut condition = json!({});
-                            let spec = self
-                                .state
-                                .spec
-                                .event_sub
-                                .iter()
-                                .find(|spec| spec.name == sub.name)
-                                .ok_or(anyhow::anyhow!(
-                                    "could not find spec for {} v{}",
-                                    sub.name,
-                                    sub.version
-                                ))?;
-                            for required in spec.condition_schema.required.iter() {
-                                condition[required] = self.state.kv.get_channel_id().into();
-                            }
-                            vec![condition]
-                        }
-                    };
+                let subs = subscriptions
+                    .iter()
+                    .flat_map(|sub| {
+                        self.get_conditions(&sub.name)
+                            .unwrap()
+                            .iter()
+                            .map(|condition| {
+                                self.subscribe(
+                                    &sub.name,
+                                    &sub.version,
+                                    condition.clone(),
+                                    access_token,
+                                )
+                            })
+                            .collect::<Vec<_>>()
+                    })
+                    .chain(streamers.iter().flat_map(|streamer| {
+                        ["stream.online", "stream.offline"]
+                            .iter()
+                            .map(|key| {
+                                self.subscribe(
+                                    key,
+                                    "1",
+                                    json!({
+                                        "broadcaster_user_id": streamer.twitch_id,
+                                    }),
+                                    access_token,
+                                )
+                            })
+                            .collect::<Vec<_>>()
+                    }));
 
-                    for condition in conditions {
-                        let request = SubscriptionRequest {
-                            sub_type: sub.name.to_string(),
-                            version: sub.version.to_string(),
-                            condition,
-                            transport: Transport {
-                                method: "websocket".to_string(),
-                                session_id: id.to_string(),
-                            },
-                        };
-                        let req = self
-                            .http_client
-                            .post(ADDSUB_URL)
-                            .header("Authorization", format!("Bearer {}", access_token.secret()))
-                            .header("Content-Type", "application/json")
-                            .header("Client-Id", &self.state.config.twitch_app_id)
-                            .body(serde_json::to_string(&request).unwrap())
-                            .send()
-                            .await;
-                        match req {
-                            Ok(res) => {
-                                if !res.status().is_success() {
-                                    error!(
-                                        "Error subscribing to {} v{}\n{:?}",
-                                        sub.name,
-                                        sub.version,
-                                        res.text().await.unwrap()
-                                    );
-                                } else {
-                                    info!("Subscribed to {} v{}", sub.name, sub.version);
-                                }
-                            }
-                            Err(err) => {
-                                error!("Error subscribing: {:?}", err);
-                            }
-                        }
-                    }
-                }
+                join_all(subs).await;
             }
             _ => {}
         };
         Ok(())
+    }
+
+    fn get_conditions(&self, name: &str) -> anyhow::Result<Vec<serde_json::Value>> {
+        Ok(match name {
+            // raids are a special case - the same event
+            // is used for incoming and outgoing raids, so
+            // we have to subscribe twice with different conditions
+            // to capture all of the events.
+            "channel.raid" => {
+                vec![
+                    json!({
+                        "from_broadcaster_user_id": self.state.kv.get_channel_id(),
+                    }),
+                    json!({
+                        "to_broadcaster_user_id": self.state.kv.get_channel_id(),
+                    }),
+                ]
+            }
+            _ => {
+                let mut condition = json!({});
+                let spec = self
+                    .state
+                    .spec
+                    .event_sub
+                    .iter()
+                    .find(|spec| spec.name == name)
+                    .ok_or(anyhow::anyhow!("could not find spec for {}", name,))?;
+                for required in spec.condition_schema.required.iter() {
+                    condition[required] = self.state.kv.get_channel_id().into();
+                }
+                vec![condition]
+            }
+        })
+    }
+
+    async fn subscribe(
+        &self,
+        name: &str,
+        version: &str,
+        condition: serde_json::Value,
+        access_token: &AccessToken,
+    ) {
+        let request = SubscriptionRequest {
+            sub_type: name.to_string(),
+            version: version.to_string(),
+            condition,
+            transport: Transport {
+                method: "websocket".to_string(),
+                session_id: self.id.read().await.clone().unwrap_or("".to_string()),
+            },
+        };
+        let req = self
+            .http_client
+            .post(ADDSUB_URL)
+            .header("Authorization", format!("Bearer {}", access_token.secret()))
+            .header("Content-Type", "application/json")
+            .header("Client-Id", &self.state.config.twitch_app_id)
+            .body(serde_json::to_string(&request).unwrap())
+            .send()
+            .await;
+        match req {
+            Ok(res) => {
+                if !res.status().is_success() {
+                    error!(
+                        "Error subscribing to {} v{}\n{:?}\n{:?}",
+                        name,
+                        version,
+                        res.text().await.unwrap(),
+                        request.condition
+                    );
+                } else {
+                    info!("Subscribed to {} v{}", name, version);
+                }
+            }
+            Err(err) => {
+                error!("Error subscribing: {:?}", err);
+            }
+        }
     }
 }

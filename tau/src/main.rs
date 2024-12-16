@@ -2,7 +2,7 @@ use axum::extract::ws::{Message, WebSocket};
 use axum::extract::{State, WebSocketUpgrade};
 use axum::http::StatusCode;
 use axum::response::Response;
-use eventsub_ws::EventSubWebSocket;
+use eventsub_ws::{EventSubWebSocket, EventSubWorkerMessage};
 use futures_util::SinkExt;
 use futures_util::StreamExt;
 use log::{debug, error, info, trace, warn};
@@ -13,8 +13,9 @@ use sqlx::{Pool, Postgres};
 use std::collections::{HashMap, HashSet};
 use std::net::Ipv4Addr;
 use std::sync::Arc;
-use tokio::sync::{broadcast, Mutex};
-use twitch_oauth2::{CsrfToken, UserTokenBuilder};
+use tokio::sync::{broadcast, mpsc, Mutex};
+use twitch_api::HelixClient;
+use twitch_oauth2::{AccessToken, CsrfToken, TwitchToken, UserTokenBuilder};
 use utoipa::openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme};
 use utoipa::openapi::Components;
 
@@ -39,6 +40,8 @@ pub enum AppError {
     Anyhow(#[from] anyhow::Error),
     #[error("unauthorized")]
     Unauthorized,
+    #[error("bad request")]
+    BadRequest,
     #[error("csrf error")]
     CsrfError,
 }
@@ -50,6 +53,7 @@ impl axum::response::IntoResponse for AppError {
                 error!("{}", err);
                 StatusCode::INTERNAL_SERVER_ERROR
             }
+            AppError::BadRequest => StatusCode::BAD_REQUEST,
             AppError::Unauthorized => StatusCode::UNAUTHORIZED,
             AppError::CsrfError => StatusCode::UNAUTHORIZED,
         };
@@ -156,6 +160,8 @@ pub struct RouterState {
     pub config: settings::Settings,
     pub broadcast_event: broadcast::Sender<crate::events::Event>,
     pub spec: TwitchApiSpec,
+    pub helix_client: HelixClient<'static, reqwest::Client>,
+    pub send_to_worker: mpsc::Sender<EventSubWorkerMessage>,
 }
 
 #[derive(ToSchema, Serialize, Deserialize, Clone)]
@@ -250,6 +256,7 @@ async fn main() -> Result<(), anyhow::Error> {
         .unwrap();
     }
 
+    let (worker_tx, worker_rx) = mpsc::channel::<EventSubWorkerMessage>(10);
     let state = Arc::new(RouterState {
         broadcast_event: tx,
         pool,
@@ -265,7 +272,10 @@ async fn main() -> Result<(), anyhow::Error> {
             scopes,
         },
         kv: kv.into(),
+        helix_client: HelixClient::default(),
+        send_to_worker: worker_tx,
     });
+
     let (router, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
         .routes(routes!(health))
         .routes(routes!(ws_events))
@@ -281,10 +291,11 @@ async fn main() -> Result<(), anyhow::Error> {
 
     let state = state.clone();
     // TODO: uncomment
-    // tokio::spawn(async {
-    //     let websocket = EventSubWebSocket::new(state);
-    //     websocket.run_loop().await;
-    // });
+
+    tokio::spawn(async {
+        let websocket = EventSubWebSocket::new(state);
+        websocket.run_loop(worker_rx).await;
+    });
 
     let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, 3000)).await?;
     axum::serve(listener, router).await?;
@@ -295,13 +306,14 @@ mod twitch {
     use std::sync::Arc;
 
     use anyhow::Context as _;
-    use axum::extract::{Json, Path, State};
+    use axum::extract::{Json, Path, RawQuery, State};
     use axum::http::StatusCode;
     use axum::response::{IntoResponse, Redirect};
     use log::{debug, error, info, trace, warn};
     use reqwest::{Method, Url};
     use serde::{Deserialize, Serialize};
     use twitch_api::twitch_oauth2::UserTokenBuilder;
+    use twitch_oauth2::url::UrlQuery;
     use twitch_oauth2::CsrfToken;
     use utoipa_axum::router::OpenApiRouter;
     use utoipa_axum::routes;
@@ -323,19 +335,24 @@ mod twitch {
     pub async fn helix_passthrough(
         State(state): State<Arc<crate::RouterState>>,
         Path(path): Path<String>,
+        query: RawQuery,
         method: Method,
     ) -> Result<impl IntoResponse, crate::AppError> {
         // TODO: require authentication
-        let access_token = state
+        let user_token = state
             .kv
-            .refresh_access_token(&state.config, &state.pool)
+            .refresh_user_token(&state.config, &state.pool)
             .await?;
         let client = reqwest::Client::new();
-        let dest = format!("https://api.twitch.tv/helix/{}", path);
-        info!("{}: {}", method, dest);
+        let query = query.0.unwrap_or_default();
+        let dest = format!("https://api.twitch.tv/helix/{}?{}", path, query);
+        warn!("{:?}", &dest);
         let response = client
             .request(method, dest)
-            .header("Authorization", format!("Bearer {}", access_token.secret()))
+            .header(
+                "Authorization",
+                format!("Bearer {}", user_token.access_token.secret()),
+            )
             .header("Client-Id", &state.config.twitch_app_id)
             .send()
             .await
@@ -466,14 +483,17 @@ mod auth {
         State(state): State<Arc<crate::RouterState>>,
     ) -> Result<impl IntoResponse, crate::AppError> {
         // TODO: require authentication
-        let access_token = state
+        let user_token = state
             .kv
-            .refresh_access_token(&state.config, &state.pool)
+            .refresh_user_token(&state.config, &state.pool)
             .await?;
         let client = reqwest::Client::new();
         let req = client
             .get(twitch_oauth2::VALIDATE_URL.as_str())
-            .header("Authorization", format!("Bearer {}", access_token.secret()))
+            .header(
+                "Authorization",
+                format!("Bearer {}", user_token.access_token.secret()),
+            )
             .header("Content-Type", "application/json")
             .send()
             .await
@@ -534,7 +554,7 @@ mod auth {
         // TODO: require authentication
         state
             .kv
-            .refresh_access_token(&state.config, &state.pool)
+            .refresh_user_token(&state.config, &state.pool)
             .await;
         // let row = sqlx::query!(
         //     "SELECT id FROM users_user WHERE username = $1",
@@ -575,6 +595,8 @@ mod streamers {
     use utoipa_axum::router::OpenApiRouter;
     use utoipa_axum::routes;
     use uuid::Uuid;
+
+    use crate::eventsub_ws::EventSubWorkerMessage;
 
     pub fn router() -> OpenApiRouter<Arc<crate::RouterState>> {
         OpenApiRouter::new()
@@ -637,7 +659,20 @@ mod streamers {
     ) -> Result<impl IntoResponse, crate::AppError> {
         // TODO: require authentication
         let now = chrono::offset::Utc::now();
-        let id: Option<String> = None;
+        let user_token = state
+            .kv
+            .refresh_user_token(&state.config, &state.pool)
+            .await?;
+        let id: Option<String> = Some(
+            state
+                .helix_client
+                .get_user_from_login(&payload.twitch_username, &user_token)
+                .await
+                .map_err(|_| crate::AppError::BadRequest)?
+                .ok_or(crate::AppError::BadRequest)?
+                .id
+                .into(),
+        );
         let result = sqlx::query_as!(
             Streamer,
             "INSERT INTO streamers_streamer
@@ -660,7 +695,18 @@ mod streamers {
         )
         .fetch_one(&state.pool)
         .await
-        .context("")?;
+        .context("failed to insert")?;
+
+        let id = result
+            .twitch_id
+            .clone()
+            .ok_or(crate::AppError::BadRequest)?;
+
+        state
+            .send_to_worker
+            .send(EventSubWorkerMessage::AddStreamer { id })
+            .await
+            .context("failed to subscribe to events")?;
 
         Ok(Json(result))
     }
@@ -670,11 +716,21 @@ mod streamers {
         Path(user_id): Path<Uuid>,
     ) -> Result<impl IntoResponse, crate::AppError> {
         // TODO: require authentication
-        sqlx::query!("DELETE FROM streamers_streamer WHERE id = $1", user_id)
-            .execute(&state.pool)
-            .await
-            .context("")?;
+        let result = sqlx::query!(
+            "DELETE FROM streamers_streamer WHERE id = $1 RETURNING twitch_id",
+            user_id
+        )
+        .fetch_one(&state.pool)
+        .await
+        .context("")?;
 
+        let id = result.twitch_id.ok_or(crate::AppError::BadRequest)?;
+
+        state
+            .send_to_worker
+            .send(EventSubWorkerMessage::RemoveStreamer { id })
+            .await
+            .context("failed to subscribe to events")?;
         Ok(())
     }
 }

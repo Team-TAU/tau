@@ -7,7 +7,7 @@ use std::io::{Read, Write};
 use std::mem::drop;
 use std::process::{Command, Stdio};
 use tokio::sync::{broadcast, Mutex};
-use twitch_oauth2::AccessToken;
+use twitch_oauth2::UserToken;
 
 #[derive(Default, Serialize, Deserialize)]
 pub struct KVStoreData {
@@ -22,7 +22,8 @@ pub struct KVStoreData {
 
 pub struct KVStore {
     data: std::sync::RwLock<KVStoreData>,
-    refresh_handle: Mutex<Option<broadcast::Sender<AccessToken>>>,
+    refresh_handle: Mutex<Option<broadcast::Sender<UserToken>>>,
+    user_token: std::sync::RwLock<Option<UserToken>>,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
@@ -37,6 +38,7 @@ impl KVStore {
         return KVStore {
             data: std::sync::RwLock::new(KVStoreData::default()),
             refresh_handle: Mutex::new(None),
+            user_token: std::sync::RwLock::new(None),
         };
     }
 
@@ -44,21 +46,40 @@ impl KVStore {
         return self.data.read().unwrap().channel_id.clone();
     }
 
-    pub async fn refresh_access_token(
+    pub async fn current_user_token(&self) -> anyhow::Result<UserToken> {
+        let cloned = {
+            let user_token = self.user_token.read().unwrap();
+            user_token.clone()
+        };
+        match cloned {
+            Some(token) => Ok(token),
+            None => {
+                let client = reqwest::Client::new();
+                let token = {
+                    let data = self.data.read().unwrap();
+                    data.twitch_access_token.clone()
+                };
+                let token = UserToken::from_token(&client, token.into()).await?;
+                let mut user_token = self.user_token.write().unwrap();
+                *user_token = Some(token.clone());
+                Ok(token)
+            }
+        }
+    }
+
+    pub async fn refresh_user_token(
         &self,
         config: &Settings,
         pool: &Pool<Postgres>,
-    ) -> anyhow::Result<AccessToken> {
+    ) -> anyhow::Result<UserToken> {
         {
-            let data = self.data.read().unwrap();
-            if data.twitch_access_token_expiration
-                > chrono::offset::Utc::now() + chrono::Duration::minutes(5)
-            {
+            let expiration = {
+                let data = self.data.read().unwrap();
+                data.twitch_access_token_expiration
+            };
+            if expiration > chrono::offset::Utc::now() + chrono::Duration::minutes(5) {
                 // expires in the future
-                return Ok(data.twitch_access_token.clone().into());
-            } else {
-                println!("Now: {}", chrono::offset::Utc::now());
-                println!("Expires: {}", data.twitch_access_token_expiration);
+                return self.current_user_token().await;
             }
         }
         let mut handle = self.refresh_handle.lock().await;
@@ -70,7 +91,8 @@ impl KVStore {
             drop(handle);
             rx.recv().await.context("hi")
         } else {
-            let (tx, _rx) = broadcast::channel::<AccessToken>(1);
+            let client = reqwest::Client::new();
+            let (tx, _rx) = broadcast::channel::<UserToken>(1);
             *handle = Some(tx);
             drop(handle);
             // ok fine, let's start an async task to refresh the token
@@ -96,14 +118,15 @@ impl KVStore {
                     data.twitch_access_token = access_token.secret().to_string();
                     data.twitch_access_token_expiration = chrono::offset::Utc::now() + duration;
                 }
+                let user_token = UserToken::from_token(&client, access_token).await?;
                 let mut handle = self.refresh_handle.lock().await;
                 if handle.is_some() {
-                    let _ = handle.as_mut().unwrap().send(access_token.clone());
+                    let _ = handle.as_mut().unwrap().send(user_token.clone());
                 }
                 *handle = None;
                 drop(handle);
                 let _ = self.save(pool).await;
-                Ok(access_token)
+                Ok(user_token)
             } else {
                 let mut handle = self.refresh_handle.lock().await;
                 *handle = None;
