@@ -21,46 +21,46 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import { defineComponent, ref, computed } from "vue";
+import { useRouter } from "vue-router";
+import { useStore } from "vuex";
 export default defineComponent({
-  name: 'SideBar',
+  name: "SideBar",
   setup(props, context) {
     const store = useStore();
     const router = useRouter();
-    const username = ref(localStorage.getItem('tau-username'));
+    const username = ref(localStorage.getItem("tau-username"));
     const items = ref([
       {
-        label: 'Dashboard',
-        icon: 'pi pi-desktop',
-        routeTo: '/dashboard',
+        label: "Dashboard",
+        icon: "pi pi-desktop",
+        routeTo: "/dashboard",
       },
       {
-        label: 'Streamers',
-        icon: 'pi pi-video',
-        routeTo: '/dashboard/streamers',
+        label: "Streamers",
+        icon: "pi pi-video",
+        routeTo: "/dashboard/streamers",
       },
-      {
+      /*      {
         label: 'ChatBots',
         icon: 'pi pi-android',
         routeTo: '/dashboard/chat-bots',
+      }, */
+      {
+        label: "Config",
+        icon: "pi pi-cog",
+        routeTo: "/dashboard/config",
       },
       {
-        label: 'Config',
-        icon: 'pi pi-cog',
-        routeTo: '/dashboard/config',
+        label: "User",
+        icon: "pi pi-user",
+        routeTo: "/dashboard/user",
       },
-      {
-        label: 'User',
-        icon: 'pi pi-user',
-        routeTo: '/dashboard/user',
-      },
-      {
-        label: 'Webhooks',
-        icon: 'pi pi-sitemap',
-        routeTo: '/dashboard/webhook-monitor',
-      },
+      /* {
+        label: "Webhooks",
+        icon: "pi pi-sitemap",
+        routeTo: "/dashboard/webhook-monitor",
+      }, */
     ]);
     return {
       items,

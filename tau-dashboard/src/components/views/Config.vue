@@ -1,6 +1,6 @@
 <template>
   <h1>TAU Settings</h1>
-  <Panel class="dark-header" header="General TAU settings">
+  <!-- <Panel class="dark-header" header="General TAU settings">
     <DataTable :value="settings" stripedRows>
       <Column field="active" header="" headerStyle="width: 6rem;">
         <template #body="{ data }">
@@ -15,7 +15,7 @@
       <Column field="description" header="Description"></Column>
     </DataTable>
     <Button @click="updateSettings()">Update Settings</Button>
-  </Panel>
+</Panel> -->
   <Panel class="dark-header" header="Twitch EventSub Subscriptions">
     <p>
       Check the subscriptions you would like to use, then click "Update Token"
@@ -50,10 +50,7 @@
       <Column field="scope" header="Scope" headerStyle="width: 20rem;"></Column>
       <Column field="scope" header="Endpoints">
         <template #body="{ data }">
-          <template
-            v-for="endpoint of scopeEndpoints[data.id]"
-            :key="endpoint.id"
-          >
+          <template v-for="endpoint of scopeEndpoints[data.scope]">
             <a :href="endpoint.reference_url" target="_blank">{{
               endpoint.description
             }}</a
@@ -67,91 +64,94 @@
 </template>
 
 <script lang="ts">
-import { EventSubscription } from '@/models/event-subscription';
-import { TwitchHelixEndpoint } from '@/models/twitch-helix-endpoint';
-import { TwitchOAuthScope } from '@/models/twitch-oauth-scope';
-import baseUrl from '@/services/base-api-url';
-import api$ from '@/services/tau-apis';
+import { EventSubscription } from "@/models/event-subscription";
+import { TwitchHelixEndpoint } from "@/models/twitch-helix-endpoint";
+import { TwitchOAuthScope } from "@/models/twitch-oauth-scope";
+import baseUrl from "@/services/base-api-url";
+import api$ from "@/services/tau-apis";
 
-import { computed, defineComponent, onMounted, ref } from 'vue';
-import { useStore } from 'vuex';
+import { computed, defineComponent, onMounted, ref } from "vue";
+import { useStore } from "vuex";
 
 export default defineComponent({
-  name: 'Config',
+  name: "Config",
   setup() {
     const store = useStore();
 
     const settings = ref([
       {
         active: true,
-        setting: 'Use IRC',
+        setting: "Use IRC",
         description:
-          'Use IRC for grabbing emote data for Channel Point Redemptions',
+          "Use IRC for grabbing emote data for Channel Point Redemptions",
       },
     ]);
 
     const eventSubs = computed(function () {
-      return store.getters['eventSubscriptions/all'];
+      return store.getters["eventSubscriptions/all"];
     });
 
     const scopes = computed(function () {
-      console.log(store.getters['twitchOAuthScopes/all']);
-      return store.getters['twitchOAuthScopes/all'];
+      console.log(store.getters["twitchOAuthScopes/all"]);
+      return store.getters["twitchOAuthScopes/all"];
     });
 
     const scopeEndpoints = computed(function () {
       const endpoints = store.getters[
-        'twitchHelixEndpoints/all'
+        "twitchHelixEndpoints/all"
       ] as TwitchHelixEndpoint[];
       const scopes = store.getters[
-        'twitchOAuthScopes/all'
+        "twitchOAuthScopes/all"
       ] as TwitchOAuthScope[];
       const endpointsByScope: { [key: string]: TwitchHelixEndpoint[] } = {};
 
       for (let scope of scopes) {
-        endpointsByScope[scope.id] = endpoints.filter(
-          (endpoint) => endpoint.scope === scope.id,
+        endpointsByScope[scope.scope] = endpoints.filter(
+          (endpoint) => endpoint.scope === scope.scope,
         );
       }
+      console.log(endpointsByScope);
       return endpointsByScope;
     });
 
     async function updateEventSubs() {
       const eventSubscriptions: EventSubscription[] =
-        store.getters['eventSubscriptions/all'];
+        store.getters["eventSubscriptions/all"];
       const payload = eventSubscriptions.map((es) => {
         return {
           id: es.id,
           active: es.active,
         };
       });
-      await store.dispatch('eventSubscriptions/bulkActivate', payload);
+      await store.dispatch("eventSubscriptions/bulkActivate", payload);
       window.location.href = `${baseUrl}/refresh-token-scope/`;
     }
 
     async function updateTokenScopes() {
       const scopeData = scopes.value as TwitchOAuthScope[];
-      const payload = scopeData.map((scope) => ({ ...scope }));
-      await store.dispatch('twitchOAuthScopes/bulkUpdate', payload);
-      window.location.href = `${baseUrl}/refresh-token-scope/`;
+      const payload = scopeData
+        .filter((scope) => scope.required)
+        .map((scope) => scope.scope);
+      console.log(payload);
+      // window.location.href = `${baseUrl}/refresh-token-scope/`;
     }
 
     async function updateSettings() {
-      console.log('update settings called!');
+      console.log("update settings called!");
       for (const setting of settings.value) {
-        if (setting.setting === 'Use IRC') {
+        if (setting.setting === "Use IRC") {
           const payload = {
             value: setting.active,
           };
-          const res = await api$.tau.put('settings/use_irc', payload);
+          const res = await api$.tau.put("settings/use_irc", payload);
         }
       }
     }
 
     onMounted(async () => {
-      await store.dispatch('twitchOAuthScopes/loadAll');
-      await store.dispatch('twitchHelixEndpoints/loadAll');
-      const irc_res = await api$.tau.get('settings/use_irc');
+      await store.dispatch("twitchOAuthScopes/loadAll");
+      await store.dispatch("twitchHelixEndpoints/loadAll");
+      const irc_res = await api$.tau.get("settings/use_irc");
       settings.value[0].active = irc_res.use_irc;
     });
 

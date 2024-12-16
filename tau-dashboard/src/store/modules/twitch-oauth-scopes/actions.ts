@@ -1,10 +1,10 @@
-import { Actions } from 'vuex-smart-module';
-import TwitchOAuthScopeGetters from './getters';
-import TwitchOAuthScopeMutations from './mutations';
-import TwitchOAuthScopesState from './state';
+import { Actions } from "vuex-smart-module";
+import TwitchOAuthScopeGetters from "./getters";
+import TwitchOAuthScopeMutations from "./mutations";
+import TwitchOAuthScopesState from "./state";
 
-import api$ from '@/services/tau-apis';
-import { TwitchOAuthScope } from '@/models/twitch-oauth-scope';
+import api$ from "@/services/tau-apis";
+import { TwitchOAuthScope } from "@/models/twitch-oauth-scope";
 
 export default class TwitchOAuthScopesActions extends Actions<
   TwitchOAuthScopesState,
@@ -13,10 +13,10 @@ export default class TwitchOAuthScopesActions extends Actions<
   TwitchOAuthScopesActions
 > {
   loadAll(): Promise<boolean> {
-    this.commit('loadAllRequest');
-    return api$.tau.get('twitch/scopes').then(
+    this.commit("loadAllRequest");
+    return api$.tau.get("auth/scopes").then(
       (resp) => {
-        this.commit('loadAllSuccess', {
+        this.commit("loadAllSuccess", {
           twitchOAuthScopes: resp,
         });
         return true;
@@ -30,9 +30,9 @@ export default class TwitchOAuthScopesActions extends Actions<
     );
   }
   bulkUpdate(payload: TwitchOAuthScope[]) {
-    return api$.tau.put('twitch/scopes/bulk', payload).then(
+    return api$.tau.put("twitch/scopes/bulk", payload).then(
       (resp) => {
-        this.commit('loadAllSuccess', {
+        this.commit("loadAllSuccess", {
           twitchOAuthScopes: resp,
         });
         return true;

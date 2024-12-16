@@ -5,11 +5,12 @@ use axum::response::Response;
 use eventsub_ws::EventSubWebSocket;
 use futures_util::SinkExt;
 use futures_util::StreamExt;
+use log::{debug, error, info, trace, warn};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{Pool, Postgres};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::net::Ipv4Addr;
 use std::sync::Arc;
 use tokio::sync::{broadcast, Mutex};
@@ -18,7 +19,7 @@ use utoipa::openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme};
 use utoipa::openapi::Components;
 
 use tokio::net::TcpListener;
-use utoipa::{Modify, OpenApi};
+use utoipa::{Modify, OpenApi, ToSchema};
 use utoipa_axum::router::OpenApiRouter;
 use utoipa_axum::routes;
 use utoipa_swagger_ui::SwaggerUi;
@@ -28,6 +29,7 @@ mod kv_store;
 mod settings;
 
 const AUTH_TAG: &str = "auth";
+const TWITCH_TAG: &str = "twitch";
 
 use thiserror::Error;
 
@@ -43,8 +45,11 @@ pub enum AppError {
 
 impl axum::response::IntoResponse for AppError {
     fn into_response(self) -> axum::response::Response {
-        let status = match self {
-            AppError::Anyhow(..) => StatusCode::INTERNAL_SERVER_ERROR,
+        let status = match &self {
+            AppError::Anyhow(err) => {
+                error!("{}", err);
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
             AppError::Unauthorized => StatusCode::UNAUTHORIZED,
             AppError::CsrfError => StatusCode::UNAUTHORIZED,
         };
@@ -56,6 +61,7 @@ impl axum::response::IntoResponse for AppError {
 #[openapi(
     tags(
         (name = AUTH_TAG, description = "Auth API endpoints"),
+        (name = TWITCH_TAG, description = "Twitch API endpoints"),
     ),
         modifiers(&SecurityAddon)
 )]
@@ -88,6 +94,7 @@ async fn ws_events(ws: WebSocketUpgrade, State(state): State<Arc<crate::RouterSt
 }
 
 async fn handle_socket(stream: WebSocket, state: Arc<crate::RouterState>) {
+    // TODO: require authentication
     let (mut sender, mut receiver) = stream.split();
     while let Some(Ok(msg)) = receiver.next().await {
         println!("{}", msg.to_text().unwrap());
@@ -125,7 +132,7 @@ async fn handle_socket(stream: WebSocket, state: Arc<crate::RouterState>) {
 /// Get health of the API.
 #[utoipa::path(
     method(get, head),
-    path = "/api/health",
+    path = "/api/v1/health",
     responses(
         (status = OK, description = "Success", body = str, content_type = "text/plain")
     ),
@@ -140,6 +147,7 @@ async fn health() -> &'static str {
 pub struct TwitchApiSpec {
     pub event_sub: Vec<EventSub>,
     pub helix: Vec<HelixEndpoint>,
+    pub scopes: HashSet<String>,
 }
 pub struct RouterState {
     pub pool: Pool<Postgres>,
@@ -150,12 +158,12 @@ pub struct RouterState {
     pub spec: TwitchApiSpec,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(ToSchema, Serialize, Deserialize, Clone)]
 pub struct ConditionSchema {
     pub required: Vec<String>,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(ToSchema, Serialize, Deserialize, Clone)]
 pub struct EventSub {
     pub subscription_type: String,
     pub name: String,
@@ -166,7 +174,7 @@ pub struct EventSub {
     pub condition_schema: ConditionSchema,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+#[derive(ToSchema, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum TokenType {
     #[serde(rename = "OAuth")]
     UserToken,
@@ -174,7 +182,7 @@ pub enum TokenType {
     AppAccessToken,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(ToSchema, Serialize, Deserialize, Clone)]
 pub struct HelixEndpoint {
     pub description: String,
     pub endpoint: String,
@@ -191,6 +199,12 @@ async fn main() -> Result<(), anyhow::Error> {
         serde_json::from_str(include_str!("../../eventsub_subscriptions.json")).unwrap();
     let helix_spec: Vec<HelixEndpoint> =
         serde_json::from_str(include_str!("../../helix_endpoints.json")).unwrap();
+    let scopes: std::collections::HashSet<String> = eventsub_spec
+        .iter()
+        .filter_map(|spec| spec.scope_required.clone())
+        .chain(helix_spec.iter().filter_map(|spec| spec.scope.clone()))
+        .collect();
+
     let pool = PgPoolOptions::new()
         .max_connections(5)
         .connect("postgres://root:root@localhost/tau_db")
@@ -221,6 +235,21 @@ async fn main() -> Result<(), anyhow::Error> {
     sqlx::migrate!().run(&pool).await?;
     kv.save(&pool).await?;
 
+    // import new EventSub subscriptions
+    for sub in eventsub_spec.iter() {
+        sqlx::query!(
+            "INSERT INTO twitch_twitcheventsubsubscription
+        (name, version, active) VALUES ($1, $2, $3)
+        ON CONFLICT (name) DO UPDATE SET active = ((SELECT version FROM twitch_twitcheventsubsubscription WHERE name = EXCLUDED.name) = EXCLUDED.version), version = EXCLUDED.VERSION",
+            &sub.name,
+            &sub.version,
+            false
+        )
+        .execute(&pool)
+        .await
+        .unwrap();
+    }
+
     let state = Arc::new(RouterState {
         broadcast_event: tx,
         pool,
@@ -233,6 +262,7 @@ async fn main() -> Result<(), anyhow::Error> {
         spec: TwitchApiSpec {
             event_sub: eventsub_spec,
             helix: helix_spec,
+            scopes,
         },
         kv: kv.into(),
     });
@@ -241,24 +271,79 @@ async fn main() -> Result<(), anyhow::Error> {
         .routes(routes!(ws_events))
         .nest("/api/v1/auth", auth::router())
         .nest("/api/v1/twitch-events", events::router())
-        .routes(routes!(
-            inner::secret_handlers::get_secret,
-            inner::secret_handlers::post_secret
-        ))
+        .nest("/api/v1/streamers", streamers::router())
+        .routes(routes!(twitch::get_helix_endpoints))
+        .routes(routes!(twitch::helix_passthrough))
         .with_state(state.clone())
         .split_for_parts();
 
     let router = router.merge(SwaggerUi::new("/swagger-ui").url("/apidoc/openapi.json", api));
 
     let state = state.clone();
-    tokio::spawn(async {
-        let websocket = EventSubWebSocket::new(state);
-        websocket.run_loop().await;
-    });
+    // TODO: uncomment
+    // tokio::spawn(async {
+    //     let websocket = EventSubWebSocket::new(state);
+    //     websocket.run_loop().await;
+    // });
 
     let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, 3000)).await?;
     axum::serve(listener, router).await?;
     Ok(())
+}
+
+mod twitch {
+    use std::sync::Arc;
+
+    use anyhow::Context as _;
+    use axum::extract::{Json, Path, State};
+    use axum::http::StatusCode;
+    use axum::response::{IntoResponse, Redirect};
+    use log::{debug, error, info, trace, warn};
+    use reqwest::{Method, Url};
+    use serde::{Deserialize, Serialize};
+    use twitch_api::twitch_oauth2::UserTokenBuilder;
+    use twitch_oauth2::CsrfToken;
+    use utoipa_axum::router::OpenApiRouter;
+    use utoipa_axum::routes;
+
+    #[utoipa::path(get, path = "/api/v1/twitch/helix-endpoints",
+        responses(
+        (status = OK, body = Vec<crate::HelixEndpoint>),
+    ), tag = super::TWITCH_TAG)]
+    pub async fn get_helix_endpoints(
+        State(state): State<Arc<crate::RouterState>>,
+    ) -> Result<impl IntoResponse, crate::AppError> {
+        Ok(Json(state.spec.helix.clone()))
+    }
+
+    #[utoipa::path(method(get, post, patch, put, delete), path = "/api/twitch/helix/:path",
+        responses(
+        (status = OK, body = Vec<crate::HelixEndpoint>),
+    ), tag = super::TWITCH_TAG)]
+    pub async fn helix_passthrough(
+        State(state): State<Arc<crate::RouterState>>,
+        Path(path): Path<String>,
+        method: Method,
+    ) -> Result<impl IntoResponse, crate::AppError> {
+        // TODO: require authentication
+        let access_token = state
+            .kv
+            .refresh_access_token(&state.config, &state.pool)
+            .await?;
+        let client = reqwest::Client::new();
+        let dest = format!("https://api.twitch.tv/helix/{}", path);
+        info!("{}: {}", method, dest);
+        let response = client
+            .request(method, dest)
+            .header("Authorization", format!("Bearer {}", access_token.secret()))
+            .header("Client-Id", &state.config.twitch_app_id)
+            .send()
+            .await
+            .context("spaghetti")?;
+        let status = response.status().clone();
+        let json: sqlx::types::JsonValue = response.json().await.context("not json")?;
+        Ok((status, Json(json)).into_response())
+    }
 }
 
 mod auth {
@@ -282,6 +367,12 @@ mod auth {
         username: String,
     }
 
+    #[derive(ToSchema, Serialize)]
+    struct ScopeResponse {
+        scope: String,
+        required: bool,
+    }
+
     #[derive(ToSchema, Serialize, Deserialize)]
     struct TokenRequest {
         username: String,
@@ -299,6 +390,7 @@ mod auth {
             .routes(routes!(post_token_auth))
             .routes(routes!(login_auth))
             .routes(routes!(login_redirect_landing))
+            .routes(routes!(get_scopes))
     }
 
     #[utoipa::path(get, path = "/login",
@@ -364,6 +456,71 @@ mod auth {
         }
     }
 
+    #[utoipa::path(get, path = "/scopes",
+        responses(
+        (status = OK, body = Vec<ScopeResponse>),
+        (status = FORBIDDEN, body = ())
+    ), tag = super::AUTH_TAG)]
+    #[axum::debug_handler]
+    async fn get_scopes(
+        State(state): State<Arc<crate::RouterState>>,
+    ) -> Result<impl IntoResponse, crate::AppError> {
+        // TODO: require authentication
+        let access_token = state
+            .kv
+            .refresh_access_token(&state.config, &state.pool)
+            .await?;
+        let client = reqwest::Client::new();
+        let req = client
+            .get(twitch_oauth2::VALIDATE_URL.as_str())
+            .header("Authorization", format!("Bearer {}", access_token.secret()))
+            .header("Content-Type", "application/json")
+            .send()
+            .await
+            .context("failed to validate")?;
+
+        let resp: twitch_oauth2::ValidatedToken = req.json().await.context("failed to validate")?;
+        let scopes = resp.scopes.ok_or(anyhow::anyhow!("no scopes wut"))?;
+
+        let response: Vec<_> = state
+            .spec
+            .scopes
+            .iter()
+            .map(|scope| ScopeResponse {
+                scope: scope.clone(),
+                required: scopes
+                    .iter()
+                    .find(|active| active.as_str() == scope)
+                    .is_some(),
+            })
+            .collect();
+
+        // let row = sqlx::query!(
+        //     "SELECT id FROM users_user WHERE username = $1",
+        //     payload.username
+        // )
+        // .fetch_optional(&state.pool)
+        // .await
+        // .context("")?;
+        // if let Some(_) = row {
+        //     if payload.password == "hunter2" {
+        //         Ok((
+        //             StatusCode::OK,
+        //             Json(LoginResponse {
+        //                 token: String::from("*******"),
+        //                 username: "".to_string(),
+        //             }),
+        //         )
+        //             .into_response())
+        //     } else {
+        //         Ok(StatusCode::FORBIDDEN.into_response())
+        //     }
+        // } else {
+        //     Ok(StatusCode::FORBIDDEN.into_response())
+        // }
+        Ok(Json(response))
+    }
+
     #[utoipa::path(post, path = "/token",
         responses(
         (status = OK, body = LoginResponse),
@@ -374,6 +531,7 @@ mod auth {
         State(state): State<Arc<crate::RouterState>>,
         Json(payload): Json<TokenRequest>,
     ) -> Result<impl IntoResponse, crate::AppError> {
+        // TODO: require authentication
         state
             .kv
             .refresh_access_token(&state.config, &state.pool)
@@ -404,6 +562,123 @@ mod auth {
         Ok(())
     }
 }
+mod streamers {
+    use std::sync::Arc;
+
+    use anyhow::Context as _;
+    use axum::extract::State;
+    use axum::extract::{Json, Path};
+    use axum::response::IntoResponse;
+    use chrono::{DateTime, Utc};
+    use serde::{Deserialize, Serialize};
+    use utoipa::ToSchema;
+    use utoipa_axum::router::OpenApiRouter;
+    use utoipa_axum::routes;
+    use uuid::Uuid;
+
+    pub fn router() -> OpenApiRouter<Arc<crate::RouterState>> {
+        OpenApiRouter::new()
+            .routes(routes!(get_streamers))
+            .routes(routes!(delete_streamer))
+            .routes(routes!(add_streamer))
+    }
+
+    #[derive(ToSchema, Serialize, Deserialize, Clone, Debug)]
+    struct Streamer {
+        id: Uuid,
+        twitch_username: String,
+        twitch_id: Option<String>,
+        streaming: bool,
+        disabled: bool,
+        created: DateTime<Utc>,
+        updated: DateTime<Utc>,
+    }
+
+    #[derive(ToSchema, Serialize, Deserialize, Clone, Debug)]
+    struct StreamersResponse {
+        results: Vec<Streamer>,
+    }
+
+    #[utoipa::path(get, path = "", responses((status = OK, body = StreamersResponse)))]
+    async fn get_streamers(
+        State(state): State<Arc<crate::RouterState>>,
+    ) -> Result<impl IntoResponse, crate::AppError> {
+        // TODO: require authentication
+        let rows = sqlx::query_as!(
+            Streamer,
+            "SELECT
+                id,
+                twitch_username,
+                twitch_id,
+                streaming,
+                disabled,
+                created,
+                updated
+            FROM streamers_streamer"
+        )
+        .fetch_all(&state.pool)
+        .await
+        .context("")?;
+
+        let response = StreamersResponse { results: rows };
+        Ok(Json(response))
+    }
+
+    #[derive(ToSchema, Serialize, Deserialize, Clone, Debug)]
+    struct AddStreamerRequest {
+        twitch_username: String,
+        disabled: bool,
+    }
+
+    #[utoipa::path(post, path = "", responses((status = OK)))]
+    async fn add_streamer(
+        State(state): State<Arc<crate::RouterState>>,
+        Json(payload): Json<AddStreamerRequest>,
+    ) -> Result<impl IntoResponse, crate::AppError> {
+        // TODO: require authentication
+        let now = chrono::offset::Utc::now();
+        let id: Option<String> = None;
+        let result = sqlx::query_as!(
+            Streamer,
+            "INSERT INTO streamers_streamer
+            (id, twitch_username, twitch_id, streaming, disabled, created, updated)
+     VALUES ($1, $2, $3, False, $4, $5, $6)
+           RETURNING
+                id,
+                twitch_username,
+                twitch_id,
+                streaming,
+                disabled,
+                created,
+                updated",
+            Uuid::new_v4(),
+            payload.twitch_username,
+            id,
+            payload.disabled,
+            &now,
+            &now
+        )
+        .fetch_one(&state.pool)
+        .await
+        .context("")?;
+
+        Ok(Json(result))
+    }
+    #[utoipa::path(delete, path = "/:uuid", responses((status = OK)))]
+    async fn delete_streamer(
+        State(state): State<Arc<crate::RouterState>>,
+        Path(user_id): Path<Uuid>,
+    ) -> Result<impl IntoResponse, crate::AppError> {
+        // TODO: require authentication
+        sqlx::query!("DELETE FROM streamers_streamer WHERE id = $1", user_id)
+            .execute(&state.pool)
+            .await
+            .context("")?;
+
+        Ok(())
+    }
+}
+
 mod events {
     use std::sync::Arc;
 
@@ -445,6 +720,7 @@ mod events {
     async fn get_events(
         State(state): State<Arc<crate::RouterState>>,
     ) -> Result<impl IntoResponse, crate::AppError> {
+        // TODO: require authentication
         let mut rows = sqlx::query_as!(
             Event,
             "SELECT
@@ -473,21 +749,5 @@ mod events {
             previous: None,
         };
         Ok(Json(response))
-    }
-}
-
-mod inner {
-    pub mod secret_handlers {
-        /// This is some secret inner handler
-        #[utoipa::path(get, path = "/api/inner/secret", responses((status = OK, body = str)))]
-        pub async fn get_secret() -> &'static str {
-            "secret"
-        }
-
-        /// Post some secret inner handler
-        #[utoipa::path(post, path = "/api/inner/secret", responses((status = OK)))]
-        pub async fn post_secret() {
-            println!("You posted a secret")
-        }
     }
 }
