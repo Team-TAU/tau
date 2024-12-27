@@ -751,7 +751,9 @@ mod events {
 
     /// expose the Customer OpenAPI to parent module
     pub fn router() -> OpenApiRouter<Arc<crate::RouterState>> {
-        OpenApiRouter::new().routes(routes!(get_events))
+        OpenApiRouter::new()
+            .routes(routes!(get_events))
+            .routes(routes!(replay_event))
     }
 
     #[derive(ToSchema, Serialize, Deserialize, Clone, Debug)]
@@ -771,6 +773,30 @@ mod events {
         next: Option<String>,
         previous: Option<String>,
         results: T,
+    }
+
+    use axum::extract::Path;
+
+    #[utoipa::path(method(post), path = "/:id/replay")]
+    async fn replay_event(
+        State(state): State<Arc<crate::RouterState>>,
+
+        Path(id): Path<Uuid>,
+    ) -> Result<impl IntoResponse, crate::AppError> {
+        // TODO: require authentication
+        let mut result = sqlx::query_as!(
+            Event,
+            "SELECT id, event_id, event_type, event_source, event_data, created,
+                NULL as origin
+    FROM twitchevents_twitchevent WHERE id = $1",
+            id
+        )
+        .fetch_one(&state.pool)
+        .await
+        .context("hi")?;
+        result.origin = Some("replay".to_string());
+        state.broadcast_event.send(result).unwrap();
+        Ok(())
     }
     #[utoipa::path(get, path = "", responses((status = OK, body = Paginated<Events>)))]
     async fn get_events(
