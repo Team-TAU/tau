@@ -1,6 +1,7 @@
 use crate::settings::Settings;
 use anyhow::Context as _;
 use chrono::{DateTime, Utc};
+use log::{debug, error, info, trace, warn};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 use std::io::{Read, Write};
@@ -153,16 +154,12 @@ impl KVStore {
             drop(handle);
             rx.recv().await.context("hi")
         } else {
+            info!("Starting a token refresh...");
             let client = reqwest::Client::new();
             let (tx, _rx) = broadcast::channel::<UserToken>(1);
             *handle = Some(tx);
             drop(handle);
             // ok fine, let's start an async task to refresh the token
-            println!(
-                "refreshing! before token: {}",
-                self.data.read().unwrap().twitch_access_token
-            );
-            tokio::time::sleep(tokio::time::Duration::from_millis(5000)).await;
             let current_refresh = self.data.read().unwrap().twitch_refresh_token.clone();
             let client_secret = config.twitch_client_secret.clone();
             let client_id = config.twitch_app_id.clone();
@@ -180,19 +177,23 @@ impl KVStore {
                     data.twitch_refresh_token = refresh.secret().to_string();
                     data.twitch_access_token = access_token.secret().to_string();
                     data.twitch_access_token_expiration = chrono::offset::Utc::now() + duration;
+                    let mut save_token = self.user_token.write().unwrap();
+                    *save_token = None;
                 }
                 let user_token = UserToken::from_token(&client, access_token).await?;
+                let _ = self.save(pool).await;
                 let mut handle = self.refresh_handle.lock().await;
                 if handle.is_some() {
                     let _ = handle.as_mut().unwrap().send(user_token.clone());
                 }
                 *handle = None;
                 drop(handle);
-                let _ = self.save(pool).await;
+                info!("Completed token refresh!");
                 Ok(user_token)
             } else {
                 let mut handle = self.refresh_handle.lock().await;
                 *handle = None;
+                error!("Failed to refresh twitch token :(");
                 Err(anyhow::anyhow!("error refreshing twitch token"))
             }
         }
@@ -221,6 +222,7 @@ impl KVStore {
     }
 
     pub async fn migrate(&mut self, pool: &Pool<Postgres>) -> Result<(), anyhow::Error> {
+        // TODO: we should migrate the existing token for convenience probably
         let row = sqlx::query!(
             "SELECT array_to_json(array_agg(row_to_json(constance_config))) as json_agg FROM constance_config",
         )

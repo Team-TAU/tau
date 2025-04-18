@@ -1,8 +1,8 @@
-import { Store } from 'vuex';
-import { webSocket, WebSocketSubject } from 'rxjs/webSocket';
-import { retryWhen, delay } from 'rxjs/operators';
+import { Store } from "vuex";
+import { webSocket, WebSocketSubject } from "rxjs/webSocket";
+import { retryWhen, delay } from "rxjs/operators";
 
-import baseUrl from './base-api-url';
+import baseUrl from "./base-api-url";
 
 interface TwitchEventMessage {
   created: string;
@@ -15,7 +15,7 @@ interface TwitchEventMessage {
 }
 
 interface KeepAliveMessage {
-  event: 'keep_alive';
+  event: "keep_alive";
 }
 
 abstract class BaseWsService {
@@ -26,13 +26,13 @@ abstract class BaseWsService {
   }
 
   get baseWsUrl() {
-    return baseUrl.replace('http', 'ws');
+    return baseUrl.replace("http", "ws");
   }
 
   get token() {
-    const token = localStorage.getItem('tau-token');
+    const token = localStorage.getItem("tau-token");
     if (token === null) {
-      throw new Error('No token currently exists.  You must authorize.');
+      throw new Error("No token currently exists.  You must authorize.");
     }
     return token;
   }
@@ -67,7 +67,7 @@ abstract class BaseWsService {
         ?.pipe(
           // If we are disconnected, wait 2s before attempting to reconnect.
           retryWhen((err) => {
-            console.log('Disconnected!  Attempting reconnection shortly...');
+            console.log("Disconnected!  Attempting reconnection shortly...");
             return err.pipe(delay(2000));
           }),
         )
@@ -87,22 +87,25 @@ abstract class BaseWsService {
 
 export class TauTwitchEventWsService extends BaseWsService {
   constructor(private store: any) {
-    super('ws/twitch-events/');
+    super("ws/twitch-events/");
   }
 
   handle(msg: TwitchEventMessage | KeepAliveMessage) {
-    if ('event' in msg) {
+    if ("event" in msg) {
       return;
     }
-    this.store.dispatch('twitchEvents/createOne', msg);
-    if (msg.event_type === 'stream-online') {
+    if (msg.event_type === "channel-chat-message") {
+      return;
+    }
+    this.store.dispatch("twitchEvents/createOne", msg);
+    if (msg.event_type === "stream-online") {
       this.store.dispatch(
-        'streamers/streamerOnline',
+        "streamers/streamerOnline",
         msg.event_data.broadcaster_user_id,
       );
-    } else if (msg.event_type === 'stream-offline') {
+    } else if (msg.event_type === "stream-offline") {
       this.store.dispatch(
-        'streamers/streamerOffline',
+        "streamers/streamerOffline",
         msg.event_data.broadcaster_user_id,
       );
     }
@@ -111,30 +114,30 @@ export class TauTwitchEventWsService extends BaseWsService {
 
 export class TauStatusWsService extends BaseWsService {
   constructor(private store: any) {
-    super('ws/tau-status/');
+    super("ws/tau-status/");
   }
 
   handle(msg: any) {
-    if ('event' in msg) {
+    if ("event" in msg) {
       return;
     }
-    this.store.dispatch('eventSubscriptions/updateOne', msg);
+    this.store.dispatch("eventSubscriptions/updateOne", msg);
   }
 }
 
 export class ChatBotStatusWsService extends BaseWsService {
   constructor(private store: any) {
-    super('ws/chat-bots/status/');
+    super("ws/chat-bots/status/");
   }
 
   handle(msg: any) {
-    if ('event' in msg) {
+    if ("event" in msg) {
       return;
     }
-    if (msg.event === 'Created') {
-      this.store.dispatch('chatBots/addOne', msg.chatBot);
+    if (msg.event === "Created") {
+      this.store.dispatch("chatBots/addOne", msg.chatBot);
     } else {
-      console.log('update not yet implemented');
+      console.log("update not yet implemented");
     }
   }
 }

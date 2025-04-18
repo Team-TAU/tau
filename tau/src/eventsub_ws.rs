@@ -212,21 +212,24 @@ impl EventSubWebSocket {
                         .ok_or(anyhow::anyhow!("twitch broke"))?
                         .clone(),
                 };
-                let result = sqlx::query!(
-                    "INSERT INTO twitchevents_twitchevent
+                // hacky - let's make a blocklist or something instead
+                if event.event_type != "channel-chat-message" {
+                    let result = sqlx::query!(
+                        "INSERT INTO twitchevents_twitchevent
                             (id, event_id, event_type, event_source, event_data, created) VALUES
                             ($1, $2, $3, $4, $5, $6)",
-                    event.id,
-                    event.event_id,
-                    event.event_type,
-                    event.event_source,
-                    event.event_data,
-                    event.created
-                )
-                .execute(&self.state.pool)
-                .await;
-                if let Err(err) = result {
-                    error!("ERROR: {}", err);
+                        event.id,
+                        event.event_id,
+                        event.event_type,
+                        event.event_source,
+                        event.event_data,
+                        event.created
+                    )
+                    .execute(&self.state.pool)
+                    .await;
+                    if let Err(err) = result {
+                        error!("ERROR: {}", err);
+                    }
                 }
                 self.state.broadcast_event.send(event.into()).unwrap();
             }

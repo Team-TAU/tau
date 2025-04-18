@@ -695,7 +695,7 @@ mod auth {
         let resp: twitch_oauth2::ValidatedToken = req.json().await.context("failed to validate")?;
         let scopes = resp.scopes.ok_or(anyhow::anyhow!("no scopes wut"))?;
 
-        let response: Vec<_> = state
+        let mut response: Vec<_> = state
             .spec
             .scopes
             .iter()
@@ -707,6 +707,7 @@ mod auth {
                     .is_some(),
             })
             .collect();
+        response.sort_by(|a, b| a.scope.cmp(&b.scope));
         Ok(Json(response))
     }
 

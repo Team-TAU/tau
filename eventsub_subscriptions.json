@@ -1,5 +1,363 @@
 [
   {
+    "subscription_type": "Channel Chat Message",
+    "name": "channel.chat.message",
+    "version": "1",
+    "description": "The channel.chat.message subscription type sends a notification when any user sends a message to a channel’s chat room.",
+    "scope_required": "user:read:chat",
+    "event_schema": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "object",
+      "description": "Schema for a structured chat message object.",
+      "properties": {
+        "broadcaster_user_id": {
+          "type": "string",
+          "description": "The broadcaster user ID."
+        },
+        "broadcaster_user_name": {
+          "type": "string",
+          "description": "The broadcaster display name."
+        },
+        "broadcaster_user_login": {
+          "type": "string",
+          "description": "The broadcaster login."
+        },
+        "chatter_user_id": {
+          "type": "string",
+          "description": "The user ID of the user that sent the message."
+        },
+        "chatter_user_name": {
+          "type": "string",
+          "description": "The user name of the user that sent the message."
+        },
+        "chatter_user_login": {
+          "type": "string",
+          "description": "The user login of the user that sent the message."
+        },
+        "message_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "A UUID that identifies the message."
+        },
+        "message": {
+          "type": "object",
+          "description": "The structured chat message.",
+          "properties": {
+            "text": {
+              "type": "string",
+              "description": "The chat message in plain text."
+            },
+            "fragments": {
+              "type": "array",
+              "description": "Ordered list of chat message fragments.",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "text",
+                      "cheermote",
+                      "emote",
+                      "mention"
+                    ],
+                    "description": "The type of message fragment."
+                  },
+                  "text": {
+                    "type": "string",
+                    "description": "Message text in fragment."
+                  },
+                  "cheermote": {
+                    "type": "object",
+                    "description": "Optional. Metadata pertaining to the cheermote.",
+                    "properties": {
+                      "prefix": {
+                        "type": "string",
+                        "description": "The name portion of the Cheermote string used in chat to cheer Bits."
+                      },
+                      "bits": {
+                        "type": "integer",
+                        "description": "The amount of Bits cheered."
+                      },
+                      "tier": {
+                        "type": "integer",
+                        "description": "The tier level of the cheermote."
+                      }
+                    },
+                    "required": [
+                      "prefix",
+                      "bits",
+                      "tier"
+                    ]
+                  },
+                  "emote": {
+                    "type": "object",
+                    "description": "Optional. Metadata pertaining to the emote.",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "An ID that uniquely identifies this emote."
+                      },
+                      "emote_set_id": {
+                        "type": "string",
+                        "description": "An ID that identifies the emote set that the emote belongs to."
+                      },
+                      "owner_id": {
+                        "type": "string",
+                        "description": "The ID of the broadcaster who owns the emote."
+                      },
+                      "format": {
+                        "type": "array",
+                        "description": "The formats that the emote is available in.",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "animated",
+                            "static"
+                          ]
+                        }
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "emote_set_id",
+                      "owner_id",
+                      "format"
+                    ]
+                  },
+                  "mention": {
+                    "type": "object",
+                    "description": "Optional. Metadata pertaining to the mention.",
+                    "properties": {
+                      "user_id": {
+                        "type": "string",
+                        "description": "The user ID of the mentioned user."
+                      },
+                      "user_name": {
+                        "type": "string",
+                        "description": "The user name of the mentioned user."
+                      },
+                      "user_login": {
+                        "type": "string",
+                        "description": "The user login of the mentioned user."
+                      }
+                    },
+                    "required": [
+                      "user_id",
+                      "user_name",
+                      "user_login"
+                    ]
+                  }
+                },
+                "required": [
+                  "type",
+                  "text"
+                ]
+              }
+            }
+          },
+          "required": [
+            "text",
+            "fragments"
+          ]
+        },
+        "message_type": {
+          "type": "string",
+          "description": "The type of message.",
+          "enum": [
+            "text",
+            "channel_points_highlighted",
+            "channel_points_sub_only",
+            "user_intro",
+            "power_ups_message_effect",
+            "power_ups_gigantified_emote"
+          ]
+        },
+        "badges": {
+          "type": "array",
+          "description": "List of chat badges.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "set_id": {
+                "type": "string",
+                "description": "An ID that identifies this set of chat badges."
+              },
+              "id": {
+                "type": "string",
+                "description": "An ID that identifies this version of the badge."
+              },
+              "info": {
+                "type": "string",
+                "description": "Metadata related to chat badges, such as subscriber months."
+              }
+            },
+            "required": [
+              "set_id",
+              "id",
+              "info"
+            ]
+          }
+        },
+        "cheer": {
+          "type": "object",
+          "description": "Optional. Metadata if this message is a cheer.",
+          "properties": {
+            "bits": {
+              "type": "integer",
+              "description": "The amount of Bits the user cheered."
+            }
+          },
+          "required": [
+            "bits"
+          ]
+        },
+        "color": {
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{6}$",
+          "description": "The color of the user’s name in the chat room. May be empty if never set."
+        },
+        "reply": {
+          "type": "object",
+          "description": "Optional. Metadata if this message is a reply.",
+          "properties": {
+            "parent_message_id": {
+              "type": "string",
+              "description": "ID of the parent message."
+            },
+            "parent_message_body": {
+              "type": "string",
+              "description": "Body of the parent message."
+            },
+            "parent_user_id": {
+              "type": "string",
+              "description": "User ID of sender of parent message."
+            },
+            "parent_user_name": {
+              "type": "string",
+              "description": "User name of sender of parent message."
+            },
+            "parent_user_login": {
+              "type": "string",
+              "description": "User login of sender of parent message."
+            },
+            "thread_message_id": {
+              "type": "string",
+              "description": "ID of the thread’s parent message."
+            },
+            "thread_user_id": {
+              "type": "string",
+              "description": "User ID of sender of thread’s parent message."
+            },
+            "thread_user_name": {
+              "type": "string",
+              "description": "User name of sender of thread’s parent message."
+            },
+            "thread_user_login": {
+              "type": "string",
+              "description": "User login of sender of thread’s parent message."
+            }
+          },
+          "required": [
+            "parent_message_id",
+            "parent_message_body",
+            "parent_user_id",
+            "parent_user_name",
+            "parent_user_login",
+            "thread_message_id",
+            "thread_user_id",
+            "thread_user_name",
+            "thread_user_login"
+          ]
+        },
+        "channel_points_custom_reward_id": {
+          "type": "string",
+          "description": "Optional. ID of a channel points custom reward that was redeemed."
+        },
+        "source_broadcaster_user_id": {
+          "type": "string",
+          "description": "Optional. Broadcaster user ID of the channel the message was sent from."
+        },
+        "source_broadcaster_user_name": {
+          "type": "string",
+          "description": "Optional. User name of the broadcaster of the channel the message was sent from."
+        },
+        "source_broadcaster_user_login": {
+          "type": "string",
+          "description": "Optional. Login of the broadcaster of the channel the message was sent from."
+        },
+        "source_message_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Optional. UUID of the source message from the channel it was sent from."
+        },
+        "source_badges": {
+          "type": "array",
+          "description": "Optional. List of chat badges in the source channel.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "set_id": {
+                "type": "string",
+                "description": "ID identifying this set of chat badges."
+              },
+              "id": {
+                "type": "string",
+                "description": "ID identifying this version of the badge."
+              },
+              "info": {
+                "type": "string",
+                "description": "Metadata for subscriber badges, e.g. number of months."
+              }
+            },
+            "required": [
+              "set_id",
+              "id",
+              "info"
+            ]
+          }
+        },
+        "is_source_only": {
+          "type": "boolean",
+          "description": "Optional. Whether this message was only sent to the source channel in a shared session."
+        }
+      },
+      "required": [
+        "broadcaster_user_id",
+        "broadcaster_user_name",
+        "broadcaster_user_login",
+        "chatter_user_id",
+        "chatter_user_name",
+        "chatter_user_login",
+        "message_id",
+        "message",
+        "message_type",
+        "badges"
+      ]
+    },
+    "condition_schema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": null,
+      "title": "Channel Update request arguments",
+      "description": "Required and optional query parameters for requesting a Channel Update event subscription",
+      "type": "object",
+      "properties": {
+        "broadcaster_user_id": {
+          "description": "The broadcaster user ID for the channel you want to get updates for.",
+          "type": "string"
+        },
+        "user_id": {
+          "description": "The User ID to read chat as.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "broadcaster_user_id",
+        "user_id"
+      ]
+    }
+  },
+  {
     "subscription_type": "Channel Update",
     "name": "channel.update",
     "version": "1",
