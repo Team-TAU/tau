@@ -1,7 +1,11 @@
 use axum::extract::ws::{Message, WebSocket};
 use axum::extract::{State, WebSocketUpgrade};
-use axum::http::StatusCode;
+use axum::http::{HeaderMap, HeaderValue, StatusCode};
+use axum::middleware;
 use axum::response::Response;
+use axum_extra::headers::authorization::{Bearer, Credentials};
+use axum_extra::headers::Authorization;
+use axum_extra::TypedHeader;
 use eventsub_ws::{EventSubWebSocket, EventSubWorkerMessage};
 use futures_util::SinkExt;
 use futures_util::StreamExt;
@@ -18,6 +22,7 @@ use twitch_api::HelixClient;
 use twitch_oauth2::{AccessToken, CsrfToken, TwitchToken, UserTokenBuilder};
 use utoipa::openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme};
 use utoipa::openapi::Components;
+use uuid::Uuid;
 
 use tokio::net::TcpListener;
 use utoipa::{Modify, OpenApi, ToSchema};
@@ -44,6 +49,49 @@ pub enum AppError {
     BadRequest,
     #[error("csrf error")]
     CsrfError,
+}
+
+use axum::{extract::Request, middleware::Next};
+
+pub struct TauToken(pub String);
+
+impl TauToken {
+    /// View the token part as a `&str`.
+    pub fn token(&self) -> &str {
+        self.0.as_str()["Token ".len()..].trim_start()
+    }
+}
+
+impl Credentials for TauToken {
+    const SCHEME: &'static str = "Token";
+
+    fn decode(value: &HeaderValue) -> Option<Self> {
+        debug_assert!(
+            value.as_bytes()[..Self::SCHEME.len()].eq_ignore_ascii_case(Self::SCHEME.as_bytes()),
+            "HeaderValue to decode should start with \"Token ..\", received = {:?}",
+            value,
+        );
+
+        value.to_str().ok().map(|arg| TauToken(arg.to_string()))
+    }
+
+    fn encode(&self) -> HeaderValue {
+        HeaderValue::from_str((&self.0).as_str()).unwrap()
+    }
+}
+
+async fn require_auth(
+    TypedHeader(authorization): TypedHeader<Authorization<TauToken>>,
+    State(state): State<Arc<crate::RouterState>>,
+    request: Request,
+    next: Next,
+) -> Result<Response, AppError> {
+    if authorization.0.token() != state.kv.get_tau_token() {
+        return Err(AppError::Unauthorized);
+    }
+
+    let response = next.run(request).await;
+    Ok(response)
 }
 
 impl axum::response::IntoResponse for AppError {
@@ -97,33 +145,94 @@ async fn ws_events(ws: WebSocketUpgrade, State(state): State<Arc<crate::RouterSt
     ws.on_upgrade(|socket| handle_socket(socket, state))
 }
 
+#[derive(Serialize, Deserialize)]
+struct AuthMsg {
+    pub token: String,
+}
+
+fn verify_auth(state: Arc<crate::RouterState>, message: &str) -> bool {
+    let parsed = serde_json::from_str::<AuthMsg>(message);
+    match parsed {
+        Err(..) => false,
+        Ok(msg) => {
+            let token = state.kv.get_tau_token();
+            msg.token == token
+        }
+    }
+}
+
 async fn handle_socket(stream: WebSocket, state: Arc<crate::RouterState>) {
-    // TODO: require authentication
+    let mut authenticated = false;
+    let uuid = Uuid::new_v4();
     let (mut sender, mut receiver) = stream.split();
-    while let Some(Ok(msg)) = receiver.next().await {
-        println!("{}", msg.to_text().unwrap());
-        break;
+    // NOTE: this is where we would block reads until authenticated
+    // skipping this is a new feature not present in the original TAU
+    if !state.config.public_read_access {
+        while let Some(Ok(Message::Text(text))) = receiver.next().await {
+            if verify_auth(state.clone(), text.as_str()) {
+                authenticated = true;
+                break;
+            }
+        }
     }
     let mut rx = state.broadcast_event.subscribe();
 
     let mut send_task = tokio::spawn(async move {
         while let Ok(msg) = rx.recv().await {
+            if let Some(sender) = msg.sender {
+                if sender == uuid {
+                    // filter out messages from ourself
+                    continue;
+                }
+            }
             // In any websocket error, break loop.
-            let msg = serde_json::to_string(&msg).unwrap();
+            let msg = serde_json::to_string(&msg.event).unwrap();
             if sender.send(Message::Text(msg)).await.is_err() {
-                println!("ahhhhh");
                 break;
             }
         }
     });
 
-    // let msg = "hi".to_string();
-    // let _ = state.broadcast_event.send(msg);
-
     let mut recv_task = tokio::spawn(async move {
         while let Some(Ok(Message::Text(text))) = receiver.next().await {
-            // Add username before message.
-            println!("{}", text);
+            if !authenticated {
+                if verify_auth(state.clone(), text.as_str()) {
+                    authenticated = true;
+                }
+                continue;
+            }
+
+            // any message past this point should be treated as a msg bus event
+            let parsed = serde_json::from_str::<events::Event>(text.as_str());
+            let Ok(mut event) = parsed else {
+                warn!("Received invalid event from msg bus");
+                continue;
+            };
+            event.origin = "tau".to_string().into();
+            state
+                .broadcast_event
+                .send(events::TaggedEvent {
+                    event: event.clone(),
+                    sender: uuid.into(),
+                })
+                .unwrap();
+
+            let result = sqlx::query!(
+                "INSERT INTO twitchevents_twitchevent
+                            (id, event_id, event_type, event_source, event_data, created) VALUES
+                            ($1, $2, $3, $4, $5, $6)",
+                event.id,
+                event.event_id,
+                event.event_type,
+                event.event_source,
+                event.event_data,
+                event.created
+            )
+            .execute(&state.pool)
+            .await;
+            if let Err(err) = result {
+                error!("ERROR: {}", err);
+            }
         }
     });
 
@@ -164,7 +273,7 @@ pub struct RouterState {
     pub oauth_state: Mutex<HashMap<CsrfToken, OauthState>>,
     pub kv: kv_store::KVStore,
     pub config: settings::Settings,
-    pub broadcast_event: broadcast::Sender<crate::events::Event>,
+    pub broadcast_event: broadcast::Sender<crate::events::TaggedEvent>,
     pub spec: TwitchApiSpec,
     pub helix_client: HelixClient<'static, reqwest::Client>,
     pub send_to_worker: mpsc::Sender<EventSubWorkerMessage>,
@@ -217,16 +326,25 @@ async fn main() -> Result<(), anyhow::Error> {
         .chain(helix_spec.iter().filter_map(|spec| spec.scope.clone()))
         .collect();
 
+    dotenvy::dotenv()?;
+    let settings = settings::Settings {
+        twitch_app_id: std::env::var("TWITCH_APP_ID").unwrap(),
+        twitch_client_secret: std::env::var("TWITCH_CLIENT_SECRET").unwrap(),
+        superuser: std::env::var("SUPERUSER").unwrap(),
+        public_read_access: true, // this should be off by default; its new
+        postgres_connection: std::env::var("POSTGRES_CONNECTION").unwrap(),
+        base_url: std::env::var("BASE_URL").unwrap(),
+        port: std::env::var("PORT").unwrap().parse::<_>().unwrap(),
+    };
+
     let pool = PgPoolOptions::new()
         .max_connections(5)
-        .connect("postgres://root:root@localhost/tau_db")
+        .connect(settings.postgres_connection.as_str())
         .await?;
 
     let mut kv = kv_store::KVStore::new();
 
-    let (tx, _rx) = broadcast::channel::<crate::events::Event>(100);
-
-    dotenvy::dotenv()?;
+    let (tx, _rx) = broadcast::channel::<crate::events::TaggedEvent>(100);
 
     // TODO: check if '_sqlx_migrations' table exists;
     // if not, run a pgdump to a backup file
@@ -239,6 +357,8 @@ async fn main() -> Result<(), anyhow::Error> {
             Err(e) => {
                 // This is not fatal - this is the expected flow
                 // for a fresh install
+                // maybe we should prompt to make sure they are fresh installing tho?
+                // otherwise this can pave over existing stuff
                 println!("Failed to load KV store.\nFalling back to defaults.\n{}", e);
             }
             _ => {}
@@ -267,11 +387,7 @@ async fn main() -> Result<(), anyhow::Error> {
         broadcast_event: tx,
         pool,
         oauth_state: HashMap::new().into(),
-        config: settings::Settings {
-            twitch_app_id: std::env::var("TWITCH_APP_ID").unwrap(),
-            twitch_client_secret: std::env::var("TWITCH_CLIENT_SECRET").unwrap(),
-            superuser: "badcop_".to_string(),
-        },
+        config: settings.clone(),
         spec: TwitchApiSpec {
             event_sub: eventsub_spec,
             helix: helix_spec,
@@ -285,25 +401,32 @@ async fn main() -> Result<(), anyhow::Error> {
     let (router, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
         .routes(routes!(health))
         .routes(routes!(ws_events))
-        .nest("/api/v1/auth", auth::router())
-        .nest("/api/v1/twitch-events", events::router())
-        .nest("/api/v1/streamers", streamers::router())
+        .nest("/api/v1/auth", auth::router(state.clone()))
+        .nest("/api/v1/twitch-events", events::router(state.clone()))
+        .nest("/api/v1/streamers", streamers::router(state.clone()))
         .routes(routes!(twitch::get_helix_endpoints))
-        .routes(routes!(twitch::helix_passthrough))
+        .nest(
+            "/api/twitch/",
+            OpenApiRouter::new()
+                .routes(routes!(twitch::helix_passthrough))
+                .layer(middleware::from_fn_with_state(
+                    state.clone(),
+                    crate::require_auth,
+                )),
+        )
         .with_state(state.clone())
         .split_for_parts();
 
     let router = router.merge(SwaggerUi::new("/swagger-ui").url("/apidoc/openapi.json", api));
 
     let state = state.clone();
-    // TODO: uncomment
 
     tokio::spawn(async {
         let websocket = EventSubWebSocket::new(state);
         websocket.run_loop(worker_rx).await;
     });
 
-    let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, 3000)).await?;
+    let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, settings.port)).await?;
     axum::serve(listener, router).await?;
     Ok(())
 }
@@ -334,7 +457,7 @@ mod twitch {
         Ok(Json(state.spec.helix.clone()))
     }
 
-    #[utoipa::path(method(get, post, patch, put, delete), path = "/api/twitch/helix/:path",
+    #[utoipa::path(method(get, post, patch, put, delete), path = "/helix/:path",
         responses(
         (status = OK, body = Vec<crate::HelixEndpoint>),
     ), tag = super::TWITCH_TAG)]
@@ -344,7 +467,6 @@ mod twitch {
         query: RawQuery,
         method: Method,
     ) -> Result<impl IntoResponse, crate::AppError> {
-        // TODO: require authentication
         let user_token = state
             .kv
             .refresh_user_token(&state.config, &state.pool)
@@ -375,6 +497,7 @@ mod auth {
     use anyhow::Context as _;
     use axum::extract::{Json, Query, State};
     use axum::http::StatusCode;
+    use axum::middleware;
     use axum::response::{IntoResponse, Redirect};
     use reqwest::Url;
     use serde::{Deserialize, Serialize};
@@ -409,13 +532,14 @@ mod auth {
         code: String,
     }
 
-    pub fn router() -> OpenApiRouter<Arc<crate::RouterState>> {
+    pub fn router(state: Arc<crate::RouterState>) -> OpenApiRouter<Arc<crate::RouterState>> {
         OpenApiRouter::new()
             .routes(routes!(post_token_auth))
+            .routes(routes!(get_scopes))
+            .layer(middleware::from_fn_with_state(state, crate::require_auth))
             .routes(routes!(login_auth))
             .routes(routes!(refresh_scopes))
             .routes(routes!(login_redirect_landing))
-            .routes(routes!(get_scopes))
     }
 
     #[utoipa::path(get, path = "/login",
@@ -428,7 +552,7 @@ mod auth {
         let mut builder = UserTokenBuilder::new(
             state.config.twitch_app_id.as_str(),
             state.config.twitch_client_secret.as_str(),
-            Url::parse("http://localhost:5173/twitch-callback/")
+            Url::parse((state.config.base_url.clone() + "/twitch-callback/").as_str())
                 .context("failed to parse redirect URL")?,
         );
         let (url, csrf_token) = builder.generate_url();
@@ -463,7 +587,7 @@ mod auth {
         let mut builder = UserTokenBuilder::new(
             state.config.twitch_app_id.as_str(),
             state.config.twitch_client_secret.as_str(),
-            Url::parse("http://localhost:5173/twitch-callback/")
+            Url::parse((state.config.base_url.clone() + "/twitch-callback/").as_str())
                 .context("failed to parse redirect URL")?,
         )
         .set_scopes(query.scopes);
@@ -513,7 +637,6 @@ mod auth {
             .ok_or(crate::AppError::Unauthorized)?;
         if user_info.login.to_string() == state.config.superuser {
             if csrf_state.save {
-                println!("saving!");
                 let refresh = token
                     .refresh_token
                     .clone()
@@ -532,7 +655,7 @@ mod auth {
             Ok((
                 StatusCode::OK,
                 Json(LoginResponse {
-                    token: "special_token".to_string(),
+                    token: state.kv.get_or_create_tau_token(&state.pool, false).await?,
                     username: user_info.login.to_string(),
                 }),
             ))
@@ -550,7 +673,6 @@ mod auth {
     async fn get_scopes(
         State(state): State<Arc<crate::RouterState>>,
     ) -> Result<impl IntoResponse, crate::AppError> {
-        // TODO: require authentication
         let user_token = state
             .kv
             .refresh_user_token(&state.config, &state.pool)
@@ -582,34 +704,10 @@ mod auth {
                     .is_some(),
             })
             .collect();
-
-        // let row = sqlx::query!(
-        //     "SELECT id FROM users_user WHERE username = $1",
-        //     payload.username
-        // )
-        // .fetch_optional(&state.pool)
-        // .await
-        // .context("")?;
-        // if let Some(_) = row {
-        //     if payload.password == "hunter2" {
-        //         Ok((
-        //             StatusCode::OK,
-        //             Json(LoginResponse {
-        //                 token: String::from("*******"),
-        //                 username: "".to_string(),
-        //             }),
-        //         )
-        //             .into_response())
-        //     } else {
-        //         Ok(StatusCode::FORBIDDEN.into_response())
-        //     }
-        // } else {
-        //     Ok(StatusCode::FORBIDDEN.into_response())
-        // }
         Ok(Json(response))
     }
 
-    #[utoipa::path(post, path = "/token",
+    #[utoipa::path(post, path = "/rotate-token",
         responses(
         (status = OK, body = LoginResponse),
         (status = FORBIDDEN, body = ())
@@ -617,37 +715,14 @@ mod auth {
     #[axum::debug_handler]
     async fn post_token_auth(
         State(state): State<Arc<crate::RouterState>>,
-        Json(payload): Json<TokenRequest>,
     ) -> Result<impl IntoResponse, crate::AppError> {
-        // TODO: require authentication
-        state
-            .kv
-            .refresh_user_token(&state.config, &state.pool)
-            .await;
-        // let row = sqlx::query!(
-        //     "SELECT id FROM users_user WHERE username = $1",
-        //     payload.username
-        // )
-        // .fetch_optional(&state.pool)
-        // .await
-        // .context("")?;
-        // if let Some(_) = row {
-        //     if payload.password == "hunter2" {
-        //         Ok((
-        //             StatusCode::OK,
-        //             Json(LoginResponse {
-        //                 token: String::from("*******"),
-        //                 username: "".to_string(),
-        //             }),
-        //         )
-        //             .into_response())
-        //     } else {
-        //         Ok(StatusCode::FORBIDDEN.into_response())
-        //     }
-        // } else {
-        //     Ok(StatusCode::FORBIDDEN.into_response())
-        // }
-        Ok(())
+        Ok((
+            StatusCode::OK,
+            Json(LoginResponse {
+                token: state.kv.get_or_create_tau_token(&state.pool, true).await?,
+                username: state.kv.get_channel(),
+            }),
+        ))
     }
 }
 mod streamers {
@@ -656,6 +731,7 @@ mod streamers {
     use anyhow::Context as _;
     use axum::extract::State;
     use axum::extract::{Json, Path};
+    use axum::middleware;
     use axum::response::IntoResponse;
     use chrono::{DateTime, Utc};
     use serde::{Deserialize, Serialize};
@@ -666,11 +742,12 @@ mod streamers {
 
     use crate::eventsub_ws::EventSubWorkerMessage;
 
-    pub fn router() -> OpenApiRouter<Arc<crate::RouterState>> {
+    pub fn router(state: Arc<crate::RouterState>) -> OpenApiRouter<Arc<crate::RouterState>> {
         OpenApiRouter::new()
             .routes(routes!(get_streamers))
             .routes(routes!(delete_streamer))
             .routes(routes!(add_streamer))
+            .layer(middleware::from_fn_with_state(state, crate::require_auth))
     }
 
     #[derive(ToSchema, Serialize, Deserialize, Clone, Debug)]
@@ -693,7 +770,6 @@ mod streamers {
     async fn get_streamers(
         State(state): State<Arc<crate::RouterState>>,
     ) -> Result<impl IntoResponse, crate::AppError> {
-        // TODO: require authentication
         let rows = sqlx::query_as!(
             Streamer,
             "SELECT
@@ -725,7 +801,6 @@ mod streamers {
         State(state): State<Arc<crate::RouterState>>,
         Json(payload): Json<AddStreamerRequest>,
     ) -> Result<impl IntoResponse, crate::AppError> {
-        // TODO: require authentication
         let now = chrono::offset::Utc::now();
         let user_token = state
             .kv
@@ -783,7 +858,6 @@ mod streamers {
         State(state): State<Arc<crate::RouterState>>,
         Path(user_id): Path<Uuid>,
     ) -> Result<impl IntoResponse, crate::AppError> {
-        // TODO: require authentication
         let result = sqlx::query!(
             "DELETE FROM streamers_streamer WHERE id = $1 RETURNING twitch_id",
             user_id
@@ -809,7 +883,7 @@ mod events {
     use anyhow::Context as _;
     use axum::extract::State;
     use axum::response::IntoResponse;
-    use axum::Json;
+    use axum::{middleware, Json};
     use chrono::{DateTime, Utc};
     use serde::{Deserialize, Serialize};
     use sqlx::types::Uuid;
@@ -818,21 +892,46 @@ mod events {
     use utoipa_axum::routes;
 
     /// expose the Customer OpenAPI to parent module
-    pub fn router() -> OpenApiRouter<Arc<crate::RouterState>> {
+    pub fn router(state: Arc<crate::RouterState>) -> OpenApiRouter<Arc<crate::RouterState>> {
         OpenApiRouter::new()
             .routes(routes!(get_events))
             .routes(routes!(replay_event))
+            .layer(middleware::from_fn_with_state(state, crate::require_auth))
+    }
+
+    fn default_uuid() -> Uuid {
+        Uuid::new_v4()
+    }
+    fn default_time() -> DateTime<Utc> {
+        chrono::offset::Utc::now()
+    }
+
+    #[derive(Clone, Debug)]
+    pub struct TaggedEvent {
+        pub event: Event,
+        pub sender: Option<Uuid>,
     }
 
     #[derive(ToSchema, Serialize, Deserialize, Clone, Debug)]
     pub struct Event {
+        #[serde(default = "default_uuid")]
         pub id: Uuid,
         pub event_id: Option<String>,
         pub event_data: sqlx::types::JsonValue,
         pub event_type: String,
         pub event_source: String,
+        #[serde(default = "default_time")]
         pub created: DateTime<Utc>,
         pub origin: Option<String>,
+    }
+
+    impl From<Event> for TaggedEvent {
+        fn from(event: Event) -> Self {
+            TaggedEvent {
+                sender: None,
+                event,
+            }
+        }
     }
     type Events = Vec<Event>;
 
@@ -851,7 +950,6 @@ mod events {
 
         Path(id): Path<Uuid>,
     ) -> Result<impl IntoResponse, crate::AppError> {
-        // TODO: require authentication
         let mut result = sqlx::query_as!(
             Event,
             "SELECT id, event_id, event_type, event_source, event_data, created,
@@ -863,14 +961,13 @@ mod events {
         .await
         .context("hi")?;
         result.origin = Some("replay".to_string());
-        state.broadcast_event.send(result).unwrap();
+        state.broadcast_event.send(result.into()).unwrap();
         Ok(())
     }
     #[utoipa::path(get, path = "", responses((status = OK, body = Paginated<Events>)))]
     async fn get_events(
         State(state): State<Arc<crate::RouterState>>,
     ) -> Result<impl IntoResponse, crate::AppError> {
-        // TODO: require authentication
         let mut rows = sqlx::query_as!(
             Event,
             "SELECT

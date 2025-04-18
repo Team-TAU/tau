@@ -30,27 +30,27 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-import api$ from '@/services/tau-apis';
+import { defineComponent, ref } from "vue";
+import api$ from "@/services/tau-apis";
 
 export default defineComponent({
-  name: 'User',
+  name: "User",
   setup() {
     const displayTokenModal = ref(false);
-    const token = ref('loading...');
+    const token = ref("loading...");
 
     const refreshToken = async () => {
-      token.value = 'refreshing...';
+      token.value = "refreshing...";
       displayTokenModal.value = true;
-      const newTokenData = await api$.tau.post('tau-user-token/refresh/', {});
-      localStorage.setItem('tau-token', newTokenData.token);
+      const newTokenData = await api$.tau.post("auth/rotate-token", {});
+      localStorage.setItem("tau-token", newTokenData.token);
       token.value = newTokenData.token;
     };
 
     const openTokenModal = async () => {
-      token.value = 'loading...';
+      token.value = "loading...";
       displayTokenModal.value = true;
-      const tokenData = await api$.tau.get('tau-user-token/');
+      const tokenData = await api$.tau.get("tau-user-token/");
       token.value = tokenData.token;
     };
 

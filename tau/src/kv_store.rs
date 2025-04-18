@@ -11,13 +11,22 @@ use twitch_oauth2::UserToken;
 
 #[derive(Default, Serialize, Deserialize)]
 pub struct KVStoreData {
+    #[serde(default)]
     pub channel: String,
+    #[serde(default)]
     pub twitch_app_access_token: String,
+    #[serde(default)]
     pub channel_id: String,
+    #[serde(default)]
     pub use_irc: bool,
+    #[serde(default)]
     pub twitch_refresh_token: String,
+    #[serde(default)]
     pub twitch_access_token: String,
+    #[serde(default)]
     pub twitch_access_token_expiration: DateTime<Utc>,
+    #[serde(default)]
+    pub tau_token: String,
 }
 
 pub struct KVStore {
@@ -33,6 +42,7 @@ struct MigrationRow {
     id: u32,
 }
 
+// This is a database-backed key/value store.
 impl KVStore {
     pub fn new() -> Self {
         return KVStore {
@@ -46,6 +56,37 @@ impl KVStore {
         return self.data.read().unwrap().channel_id.clone();
     }
 
+    pub fn get_channel(&self) -> String {
+        return self.data.read().unwrap().channel.clone();
+    }
+
+    pub fn get_tau_token(&self) -> String {
+        return self.data.read().unwrap().tau_token.clone();
+    }
+
+    pub async fn get_or_create_tau_token(
+        &self,
+        pool: &Pool<Postgres>,
+        force: bool,
+    ) -> anyhow::Result<String> {
+        use rand::prelude::*;
+        let mut token = self.data.read().unwrap().tau_token.clone();
+        if token != "" && !force {
+            return Ok(token);
+        } else {
+            let mut data = self.data.write().unwrap();
+            let mut rng = rand::rng();
+            token = (&mut rng)
+                .sample_iter(rand::distr::Alphanumeric)
+                .take(32)
+                .map(char::from)
+                .collect();
+            data.tau_token = token.clone();
+        }
+        self.save(pool).await?;
+        Ok(token)
+    }
+
     pub async fn write_data(
         &self,
         pool: &Pool<Postgres>,
@@ -53,6 +94,8 @@ impl KVStore {
         access_token: &twitch_oauth2::AccessToken,
         duration: std::time::Duration,
     ) -> anyhow::Result<()> {
+        // there is probably a (rare) race condition here, if a token is
+        // actively refreshing... we should probably stall in that case
         {
             let mut data = self.data.write().unwrap();
             data.twitch_refresh_token = refresh.secret().to_string();

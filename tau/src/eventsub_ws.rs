@@ -228,7 +228,7 @@ impl EventSubWebSocket {
                 if let Err(err) = result {
                     error!("ERROR: {}", err);
                 }
-                self.state.broadcast_event.send(event).unwrap();
+                self.state.broadcast_event.send(event.into()).unwrap();
             }
             "session_keepalive" => {}
             "session_welcome" => {
