@@ -12,11 +12,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref } from "vue";
 
 export default defineComponent({
-  name: 'NumberInput',
-  emits: ['update:value'],
+  name: "NumberInput",
+  emits: ["update:value"],
   props: {
     value: {
       type: Number,
@@ -28,14 +28,14 @@ export default defineComponent({
     },
   },
   setup(props, { emit }) {
-    const inputValue = ref<string>();
+    const inputValue = ref<number | null>(null);
 
     function onChange(event: any) {
       updateModel(event.value);
     }
 
     function updateModel(newValue: any) {
-      emit('update:value', newValue);
+      emit("update:value", newValue);
     }
 
     return {

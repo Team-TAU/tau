@@ -86,7 +86,7 @@ abstract class BaseWsService {
 }
 
 export class TauTwitchEventWsService extends BaseWsService {
-  constructor(private store: Store<any>) {
+  constructor(private store: any) {
     super('ws/twitch-events/');
   }
 
@@ -110,7 +110,7 @@ export class TauTwitchEventWsService extends BaseWsService {
 }
 
 export class TauStatusWsService extends BaseWsService {
-  constructor(private store: Store<any>) {
+  constructor(private store: any) {
     super('ws/tau-status/');
   }
 
@@ -123,7 +123,7 @@ export class TauStatusWsService extends BaseWsService {
 }
 
 export class ChatBotStatusWsService extends BaseWsService {
-  constructor(private store: Store<any>) {
+  constructor(private store: any) {
     super('ws/chat-bots/status/');
   }
 

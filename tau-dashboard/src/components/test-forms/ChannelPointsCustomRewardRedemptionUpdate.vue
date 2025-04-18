@@ -49,28 +49,28 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref } from 'vue';
-import BroadcasterInfo from './components/BroadcasterInfo.vue';
-import TwitchUser from './components/TwitchUser.vue';
-import RewardSelect from './components/RewardSelect.vue';
-import EmoteMessage from './components/EmoteMessage.vue';
-import PointRedemptionStatusSelect from './components/PointRedemptionStatusSelect.vue';
-import { Reward } from './components/RewardSelect.vue';
+import { defineComponent, reactive, ref } from "vue";
+import BroadcasterInfo from "./components/BroadcasterInfo.vue";
+import TwitchUser from "./components/TwitchUser.vue";
+import RewardSelect from "./components/RewardSelect.vue";
+import EmoteMessage from "./components/EmoteMessage.vue";
+import PointRedemptionStatusSelect from "./components/PointRedemptionStatusSelect.vue";
+import { Reward } from "./components/RewardSelect.vue";
 
-import api$ from '@/services/tau-apis';
+import api$ from "@/services/tau-apis";
 
-import { useStore } from 'vuex';
-import { TwitchMessage } from './components/EmoteMessage.vue';
-import { v4 as uuidv4 } from 'uuid';
+import { useStore } from "vuex";
+import { TwitchMessage } from "./components/EmoteMessage.vue";
+import { v4 as uuidv4 } from "uuid";
 
 interface RewardRedemptionData {
   id: string;
-  reward: Reward | null;
+  reward: Reward | undefined;
   status: string;
   user_id: string;
   user_name: string;
   user_login: string;
-  user_input: string | TwitchMessage;
+  user_input: any;
   redeemed_at: string;
   broadcaster_user_id: string;
   broadcaster_user_name: string;
@@ -78,7 +78,7 @@ interface RewardRedemptionData {
 }
 
 export default defineComponent({
-  name: 'ChannelChannelPointsCustomRewardRedemptionUpdate',
+  name: "ChannelChannelPointsCustomRewardRedemptionUpdate",
   components: {
     BroadcasterInfo,
     TwitchUser,
@@ -90,21 +90,21 @@ export default defineComponent({
     const store = useStore();
     const display = ref(true);
     const testData = reactive<RewardRedemptionData>({
-      id: '',
-      reward: null,
-      status: 'fulfilled',
-      user_id: '',
-      user_name: '',
-      user_login: '',
-      user_input: '',
-      redeemed_at: '',
-      broadcaster_user_id: '',
-      broadcaster_user_name: '',
-      broadcaster_user_login: '',
+      id: "",
+      reward: undefined,
+      status: "fulfilled",
+      user_id: "",
+      user_name: "",
+      user_login: "",
+      user_input: "",
+      redeemed_at: "",
+      broadcaster_user_id: "",
+      broadcaster_user_name: "",
+      broadcaster_user_login: "",
     });
 
     const close = () => {
-      store.dispatch('UI/clearTestFormView');
+      store.dispatch("UI/clearTestFormView");
     };
     const submit = () => {
       const payload: RewardRedemptionData = {
@@ -117,21 +117,21 @@ export default defineComponent({
               title: testData.reward.title,
               prompt: testData.reward.prompt,
             }
-          : null,
+          : undefined,
         redeemed_at: new Date().toISOString(),
       };
 
       if (testData.reward?.is_user_input_required) {
-        if (typeof testData.user_input !== 'string') {
+        if (typeof testData.user_input !== "string") {
           payload.user_input = testData.user_input.text;
         } else {
           payload.user_input = testData.user_input;
         }
       } else {
-        payload.user_input = '';
+        payload.user_input = "";
       }
       api$.tau.post(
-        'twitch-events/channel-channel_points_custom_reward_redemption-update/test',
+        "twitch-events/channel-channel_points_custom_reward_redemption-update/test",
         payload,
       );
     };

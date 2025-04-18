@@ -3,7 +3,6 @@
     v-model:visible="display"
     header="Test Channel Subscribe"
     :modal="true"
-    @hide="hide"
     :closable="false"
   >
     <twitch-user
@@ -40,18 +39,18 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref } from 'vue';
-import BroadcasterInfo from './components/BroadcasterInfo.vue';
-import TwitchUser from './components/TwitchUser.vue';
-import SubTierSelect from './components/SubTierSelect.vue';
-import Toggle from './components/Toggle.vue';
+import { defineComponent, reactive, ref } from "vue";
+import BroadcasterInfo from "./components/BroadcasterInfo.vue";
+import TwitchUser from "./components/TwitchUser.vue";
+import SubTierSelect from "./components/SubTierSelect.vue";
+import Toggle from "./components/Toggle.vue";
 
-import api$ from '@/services/tau-apis';
+import api$ from "@/services/tau-apis";
 
-import { useStore } from 'vuex';
+import { useStore } from "vuex";
 
 export default defineComponent({
-  name: 'ChannelSubscribe',
+  name: "ChannelSubscribe",
   components: {
     BroadcasterInfo,
     TwitchUser,
@@ -62,22 +61,22 @@ export default defineComponent({
     const store = useStore();
     const display = ref(true);
     const testData = reactive({
-      user_id: '',
-      user_name: '',
-      user_login: '',
-      broadcaster_user_id: '',
-      broadcaster_user_name: '',
-      broadcaster_user_login: '',
-      tier: '',
+      user_id: "",
+      user_name: "",
+      user_login: "",
+      broadcaster_user_id: "",
+      broadcaster_user_name: "",
+      broadcaster_user_login: "",
+      tier: "",
       is_gift: false,
     });
 
     const close = () => {
-      store.dispatch('UI/clearTestFormView');
+      store.dispatch("UI/clearTestFormView");
     };
 
     const submit = () => {
-      api$.tau.post('twitch-events/channel-subscribe/test', testData);
+      api$.tau.post("twitch-events/channel-subscribe/test", testData);
     };
 
     return {

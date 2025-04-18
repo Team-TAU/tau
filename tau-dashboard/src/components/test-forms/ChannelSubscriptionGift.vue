@@ -52,27 +52,27 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref } from 'vue';
-import BroadcasterInfo from './components/BroadcasterInfo.vue';
-import TwitchUser from './components/TwitchUser.vue';
-import SubTierSelect from './components/SubTierSelect.vue';
-import Toggle from './components/Toggle.vue';
-import NumberInput from './components/NumberInput.vue';
-import _ from 'lodash';
-import api$ from '@/services/tau-apis';
+import { defineComponent, reactive, ref } from "vue";
+import BroadcasterInfo from "./components/BroadcasterInfo.vue";
+import TwitchUser from "./components/TwitchUser.vue";
+import SubTierSelect from "./components/SubTierSelect.vue";
+import Toggle from "./components/Toggle.vue";
+import NumberInput from "./components/NumberInput.vue";
+import _ from "lodash";
+import api$ from "@/services/tau-apis";
 
-import { useStore } from 'vuex';
+import { useStore } from "vuex";
 
 export interface ChannelSubscriptionGiftEvent {
-  user_id: string | null;
-  user_login: string | null;
-  user_name: string | null;
+  user_id: string | undefined;
+  user_login: string | undefined;
+  user_name: string | undefined;
   broadcaster_user_id: string;
   broadcaster_user_login: string;
   broadcaster_user_name: string;
   total: number;
   tier: string;
-  cumulative_total: number | null;
+  cumulative_total: number;
   is_anonymous: false;
 }
 
@@ -93,7 +93,7 @@ interface FollowerResponse {
 }
 
 export default defineComponent({
-  name: 'ChannelSubscriptionGift',
+  name: "ChannelSubscriptionGift",
   components: {
     BroadcasterInfo,
     TwitchUser,
@@ -105,31 +105,31 @@ export default defineComponent({
     const store = useStore();
     const display = ref(true);
     const testData = reactive<ChannelSubscriptionGiftEvent>({
-      user_id: '',
-      user_login: '',
-      user_name: '',
-      broadcaster_user_id: '',
-      broadcaster_user_login: '',
-      broadcaster_user_name: '',
+      user_id: "",
+      user_login: "",
+      user_name: "",
+      broadcaster_user_id: "",
+      broadcaster_user_login: "",
+      broadcaster_user_name: "",
       total: 0,
-      tier: '',
+      tier: "",
       cumulative_total: 0,
       is_anonymous: false,
     });
 
     const close = () => {
-      store.dispatch('UI/clearTestFormView');
+      store.dispatch("UI/clearTestFormView");
     };
 
     const submit = async () => {
       if (testData.is_anonymous) {
-        testData.user_id = null;
-        testData.user_login = null;
-        testData.user_name = null;
-        testData.cumulative_total = null;
+        testData.user_id = undefined;
+        testData.user_login = undefined;
+        testData.user_name = undefined;
+        testData.cumulative_total = 0;
       }
       const followerData = await api$.helix.get<FollowerResponse>(
-        'users/follows',
+        "users/follows",
         {
           to_id: testData.broadcaster_user_id,
           first: 100,
@@ -137,7 +137,7 @@ export default defineComponent({
       );
       const followers = _.shuffle(followerData.data);
       await api$.tau.post(
-        'twitch-events/channel-subscription-gift/test',
+        "twitch-events/channel-subscription-gift/test",
         testData,
       );
       for (let i = 0; i < testData.total; i++) {
@@ -151,7 +151,7 @@ export default defineComponent({
           tier: testData.tier,
           is_gift: true,
         };
-        await api$.tau.post('twitch-events/channel-subscribe/test', payload);
+        await api$.tau.post("twitch-events/channel-subscribe/test", payload);
       }
     };
 

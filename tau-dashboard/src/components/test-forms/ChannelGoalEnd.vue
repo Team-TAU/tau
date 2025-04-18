@@ -45,19 +45,18 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref } from 'vue';
-import TextInput from './components/TextInput.vue';
-import GoalTypeSelect from './components/GoalTypeSelect.vue';
-import NumberInput from './components/NumberInput.vue';
-import BroadcasterInfo from './components/BroadcasterInfo.vue';
-import subDays from 'date-fns/subDays';
+import { defineComponent, reactive, ref } from "vue";
+import TextInput from "./components/TextInput.vue";
+import GoalTypeSelect from "./components/GoalTypeSelect.vue";
+import NumberInput from "./components/NumberInput.vue";
+import BroadcasterInfo from "./components/BroadcasterInfo.vue";
 
-import api$ from '@/services/tau-apis';
+import api$ from "@/services/tau-apis";
 
-import { useStore } from 'vuex';
+import { useStore } from "vuex";
 
 export default defineComponent({
-  name: 'ChannelUpdate',
+  name: "ChannelUpdate",
   components: {
     TextInput,
     GoalTypeSelect,
@@ -70,25 +69,25 @@ export default defineComponent({
     const testData = reactive({
       id: Array.from(Array(27), () =>
         Math.floor(Math.random() * 36).toString(36),
-      ).join(''),
-      type: 'follow',
+      ).join(""),
+      type: "follow",
       ended_at: new Date().toISOString(),
-      started_at: subDays(new Date(), 1).toISOString(),
-      description: '',
+      started_at: new Date().toISOString(),
+      description: "",
       is_achieved: false,
       target_amount: 30,
       current_amount: 23,
-      broadcaster_user_id: '',
-      broadcaster_user_name: '',
-      broadcaster_user_login: '',
+      broadcaster_user_id: "",
+      broadcaster_user_name: "",
+      broadcaster_user_login: "",
     });
 
     const close = () => {
-      store.dispatch('UI/clearTestFormView');
+      store.dispatch("UI/clearTestFormView");
     };
     const submit = () => {
       testData.is_achieved = testData.current_amount >= testData.target_amount;
-      api$.tau.post('twitch-events/channel-goal-end/test', testData);
+      api$.tau.post("twitch-events/channel-goal-end/test", testData);
     };
 
     return {

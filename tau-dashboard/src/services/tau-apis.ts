@@ -1,6 +1,6 @@
-import { ajax } from 'rxjs/ajax';
-import { map } from 'rxjs/operators';
-import baseUrl from './base-api-url';
+import { ajax } from "rxjs/ajax";
+import { map } from "rxjs/operators";
+import baseUrl from "./base-api-url";
 
 type QueryParams = Record<
   string,
@@ -8,86 +8,84 @@ type QueryParams = Record<
 >;
 
 class BaseApiService {
-  basePath = '';
+  basePath = "";
 
   constructor(basePath: string) {
     this.basePath = basePath;
   }
 
   get token() {
-    const token = localStorage.getItem('tau-token');
+    const token = localStorage.getItem("tau-token");
     if (token === null) {
-      throw new Error('No token currently exists.  You must authorize.');
+      throw new Error("No token currently exists.  You must authorize.");
     }
     return token;
   }
 
   get authHeader(): Readonly<Record<string, any>> {
     return {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Token ${this.token}`,
     };
   }
 
   get<T = any>(endpoint: string, queryParams: QueryParams = {}): Promise<T> {
     const queryStr =
-      queryParams === {}
-        ? ''
-        : '?' +
-          Object.keys(queryParams)
-            .map((key) => `${key}=${queryParams[key]}`)
-            .join('&');
+      "?" +
+      Object.keys(queryParams)
+        .map((key) => `${key}=${queryParams[key]}`)
+        .join("&");
     const url = `${baseUrl}${this.basePath}${endpoint}${queryStr}`;
     return ajax({
       url,
-      method: 'GET',
+      method: "GET",
       headers: this.authHeader,
     })
       .pipe(map((res) => res.response as T))
-      .toPromise();
+      .toPromise() as any;
   }
 
   post<T = any>(endpoint: string, payload: any): Promise<T> {
     const url = `${baseUrl}${this.basePath}${endpoint}`;
     return ajax({
       url,
-      method: 'POST',
+      method: "POST",
       headers: this.authHeader,
       body: payload,
     })
       .pipe(map((res) => res.response as T))
-      .toPromise();
+      .toPromise() as any;
   }
 
   put<T = any>(endpoint: string, payload: any): Promise<T> {
     const url = `${baseUrl}${this.basePath}${endpoint}`;
     return ajax({
       url,
-      method: 'PUT',
+      method: "PUT",
       headers: this.authHeader,
       body: payload,
     })
       .pipe(map((res) => res.response as T))
-      .toPromise();
+      .toPromise() as any;
   }
 
   patch<T = any>(endpoint: string, payload: any): Promise<T> {
     const url = `${baseUrl}${this.basePath}${endpoint}`;
     return ajax({
       url,
-      method: 'PATCH',
+      method: "PATCH",
       headers: this.authHeader,
       body: payload,
     })
       .pipe(map((res) => res.response as T))
-      .toPromise();
+      .toPromise() as any;
   }
 
   delete(endpoint: string): Promise<void> {
     const url = `${baseUrl}${this.basePath}${endpoint}`;
     return ajax({
       url,
-      method: 'DELETE',
+      method: "DELETE",
       headers: this.authHeader,
     })
       .pipe(
@@ -95,19 +93,19 @@ class BaseApiService {
           return;
         }),
       )
-      .toPromise();
+      .toPromise() as any;
   }
 }
 
 class TauRestService extends BaseApiService {
   constructor() {
-    super('/api/v1/');
+    super("/api/v1/");
   }
 }
 
 class TauHelixService extends BaseApiService {
   constructor() {
-    super('/api/twitch/helix/');
+    super("/api/twitch/helix/");
   }
 }
 

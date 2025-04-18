@@ -57,17 +57,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, ref } from 'vue';
-import BroadcasterInfo from './components/BroadcasterInfo.vue';
-import TwitchUser from './components/TwitchUser.vue';
-import EmoteMessage, { TwitchMessage } from './components/EmoteMessage.vue';
-import SubTierSelect from './components/SubTierSelect.vue';
-import NumberInput from './components/NumberInput.vue';
-import Toggle from './components/Toggle.vue';
+import { defineComponent, reactive, ref } from "vue";
+import BroadcasterInfo from "./components/BroadcasterInfo.vue";
+import TwitchUser from "./components/TwitchUser.vue";
+import EmoteMessage, { TwitchMessage } from "./components/EmoteMessage.vue";
+import SubTierSelect from "./components/SubTierSelect.vue";
+import NumberInput from "./components/NumberInput.vue";
+import Toggle from "./components/Toggle.vue";
 
-import api$ from '@/services/tau-apis';
+import api$ from "@/services/tau-apis";
 
-import { useStore } from 'vuex';
+import { useStore } from "vuex";
 
 interface ChannelSubscriptionMessageData {
   user_id: string;
@@ -79,12 +79,12 @@ interface ChannelSubscriptionMessageData {
   tier: string;
   message: TwitchMessage;
   cumulative_months: number;
-  streak_months: number | null;
+  streak_months: number;
   duration_months: number;
 }
 
 export default defineComponent({
-  name: 'ChannelSubscriptionMessage',
+  name: "ChannelSubscriptionMessage",
   components: {
     BroadcasterInfo,
     TwitchUser,
@@ -95,19 +95,19 @@ export default defineComponent({
   },
   setup() {
     const store = useStore();
-    const test = ref('test');
+    const test = ref("test");
     const display = ref(true);
     const showStreak = ref(true);
     const testData = reactive<ChannelSubscriptionMessageData>({
-      user_id: '',
-      user_name: '',
-      user_login: '',
-      broadcaster_user_id: '',
-      broadcaster_user_name: '',
-      broadcaster_user_login: '',
-      tier: '1000',
+      user_id: "",
+      user_name: "",
+      user_login: "",
+      broadcaster_user_id: "",
+      broadcaster_user_name: "",
+      broadcaster_user_login: "",
+      tier: "1000",
       message: {
-        text: '',
+        text: "",
         emotes: [],
       },
       cumulative_months: 0,
@@ -116,7 +116,7 @@ export default defineComponent({
     });
 
     const close = () => {
-      store.dispatch('UI/clearTestFormView');
+      store.dispatch("UI/clearTestFormView");
     };
     const catChange = (ev: any) => {
       console.log(ev);
@@ -124,10 +124,10 @@ export default defineComponent({
     const submit = () => {
       console.log(testData);
       if (!showStreak.value) {
-        testData.streak_months = null;
+        testData.streak_months = 0;
       }
       api$.tau.post(
-        'twitch-events/channel-subscription-message/test',
+        "twitch-events/channel-subscription-message/test",
         testData,
       );
     };
