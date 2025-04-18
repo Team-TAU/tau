@@ -426,8 +426,13 @@ async fn main() -> Result<(), anyhow::Error> {
         websocket.run_loop(worker_rx).await;
     });
 
+    use axum::ServiceExt as _;
+    use tower::ServiceExt as _;
+    let app = tower_http::services::ServeDir::new("dist")
+        .fallback(router.into_service())
+        .map_response(|response| response.map(axum::body::Body::new));
     let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, settings.port)).await?;
-    axum::serve(listener, router).await?;
+    axum::serve(listener, app.into_make_service()).await?;
     Ok(())
 }
 
