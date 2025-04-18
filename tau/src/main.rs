@@ -18,6 +18,7 @@ use std::collections::{HashMap, HashSet};
 use std::net::Ipv4Addr;
 use std::sync::Arc;
 use tokio::sync::{broadcast, mpsc, Mutex};
+use tower_http::services::{ServeDir, ServeFile};
 use twitch_api::HelixClient;
 use twitch_oauth2::{AccessToken, CsrfToken, TwitchToken, UserTokenBuilder};
 use utoipa::openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme};
@@ -331,7 +332,8 @@ async fn main() -> Result<(), anyhow::Error> {
         twitch_app_id: std::env::var("TWITCH_APP_ID").unwrap(),
         twitch_client_secret: std::env::var("TWITCH_CLIENT_SECRET").unwrap(),
         superuser: std::env::var("SUPERUSER").unwrap(),
-        public_read_access: true, // this should be off by default; its new
+        initial_migration: std::env::var("MIGRATE").is_ok(),
+        public_read_access: std::env::var("PUBLIC_READ_ACCESS").is_ok(),
         postgres_connection: std::env::var("POSTGRES_CONNECTION").unwrap(),
         base_url: std::env::var("BASE_URL").unwrap(),
         port: std::env::var("PORT").unwrap().parse::<_>().unwrap(),
@@ -348,8 +350,7 @@ async fn main() -> Result<(), anyhow::Error> {
 
     // TODO: check if '_sqlx_migrations' table exists;
     // if not, run a pgdump to a backup file
-    let initial_migration = false;
-    if initial_migration {
+    if settings.initial_migration {
         kv.migrate(&pool).await?;
     } else {
         let result = kv.load(&pool).await;
@@ -426,12 +427,9 @@ async fn main() -> Result<(), anyhow::Error> {
         websocket.run_loop(worker_rx).await;
     });
 
-    use axum::ServiceExt as _;
-    use tower::ServiceExt as _;
-    let app = tower_http::services::ServeDir::new("dist")
-        .fallback(router.into_service())
-        .map_response(|response| response.map(axum::body::Body::new));
-    let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, settings.port)).await?;
+    let serve_dir = ServeDir::new("dist").not_found_service(ServeFile::new("dist/index.html"));
+    let app = router.fallback_service(serve_dir);
+    let listener = TcpListener::bind(("0.0.0.0", settings.port)).await?;
     axum::serve(listener, app.into_make_service()).await?;
     Ok(())
 }
