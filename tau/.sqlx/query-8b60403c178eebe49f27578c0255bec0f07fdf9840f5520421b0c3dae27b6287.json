@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO twitch_twitcheventsubsubscription\n        (name, version, active) VALUES ($1, $2, $3)\n        ON CONFLICT (name) DO UPDATE SET active = ((SELECT version FROM twitch_twitcheventsubsubscription WHERE name = EXCLUDED.name) = EXCLUDED.version), version = EXCLUDED.VERSION",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8b60403c178eebe49f27578c0255bec0f07fdf9840f5520421b0c3dae27b6287"
+}

@@ -1,0 +1,20 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT array_to_json(array_agg(row_to_json(constance_config))) as json_agg FROM constance_config",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "json_agg",
+        "type_info": "Json"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "262e155cc71fcee47113b75572f6c2c7570a4464fa94d05f0c1bab44f11e185a"
+}

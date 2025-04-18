@@ -1,0 +1,63 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO streamers_streamer\n            (id, twitch_username, twitch_id, streaming, disabled, created, updated)\n     VALUES ($1, $2, $3, False, $4, $5, $6)\n           RETURNING\n                id,\n                twitch_username,\n                twitch_id,\n                streaming,\n                disabled,\n                created,\n                updated",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "twitch_username",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "twitch_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "streaming",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 4,
+        "name": "disabled",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "created",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 6,
+        "name": "updated",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Bool",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "8e8f265c15614d66f017cb3eeaa4b9baf7ce6109af2161a6c38b645f4e5ee798"
+}

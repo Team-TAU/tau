@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM streamers_streamer WHERE id = $1 RETURNING twitch_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "twitch_id",
+        "type_info": "Varchar"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "7c30e72dc33c4337ee97d12aa221b227337ac38d5e0ad96d8c3ca3719381f12f"
+}

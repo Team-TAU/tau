@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO twitchevents_twitchevent\n                            (id, event_id, event_type, event_source, event_data, created) VALUES\n                            ($1, $2, $3, $4, $5, $6)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Varchar",
+        "Jsonb",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "170009c80c6b86029513c6408bc110cb6879169ca8872b5ec632eddf4725c0a3"
+}
