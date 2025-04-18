@@ -46,6 +46,25 @@ impl KVStore {
         return self.data.read().unwrap().channel_id.clone();
     }
 
+    pub async fn write_data(
+        &self,
+        pool: &Pool<Postgres>,
+        refresh: &twitch_oauth2::RefreshToken,
+        access_token: &twitch_oauth2::AccessToken,
+        duration: std::time::Duration,
+    ) -> anyhow::Result<()> {
+        {
+            let mut data = self.data.write().unwrap();
+            data.twitch_refresh_token = refresh.secret().to_string();
+            data.twitch_access_token = access_token.secret().to_string();
+            data.twitch_access_token_expiration = chrono::offset::Utc::now() + duration;
+            let mut token = self.user_token.write().unwrap();
+            *token = None;
+        }
+        self.save(pool).await?;
+        Ok(())
+    }
+
     pub async fn current_user_token(&self) -> anyhow::Result<UserToken> {
         let cloned = {
             let user_token = self.user_token.read().unwrap();
@@ -97,9 +116,10 @@ impl KVStore {
             drop(handle);
             // ok fine, let's start an async task to refresh the token
             println!(
-                "before token: {}",
+                "refreshing! before token: {}",
                 self.data.read().unwrap().twitch_access_token
             );
+            tokio::time::sleep(tokio::time::Duration::from_millis(5000)).await;
             let current_refresh = self.data.read().unwrap().twitch_refresh_token.clone();
             let client_secret = config.twitch_client_secret.clone();
             let client_id = config.twitch_app_id.clone();

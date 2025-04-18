@@ -22,7 +22,7 @@ export default class TwitchOAuthScopesActions extends Actions<
         return true;
       },
       (_err) => {
-        // this.commit('authError', {
+        // this.commit("authError", {
         //   error,
         // });
         return false;

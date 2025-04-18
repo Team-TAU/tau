@@ -132,8 +132,11 @@ export default defineComponent({
       const payload = scopeData
         .filter((scope) => scope.required)
         .map((scope) => scope.scope);
-      console.log(payload);
-      // window.location.href = `${baseUrl}/refresh-token-scope/`;
+      const params = new URLSearchParams();
+      payload.forEach((scope) => {
+        params.append("scopes[]", scope);
+      });
+      window.location.href = `${baseUrl}/api/v1/auth/refresh-token-scope?${decodeURIComponent(params.toString())}`;
     }
 
     async function updateSettings() {

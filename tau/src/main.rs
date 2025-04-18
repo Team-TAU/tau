@@ -153,9 +153,15 @@ pub struct TwitchApiSpec {
     pub helix: Vec<HelixEndpoint>,
     pub scopes: HashSet<String>,
 }
+
+pub struct OauthState {
+    save: bool,
+    builder: UserTokenBuilder,
+}
+
 pub struct RouterState {
     pub pool: Pool<Postgres>,
-    pub oauth_state: Mutex<HashMap<CsrfToken, UserTokenBuilder>>,
+    pub oauth_state: Mutex<HashMap<CsrfToken, OauthState>>,
     pub kv: kv_store::KVStore,
     pub config: settings::Settings,
     pub broadcast_event: broadcast::Sender<crate::events::Event>,
@@ -367,13 +373,14 @@ mod auth {
     use std::sync::Arc;
 
     use anyhow::Context as _;
-    use axum::extract::{Json, State};
+    use axum::extract::{Json, Query, State};
     use axum::http::StatusCode;
     use axum::response::{IntoResponse, Redirect};
     use reqwest::Url;
     use serde::{Deserialize, Serialize};
+    use serde_qs::axum::QsQuery;
     use twitch_api::twitch_oauth2::UserTokenBuilder;
-    use twitch_oauth2::CsrfToken;
+    use twitch_oauth2::{CsrfToken, TwitchToken};
     use utoipa::ToSchema;
     use utoipa_axum::router::OpenApiRouter;
     use utoipa_axum::routes;
@@ -406,6 +413,7 @@ mod auth {
         OpenApiRouter::new()
             .routes(routes!(post_token_auth))
             .routes(routes!(login_auth))
+            .routes(routes!(refresh_scopes))
             .routes(routes!(login_redirect_landing))
             .routes(routes!(get_scopes))
     }
@@ -426,7 +434,49 @@ mod auth {
         let (url, csrf_token) = builder.generate_url();
 
         let mut cache = state.oauth_state.lock().await;
-        cache.insert(csrf_token, builder);
+        cache.insert(
+            csrf_token,
+            crate::OauthState {
+                builder,
+                save: false,
+            },
+        );
+        drop(cache);
+
+        Ok(Redirect::temporary(url.as_str()))
+    }
+
+    #[derive(Deserialize)]
+    struct Scopes {
+        #[serde(default)]
+        scopes: Vec<twitch_oauth2::Scope>,
+    }
+
+    #[utoipa::path(get, path = "/refresh-token-scope",
+        responses(
+        (status = FOUND, body = ()),
+    ), tag = super::AUTH_TAG)]
+    async fn refresh_scopes(
+        State(state): State<Arc<crate::RouterState>>,
+        QsQuery(query): QsQuery<Scopes>,
+    ) -> Result<impl IntoResponse, crate::AppError> {
+        let mut builder = UserTokenBuilder::new(
+            state.config.twitch_app_id.as_str(),
+            state.config.twitch_client_secret.as_str(),
+            Url::parse("http://localhost:5173/twitch-callback/")
+                .context("failed to parse redirect URL")?,
+        )
+        .set_scopes(query.scopes);
+        let (url, csrf_token) = builder.generate_url();
+
+        let mut cache = state.oauth_state.lock().await;
+        cache.insert(
+            csrf_token,
+            crate::OauthState {
+                builder,
+                save: true,
+            },
+        );
         drop(cache);
 
         Ok(Redirect::temporary(url.as_str()))
@@ -442,7 +492,7 @@ mod auth {
         Json(payload): Json<OauthRequest>,
     ) -> Result<impl IntoResponse, crate::AppError> {
         let mut cache = state.oauth_state.lock().await;
-        let builder = cache
+        let csrf_state = cache
             .remove(&CsrfToken::from(payload.state.as_str()))
             .ok_or(crate::AppError::CsrfError)?;
         drop(cache);
@@ -450,7 +500,8 @@ mod auth {
             .redirect(reqwest::redirect::Policy::none())
             .build()
             .context("failed to create reqwest client")?;
-        let token = builder
+        let token = csrf_state
+            .builder
             .get_user_token(&client, payload.state.as_ref(), payload.code.as_ref())
             .await
             .context("failed to get user token")?;
@@ -461,6 +512,23 @@ mod auth {
             .context("failed to get user info")?
             .ok_or(crate::AppError::Unauthorized)?;
         if user_info.login.to_string() == state.config.superuser {
+            if csrf_state.save {
+                println!("saving!");
+                let refresh = token
+                    .refresh_token
+                    .clone()
+                    .ok_or(crate::AppError::Unauthorized)?;
+                state
+                    .kv
+                    .write_data(
+                        &state.pool,
+                        &refresh,
+                        &token.access_token,
+                        token.expires_in(),
+                    )
+                    .await
+                    .context("failed to write new creds")?;
+            }
             Ok((
                 StatusCode::OK,
                 Json(LoginResponse {
