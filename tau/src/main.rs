@@ -165,7 +165,9 @@ fn verify_auth(state: Arc<crate::RouterState>, message: &str) -> bool {
 async fn handle_socket(stream: WebSocket, state: Arc<crate::RouterState>) {
     let mut authenticated = false;
     let uuid = Uuid::new_v4();
-    let (mut sender, mut receiver) = stream.split();
+    let (sender, mut receiver) = stream.split();
+    let sender = Arc::new(Mutex::new(sender));
+    let sender2 = sender.clone();
     // NOTE: this is where we would block reads until authenticated
     // skipping this is a new feature not present in the original TAU
     if !state.config.public_read_access {
@@ -176,6 +178,7 @@ async fn handle_socket(stream: WebSocket, state: Arc<crate::RouterState>) {
             }
         }
     }
+
     let mut rx = state.broadcast_event.subscribe();
 
     let mut send_task = tokio::spawn(async move {
@@ -188,51 +191,69 @@ async fn handle_socket(stream: WebSocket, state: Arc<crate::RouterState>) {
             }
             // In any websocket error, break loop.
             let msg = serde_json::to_string(&msg.event).unwrap();
-            if sender.send(Message::Text(msg)).await.is_err() {
+            if sender2.lock().await.send(Message::Text(msg)).await.is_err() {
                 break;
             }
         }
     });
 
     let mut recv_task = tokio::spawn(async move {
-        while let Some(Ok(Message::Text(text))) = receiver.next().await {
-            if !authenticated {
-                if verify_auth(state.clone(), text.as_str()) {
-                    authenticated = true;
+        while let Some(Ok(msg)) = receiver.next().await {
+            match msg {
+                Message::Ping(payload) => {
+                    if sender
+                        .lock()
+                        .await
+                        .send(Message::Pong(payload))
+                        .await
+                        .is_err()
+                    {
+                        break;
+                    }
                 }
-                continue;
-            }
+                Message::Pong(..) => {}
+                Message::Close(..) => {}
+                Message::Binary(..) => {}
+                Message::Text(text) => {
+                    if !authenticated {
+                        if verify_auth(state.clone(), text.as_str()) {
+                            authenticated = true;
+                        }
+                        continue;
+                    }
 
-            // any message past this point should be treated as a msg bus event
-            let parsed = serde_json::from_str::<events::Event>(text.as_str());
-            let Ok(mut event) = parsed else {
-                warn!("Received invalid event from msg bus");
-                continue;
-            };
-            event.origin = "tau".to_string().into();
-            state
-                .broadcast_event
-                .send(events::TaggedEvent {
-                    event: event.clone(),
-                    sender: uuid.into(),
-                })
-                .unwrap();
+                    // any message past this point should be treated as a msg bus event
+                    let parsed = serde_json::from_str::<events::Event>(text.as_str());
+                    let Ok(mut event) = parsed else {
+                        warn!("Received invalid event from msg bus");
+                        continue;
+                    };
+                    event.origin = "tau".to_string().into();
+                    state
+                        .broadcast_event
+                        .send(events::TaggedEvent {
+                            event: event.clone(),
+                            sender: uuid.into(),
+                        })
+                        .unwrap();
 
-            let result = sqlx::query!(
-                "INSERT INTO twitchevents_twitchevent
+                    let result = sqlx::query!(
+                        "INSERT INTO twitchevents_twitchevent
                             (id, event_id, event_type, event_source, event_data, created) VALUES
                             ($1, $2, $3, $4, $5, $6)",
-                event.id,
-                event.event_id,
-                event.event_type,
-                event.event_source,
-                event.event_data,
-                event.created
-            )
-            .execute(&state.pool)
-            .await;
-            if let Err(err) = result {
-                error!("ERROR: {}", err);
+                        event.id,
+                        event.event_id,
+                        event.event_type,
+                        event.event_source,
+                        event.event_data,
+                        event.created
+                    )
+                    .execute(&state.pool)
+                    .await;
+                    if let Err(err) = result {
+                        error!("ERROR: {}", err);
+                    }
+                }
             }
         }
     });
