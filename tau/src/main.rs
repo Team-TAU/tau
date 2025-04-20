@@ -141,9 +141,15 @@ impl Modify for SecurityAddon {
 }
 
 /// Get health of the API.
+#[utoipa::path(method(get), path = "/ws/tau-status/")]
+async fn ws_status(ws: WebSocketUpgrade, State(state): State<Arc<crate::RouterState>>) -> Response {
+    ws.on_upgrade(|socket| handle_socket_status(socket, state))
+}
+
+/// Get health of the API.
 #[utoipa::path(method(get), path = "/ws/twitch-events/")]
 async fn ws_events(ws: WebSocketUpgrade, State(state): State<Arc<crate::RouterState>>) -> Response {
-    ws.on_upgrade(|socket| handle_socket(socket, state))
+    ws.on_upgrade(|socket| handle_socket_events(socket, state))
 }
 
 #[derive(Serialize, Deserialize)]
@@ -162,7 +168,37 @@ fn verify_auth(state: Arc<crate::RouterState>, message: &str) -> bool {
     }
 }
 
-async fn handle_socket(stream: WebSocket, state: Arc<crate::RouterState>) {
+async fn handle_socket_status(stream: WebSocket, state: Arc<crate::RouterState>) {
+    let (mut sender, _receiver) = stream.split();
+
+    {
+        let subs = state.subscriptions.lock().await;
+        for sub in state.spec.event_sub.iter() {
+            let mut payload = Subscription {
+                active: false,
+                id: sub.name.clone(),
+                lookup_name: sub.name.clone(),
+                subscription_type: sub.subscription_type.clone(),
+            };
+            if let Some(val) = subs.get(&sub.name) {
+                payload.active = val.active;
+            }
+            let msg = serde_json::to_string(&payload).unwrap();
+            if sender.send(Message::Text(msg)).await.is_err() {
+                return;
+            }
+        }
+    }
+    let mut rx = state.broadcast_subscription.subscribe();
+
+    while let Ok(msg) = rx.recv().await {
+        let msg = serde_json::to_string(&msg).unwrap();
+        if sender.send(Message::Text(msg)).await.is_err() {
+            return;
+        }
+    }
+}
+async fn handle_socket_events(stream: WebSocket, state: Arc<crate::RouterState>) {
     let mut authenticated = false;
     let uuid = Uuid::new_v4();
     let (sender, mut receiver) = stream.split();
@@ -296,9 +332,25 @@ pub struct RouterState {
     pub kv: kv_store::KVStore,
     pub config: settings::Settings,
     pub broadcast_event: broadcast::Sender<crate::events::TaggedEvent>,
+    pub broadcast_subscription: broadcast::Sender<SubscriptionStatus>,
     pub spec: TwitchApiSpec,
     pub helix_client: HelixClient<'static, reqwest::Client>,
     pub send_to_worker: mpsc::Sender<EventSubWorkerMessage>,
+    pub subscriptions: Mutex<HashMap<String, SubscriptionStatus>>,
+}
+
+#[derive(Serialize, Clone)]
+pub struct Subscription {
+    pub id: String,
+    pub active: bool,
+    pub lookup_name: String,
+    pub subscription_type: String,
+}
+
+#[derive(Serialize, Clone)]
+pub struct SubscriptionStatus {
+    pub id: String,
+    pub active: bool,
 }
 
 #[derive(ToSchema, Serialize, Deserialize, Clone)]
@@ -368,6 +420,7 @@ async fn main() -> Result<(), anyhow::Error> {
     let mut kv = kv_store::KVStore::new();
 
     let (tx, _rx) = broadcast::channel::<crate::events::TaggedEvent>(100);
+    let (sub_tx, _rx) = broadcast::channel::<SubscriptionStatus>(100);
 
     // TODO: check if '_sqlx_migrations' table exists;
     // if not, run a pgdump to a backup file
@@ -407,6 +460,7 @@ async fn main() -> Result<(), anyhow::Error> {
     let (worker_tx, worker_rx) = mpsc::channel::<EventSubWorkerMessage>(10);
     let state = Arc::new(RouterState {
         broadcast_event: tx,
+        broadcast_subscription: sub_tx,
         pool,
         oauth_state: HashMap::new().into(),
         config: settings.clone(),
@@ -418,10 +472,12 @@ async fn main() -> Result<(), anyhow::Error> {
         kv: kv.into(),
         helix_client: HelixClient::default(),
         send_to_worker: worker_tx,
+        subscriptions: HashMap::new().into(),
     });
 
     let (router, api) = OpenApiRouter::with_openapi(ApiDoc::openapi())
         .routes(routes!(health))
+        .routes(routes!(ws_status))
         .routes(routes!(ws_events))
         .nest("/api/v1/auth", auth::router(state.clone()))
         .nest("/api/v1/twitch-events", events::router(state.clone()))

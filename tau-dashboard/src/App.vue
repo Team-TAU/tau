@@ -16,10 +16,10 @@ export default defineComponent({
   setup() {
     const store = useStore();
 
-    // const tauStatusWs = new TauStatusWsService(store);
+    const tauStatusWs = new TauStatusWsService(store);
     const twitchEventWs = new TauTwitchEventWsService(store);
     const chatBotStatusWs = new ChatBotStatusWsService(store);
-    // provide('tauStatusWs', tauStatusWs);
+    provide("tauStatusWs", tauStatusWs);
     provide("twitchEventWs", twitchEventWs);
     provide("chatBotStatusWs", chatBotStatusWs);
 

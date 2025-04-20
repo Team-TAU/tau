@@ -212,7 +212,7 @@ impl EventSubWebSocket {
                         .ok_or(anyhow::anyhow!("twitch broke"))?
                         .clone(),
                 };
-                // hacky - let's make a blocklist or something instead
+                // TODO: hacky - let's make a blocklist or something instead
                 if event.event_type != "channel-chat-message" {
                     let result = sqlx::query!(
                         "INSERT INTO twitchevents_twitchevent
@@ -345,6 +345,21 @@ impl EventSubWebSocket {
         })
     }
 
+    async fn update_sub_status(&self, name: &str, active: bool) {
+        let mut subscriptions = self.state.subscriptions.lock().await;
+
+        let entry =
+            subscriptions
+                .entry(name.to_string())
+                .or_insert_with(|| crate::SubscriptionStatus {
+                    active,
+                    id: name.to_string(),
+                });
+
+        entry.active = active;
+        self.state.broadcast_subscription.send(entry.clone());
+    }
+
     async fn subscribe(
         &self,
         name: &str,
@@ -380,12 +395,15 @@ impl EventSubWebSocket {
                         res.text().await.unwrap(),
                         request.condition
                     );
+                    self.update_sub_status(name, false).await;
                 } else {
                     info!("Subscribed to {} v{}", name, version);
+                    self.update_sub_status(name, true).await;
                 }
             }
             Err(err) => {
                 error!("Error subscribing: {:?}", err);
+                self.update_sub_status(name, false).await;
             }
         }
     }
