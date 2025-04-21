@@ -222,7 +222,7 @@ impl KVStore {
     }
 
     pub async fn migrate(&mut self, pool: &Pool<Postgres>) -> Result<(), anyhow::Error> {
-        // TODO: we should migrate the existing token for convenience probably
+        warn!("Attempting to migrate from previous database...");
         let row = sqlx::query!(
             "SELECT array_to_json(array_agg(row_to_json(constance_config))) as json_agg FROM constance_config",
         )
@@ -250,10 +250,17 @@ impl KVStore {
         }
 
         let status = child.wait()?;
+        info!("Successfully migrated constance data.");
 
         // Check if the process succeeded
         if status.success() {
+            warn!("Attempting to migrate user token...");
             self.data = serde_json::from_str(&output)?;
+            use sqlx::Row;
+            let row = sqlx::query("SELECT key FROM users_user LEFT JOIN authtoken_token ON id = user_id WHERE users_user.is_superuser = True").fetch_one(pool).await.unwrap();
+            let key: String = row.get("key");
+            self.data.write().unwrap().tau_token = key;
+            info!("Success!");
             Ok(())
         } else {
             Err(anyhow::anyhow!("Python script failed to execute"))

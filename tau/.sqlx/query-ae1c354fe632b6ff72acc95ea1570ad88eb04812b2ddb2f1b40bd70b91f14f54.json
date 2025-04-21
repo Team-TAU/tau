@@ -1,0 +1,20 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS (\n            SELECT 1\n            FROM pg_tables\n            WHERE tablename = '_sqlx_migrations'\n        );",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "exists",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "ae1c354fe632b6ff72acc95ea1570ad88eb04812b2ddb2f1b40bd70b91f14f54"
+}

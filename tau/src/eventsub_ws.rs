@@ -345,19 +345,22 @@ impl EventSubWebSocket {
         })
     }
 
-    async fn update_sub_status(&self, name: &str, active: bool) {
+    async fn update_sub_status(&self, name: &str, status: bool) {
         let mut subscriptions = self.state.subscriptions.lock().await;
 
         let entry =
             subscriptions
                 .entry(name.to_string())
                 .or_insert_with(|| crate::SubscriptionStatus {
-                    active,
+                    status,
                     id: name.to_string(),
                 });
 
-        entry.active = active;
-        self.state.broadcast_subscription.send(entry.clone());
+        entry.status = status;
+        self.state
+            .broadcast_subscription
+            .send(entry.clone())
+            .unwrap();
     }
 
     async fn subscribe(

@@ -12,11 +12,8 @@
             headerClass="text-center"
           >
             <template #body="{ data }">
-              <i class="pi pi-check text-green-500" v-if="data.active"></i>
-              <i
-                class="pi pi-times text-orange-600"
-                v-else-if="!data.active"
-              ></i>
+              <i class="pi pi-check text-green-500" v-if="data.status"></i>
+              <i class="pi pi-times text-orange-600" v-else></i>
             </template>
           </Column>
           <Column field="subscription_type" header="Event">

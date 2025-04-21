@@ -175,13 +175,14 @@ async fn handle_socket_status(stream: WebSocket, state: Arc<crate::RouterState>)
         let subs = state.subscriptions.lock().await;
         for sub in state.spec.event_sub.iter() {
             let mut payload = Subscription {
-                active: false,
+                active: true,
+                status: false,
                 id: sub.name.clone(),
                 lookup_name: sub.name.clone(),
                 subscription_type: sub.subscription_type.clone(),
             };
             if let Some(val) = subs.get(&sub.name) {
-                payload.active = val.active;
+                payload.status = val.status;
             }
             let msg = serde_json::to_string(&payload).unwrap();
             if sender.send(Message::Text(msg)).await.is_err() {
@@ -342,15 +343,16 @@ pub struct RouterState {
 #[derive(Serialize, Clone)]
 pub struct Subscription {
     pub id: String,
+    pub status: bool,
     pub active: bool,
     pub lookup_name: String,
     pub subscription_type: String,
 }
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Clone, Debug)]
 pub struct SubscriptionStatus {
     pub id: String,
-    pub active: bool,
+    pub status: bool,
 }
 
 #[derive(ToSchema, Serialize, Deserialize, Clone)]
@@ -401,15 +403,21 @@ async fn main() -> Result<(), anyhow::Error> {
         .collect();
 
     dotenvy::dotenv()?;
+    let port: u16 = std::env::var("PORT")
+        .map(|p| p.parse::<_>().unwrap_or(8000))
+        .unwrap_or(8000);
     let settings = settings::Settings {
-        twitch_app_id: std::env::var("TWITCH_APP_ID").unwrap(),
-        twitch_client_secret: std::env::var("TWITCH_CLIENT_SECRET").unwrap(),
-        superuser: std::env::var("SUPERUSER").unwrap(),
-        initial_migration: std::env::var("MIGRATE").is_ok(),
+        twitch_app_id: std::env::var("TWITCH_APP_ID").expect("TWITCH_APP_ID must be set"),
+        twitch_client_secret: std::env::var("TWITCH_CLIENT_SECRET")
+            .expect("TWITCH_CLIENT_SECRET must be set"),
+        superuser: std::env::var("SUPERUSER")
+            .expect("SUPERUSER must be set to your twitch user login"),
         public_read_access: std::env::var("PUBLIC_READ_ACCESS").is_ok(),
-        postgres_connection: std::env::var("POSTGRES_CONNECTION").unwrap(),
-        base_url: std::env::var("BASE_URL").unwrap(),
-        port: std::env::var("PORT").unwrap().parse::<_>().unwrap(),
+        postgres_connection: std::env::var("POSTGRES_CONNECTION").expect(
+            "POSTGRES_CONNECTION must be set (e.g. 'postgres://root:root@localhost:5432/tau_db'",
+        ),
+        base_url: std::env::var("BASE_URL").unwrap_or(format!("http://localhost:{}", port)),
+        port,
     };
 
     let pool = PgPoolOptions::new()
@@ -422,9 +430,17 @@ async fn main() -> Result<(), anyhow::Error> {
     let (tx, _rx) = broadcast::channel::<crate::events::TaggedEvent>(100);
     let (sub_tx, _rx) = broadcast::channel::<SubscriptionStatus>(100);
 
-    // TODO: check if '_sqlx_migrations' table exists;
-    // if not, run a pgdump to a backup file
-    if settings.initial_migration {
+    // TODO: run a pgdump to a backup file before migrating anything
+    let result = sqlx::query!(
+        "SELECT EXISTS (
+            SELECT 1
+            FROM pg_tables
+            WHERE tablename = '_sqlx_migrations'
+        );"
+    )
+    .fetch_one(&pool)
+    .await?;
+    if !result.exists.unwrap_or(false) {
         kv.migrate(&pool).await?;
     } else {
         let result = kv.load(&pool).await;

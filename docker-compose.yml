@@ -5,45 +5,25 @@ services:
     restart: unless-stopped
     env_file: .env
     environment:
-      POSTGRES_PASSWORD: "${POSTGRES_PW}"
-      REDIS_ENDPOINT: "${REDIS_ENDPOINT:-redis:6379}"
-      DJANGO_DB_TYPE: "${DJANGO_DB_TYPE:-postgres}"
-      DJANGO_DB_HOST: "${DJANGO_DB_HOST:-db}"
-      DJANGO_DB: "${DJANGO_DB:-tau_db}"
-      DJANGO_DB_USER: "${DJANGO_DB_USER:-tau_db}"
-      DJANGO_DB_PW: "${DJANGO_DB_PW}"
-      DJANGO_CONFIGURATION: "${DJANGO_CONFIGURATION:-Local}"
-      PROTOCOL: "${PROTOCOL:-http:}"
-      PUBLIC_URL: "${PUBLIC_URL:-localhost}"
-      USE_NGROK: "${USE_NGROK:-True}"
+      POSTGRES_CONNECTION: "postgres://postgres:${POSTGRES_PW}@db/tau_db"
       PORT: "${PORT:-8000}"
       TWITCH_WEBHOOK_SECRET: "${TWITCH_WEBHOOK_SECRET}"
-      DEBUG_TWITCH_CALLS: "${DEBUG_TWITCH_CALLS:-False}"
+    external_links:
+      - "db:db"
     depends_on:
       - db
-      - redis
     build:
       context: .
     ports:
       - ${PORT:-8000}:${PORT:-8000}
 
   db:
-    image: postgres:13-alpine
+    image: postgres:17-alpine
     restart: unless-stopped
     volumes:
       - postgres-data:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PW}
-      DJANGO_DB: ${DJANGO_DB:-tau_db}
-      DJANGO_DB_USER: ${DJANGO_DB_USER:-tau_db}
-      DJANGO_DB_PW: ${DJANGO_DB_PW}
-
-    # Add "forwardPorts": ["5432"] to **devcontainer.json** to forward PostgreSQL locally.
-    # (Adding the "ports" property to this file will not forward from a Codespace.)
-
-  redis:
-    image: redis:6-alpine
-    restart: unless-stopped
 
 volumes:
   postgres-data:
