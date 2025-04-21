@@ -3,7 +3,8 @@
 Making integrations with Twitch API easier than ever!
 
 # Recent Changes
-We have just added IRC bots to TAU.  In order to use this feature properly, you will need to add the IRC Bot Redirect URI, `http://localhost:PORT/api/v1/chat-bots/twitch-callback/` to your Twitch dev dashboard.  See details in the Twitch Setup section below.
+
+TAU has been rewritten in rust. Upgrading to this new version **will break backwards compatibility** with previous versions of TAU. Because of this, it is strongly recommended to make a backup of your database before upgrading.
 
 # Table of Contents
 
@@ -17,11 +18,9 @@ We have just added IRC bots to TAU.  In order to use this feature properly, you 
 # :microphone: Introduction
 
 TAU provides a single, locally-managed websocket connection for
-all of Twitch's realtime APIs. Currently, Twitch's realtime
-APIs are broken up into [EventSub WebHooks](https://dev.twitch.tv/docs/eventsub) and [PubSub WebSockets](https://dev.twitch.tv/docs/pubsub).
+all of Twitch's [EventSub](https://dev.twitch.tv/docs/eventsub) API.
 
-In order for a Twitch bot or overlay to be interactive, it needs to tap into the realtime events sent over the Twitch APIs. This typically requires setting up multiple protocols: a webhook on the server-side and websockets on the client-side. It also requires you to keep track of multiple Twitch access tokens. This is where TAU comes in! TAU takes care of all
-this for you and also adds the ability to replay past events and generate
+TAU adds the ability to replay past events and generate
 test events of your own from a user friendly UI. Additionally, all events are stored in a
 database.
 
@@ -33,8 +32,8 @@ _Note 1- TAU is very early stage software. There may be potential bugs
 and even security issues. I am very open to PRs and discussions that
 will help TAU become more stable and secure. Use at your own risk._
 
-_Note 2- TAU is written using django/python, however, acting as an
-API proxy, you can connect any codebase to its websockets._
+_Note 2- TAU is written using rust, however, acting as an
+API proxy, you can connect any codebase to its websocket._
 
 _Note 3- If when starting up TAU, you see the error:
 ```
@@ -53,7 +52,6 @@ Turn off autoclrf, and re-clone the repository.
   - Test events
   - Replay Events
 - Containerized setup for ease of spinning up and teardown
-- Manages multiple Twitch Event APIs without needing to register multiple Applications
 - Exposes 1 websocket for all Twitch Events
 
 # :white_check_mark: Prerequisites
@@ -92,10 +90,7 @@ Fill in values for:
 - TWITCH_CLIENT_SECRET (The Twitch Client Secret you just generated)
 - TWITCH_WEBHOOK_SECRET (a random string)
 - POSTGRES_PW Root Password
-- DJANGO_DB_PW (a random string)
-- DJANGO_SECRET_KEY (a random string)
 - PORT - If you want to change the port TAU runs on, set `PORT` to this value.
-- If you want to use an existing ngrok account, set `NGROK_TOKEN=<YOUR NGROK TOKEN>`
 
 Note- You probably will never need to use the Postgres password but you do need to set them to something (preferably a strong PW) in order to build the containers.
 
@@ -109,7 +104,7 @@ Now that you've set up your `.env` file, open your terminal of choice, navigate 
 docker-compose up
 ```
 
-If all goes to plan, you should see indications that the containers `tau-db`, `tau-redis`, and `tau-app` have started up, and you should see some logging output on your screen. In order to shut down the container, simply hit `ctrl-c`. For future runs, you simply need to execute the `docker-compose up` command, as all of your settings will be saved.
+If all goes to plan, you should see indications that the containers `tau-db` and `tau-app` have started up, and you should see some logging output on your screen. In order to shut down the container, simply hit `ctrl-c`. For future runs, you simply need to execute the `docker-compose up` command, as all of your settings will be saved.
 
 At the very end of the logs in your terminal, you should see an indication that wsworker and server have entered a RUNNING state (about 10 lines from the bottom).
 
@@ -123,15 +118,9 @@ To connect your bot or overlay code to TAU, you will need a TAU auth token. This
 
 Then simply point your bot's websocket client at `ws://localhost:PORT/ws/twitch-events/`. After it connects, send a websocket message from the client with the following JSON payload: `{"token": "YOUR_TOKEN HERE"}`. After providing your token, TAU will begin to stream all Twitch events to your websocket connection. Fin!
 
-> Note: If you wish to run TAU using a cloud service rather than locally, you will need to provide your own Redis server. This can either be another container running in the cloud, or a Redis provider such as Redislabs. Since Redis is used as a simple message broker, something like Redislab's free tier will be more than sufficient for most users. Then, simply provide the `REDIS_ENDPOINT` and `REDIS_PW` environment variables. Additionally, you will need to either provide a working postgres installation, or change the `DJANGO_DB_TYPE` environment variable to `sqlite3` to use django's local sqlite3 library. See the .env_single_container_sample file.
-
 # :hourglass_flowing_sand: Updating
 
 In order to update TAU, pull/download the latest code from github. You will then need to rebuild the app container before re-launching TAU. You can do so as follows:
 
 1. Destroy the containers: `docker compose down`
 2. Fire TAU back up by rebuilding the containers: `docker compose up --build`
-
-# :thought_balloon: Todo/Issues
-
-Currently, while hypetrain events are forwarded on to any local clients connected to the TAU websocket connection, they are not shown in the TAU dashboard, nor do they have test events available.
