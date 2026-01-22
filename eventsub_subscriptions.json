@@ -3935,7 +3935,7 @@
   {
     "subscription_type": "Hype Train Begin",
     "name": "channel.hype_train.begin",
-    "version": "1",
+    "version": "2",
     "description": "A Hype Train begins on the specified channel.",
     "scope_required": "channel:read:hype_train",
     "event_schema": {
@@ -4006,38 +4006,21 @@
             "total"
           ]
         },
-        "last_contribution": {
-          "description": "The most recent contribution.",
-          "type": "object",
-          "properties": {
-            "user_id": {
-              "description": "The ID of the user.",
-              "type": "string"
-            },
-            "user_login": {
-              "description": "The login of the user.",
-              "type": "string"
-            },
-            "user_name": {
-              "description": "The display name of the user.",
-              "type": "string"
-            },
-            "type": {
-              "description": "Type of contribution. Valid values includebits,subscription.",
-              "type": "string"
-            },
-            "total": {
-              "description": "The total contributed.",
-              "type": "integer"
-            }
-          },
-          "required": [
-            "user_id",
-            "user_login",
-            "user_name",
-            "type",
-            "total"
-          ]
+        "all_time_high_level": {
+          "description": "The all-time high level this type of Hype Train has reached for this broadcaster.",
+          "type": "integer"
+        },
+        "type": {
+          "description": "The type of the Hype Train. Possible values are: treasure, golden_kappa, regular",
+          "type": "string"
+        },
+        "is_shared_train": {
+          "description": "Indicates if the Hype Train is shared. When true, shared_train_participants will contain the list of broadcasters the train is shared with.",
+          "type": "boolean"
+        },
+        "all_time_high_total": {
+          "description": "The all-time high total this type of Hype Train has reached for this broadcaster.",
+          "type": "integer"
         },
         "started_at": {
           "description": "The time when the Hype Train started.",
@@ -4057,7 +4040,10 @@
         "progress",
         "goal",
         "top_contributions",
-        "last_contribution",
+        "all_time_high_level",
+        "all_time_high_total",
+        "type",
+        "is_shared_train",
         "started_at",
         "expires_at"
       ]
@@ -4082,7 +4068,7 @@
   {
     "subscription_type": "Hype Train Progress",
     "name": "channel.hype_train.progress",
-    "version": "1",
+    "version": "2",
     "description": "A Hype Train makes progress on the specified channel.",
     "scope_required": "channel:read:hype_train",
     "event_schema": {
@@ -4090,7 +4076,10 @@
       "$id": null,
       "title": "Hype Train Progress",
       "description": "A Hype Train makes progress on the specified channel.",
-      "type": "object",
+      "type": {
+        "description": "The type of the Hype Train. Possible values are: treasure, golden_kappa, regular",
+        "type": "string"
+      },
       "properties": {
         "id": {
           "description": "The Hype Train ID.",
@@ -4157,39 +4146,6 @@
             "total"
           ]
         },
-        "last_contribution": {
-          "description": "The most recent contribution.",
-          "type": "object",
-          "properties": {
-            "user_id": {
-              "description": "The ID of the user.",
-              "type": "string"
-            },
-            "user_login": {
-              "description": "The login of the user.",
-              "type": "string"
-            },
-            "user_name": {
-              "description": "The display name of the user.",
-              "type": "string"
-            },
-            "type": {
-              "description": "Type of contribution. Valid values includebits,subscription.",
-              "type": "string"
-            },
-            "total": {
-              "description": "The total contributed.",
-              "type": "integer"
-            }
-          },
-          "required": [
-            "user_id",
-            "user_login",
-            "user_name",
-            "type",
-            "total"
-          ]
-        },
         "started_at": {
           "description": "The time when the Hype Train started.",
           "type": "string"
@@ -4198,6 +4154,10 @@
           "description": "The time when the Hype Train expires. The expiration is extended when the Hype Train reaches a new level.",
           "type": "string"
         }
+      },
+      "is_shared_train": {
+        "description": "Indicates if the Hype Train is shared. When true, shared_train_participants will contain the list of broadcasters the train is shared with.",
+        "type": "boolean"
       },
       "required": [
         "id",
@@ -4209,9 +4169,10 @@
         "progress",
         "goal",
         "top_contributions",
-        "last_contribution",
         "started_at",
-        "expires_at"
+        "expires_at",
+        "type",
+        "is_shared_train"
       ]
     },
     "condition_schema": {
@@ -4234,7 +4195,7 @@
   {
     "subscription_type": "Hype Train End",
     "name": "channel.hype_train.end",
-    "version": "1",
+    "version": "2",
     "description": "A Hype Train ends on the specified channel.",
     "scope_required": "channel:read:hype_train",
     "event_schema": {
@@ -4312,6 +4273,14 @@
         "cooldown_ends_at": {
           "description": "The time when the Hype Train cooldown ends so that the next Hype Train can start.",
           "type": "string"
+        },
+        "type": {
+          "description": "The type of the Hype Train. Possible values are: treasure, golden_kappa, regular",
+          "type": "string"
+        },
+        "is_shared_train": {
+          "description": "Indicates if the Hype Train is shared. When true, shared_train_participants will contain the list of broadcasters the train is shared with.",
+          "type": "boolean"
         }
       },
       "required": [
@@ -4324,7 +4293,9 @@
         "top_contributions",
         "started_at",
         "ended_at",
-        "cooldown_ends_at"
+        "cooldown_ends_at",
+        "type",
+        "is_shared_train"
       ]
     },
     "condition_schema": {
