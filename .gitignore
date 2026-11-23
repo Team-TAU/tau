@@ -117,3 +117,4 @@ venv.bak/
 /db/data/db.sqlite3
 
 supervisord.pid
+.direnv/

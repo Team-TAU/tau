@@ -10,6 +10,7 @@ use eventsub_ws::{EventSubWebSocket, EventSubWorkerMessage};
 use futures_util::SinkExt;
 use futures_util::StreamExt;
 use log::{debug, error, info, trace, warn};
+use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::postgres::PgPoolOptions;
@@ -50,6 +51,8 @@ pub enum AppError {
     BadRequest,
     #[error("csrf error")]
     CsrfError,
+    #[error(":)")]
+    OK,
 }
 
 use axum::{extract::Request, middleware::Next};
@@ -82,12 +85,20 @@ impl Credentials for TauToken {
 }
 
 async fn require_auth(
-    TypedHeader(authorization): TypedHeader<Authorization<TauToken>>,
+    authorization: Option<TypedHeader<Authorization<TauToken>>>,
     State(state): State<Arc<crate::RouterState>>,
+    method: Method,
     request: Request,
     next: Next,
 ) -> Result<Response, AppError> {
-    if authorization.0.token() != state.kv.get_tau_token() {
+    if method == Method::OPTIONS {
+        return Err(AppError::OK);
+    }
+    if let Some(TypedHeader(authorization)) = authorization {
+        if authorization.0.token() != state.kv.get_tau_token() {
+            return Err(AppError::Unauthorized);
+        }
+    } else {
         return Err(AppError::Unauthorized);
     }
 
@@ -105,6 +116,7 @@ impl axum::response::IntoResponse for AppError {
             AppError::BadRequest => StatusCode::BAD_REQUEST,
             AppError::Unauthorized => StatusCode::UNAUTHORIZED,
             AppError::CsrfError => StatusCode::UNAUTHORIZED,
+            AppError::OK => StatusCode::OK,
         };
         (status, self.to_string()).into_response()
     }
@@ -502,7 +514,7 @@ async fn main() -> Result<(), anyhow::Error> {
         .nest(
             "/api/twitch/",
             OpenApiRouter::new()
-                .routes(routes!(twitch::helix_passthrough))
+                .fallback(twitch::helix_passthrough)
                 .layer(middleware::from_fn_with_state(
                     state.clone(),
                     crate::require_auth,
@@ -553,14 +565,9 @@ mod twitch {
         Ok(Json(state.spec.helix.clone()))
     }
 
-    #[utoipa::path(method(get, post, patch, put, delete), path = "/helix/:path",
-        responses(
-        (status = OK, body = Vec<crate::HelixEndpoint>),
-    ), tag = super::TWITCH_TAG)]
     pub async fn helix_passthrough(
         State(state): State<Arc<crate::RouterState>>,
-        Path(path): Path<String>,
-        query: RawQuery,
+        uri: http::Uri,
         method: Method,
     ) -> Result<impl IntoResponse, crate::AppError> {
         let user_token = state
@@ -568,8 +575,8 @@ mod twitch {
             .refresh_user_token(&state.config, &state.pool)
             .await?;
         let client = reqwest::Client::new();
-        let query = query.0.unwrap_or_default();
-        let dest = format!("https://api.twitch.tv/helix/{}?{}", path, query);
+        let query = uri.query().unwrap_or_default();
+        let dest = format!("https://api.twitch.tv{}?{}", uri.path(), query);
         warn!("{:?}", &dest);
         let response = client
             .request(method, dest)

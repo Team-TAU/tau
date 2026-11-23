@@ -32,3 +32,4 @@ axum-extra = { version = "0.9.6", features = [ "typed-header" ] }
 serde_qs = { version = "0.13.0", features = [ "axum" ] }
 rand = "0.9.1"
 tower-http = { version = "0.6.2", features = [ "fs" ] }
+http = "1.5.0"
