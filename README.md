@@ -88,7 +88,6 @@ Fill in values for:
 
 - TWITCH_CLIENT_ID (The Twitch Client ID you just generated)
 - TWITCH_CLIENT_SECRET (The Twitch Client Secret you just generated)
-- TWITCH_WEBHOOK_SECRET (a random string)
 - POSTGRES_PW Root Password
 - PORT - If you want to change the port TAU runs on, set `PORT` to this value.
 
