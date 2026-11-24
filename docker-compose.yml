@@ -7,7 +7,6 @@ services:
     environment:
       POSTGRES_CONNECTION: "postgres://postgres:${POSTGRES_PW}@db/tau_db"
       PORT: "${PORT:-8000}"
-      TWITCH_WEBHOOK_SECRET: "${TWITCH_WEBHOOK_SECRET}"
     external_links:
       - "db:db"
     depends_on:
