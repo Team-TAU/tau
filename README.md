@@ -86,8 +86,9 @@ Now that you've obtained your Client ID and Client Secret, it is time to set up 
 
 Fill in values for:
 
-- TWITCH_CLIENT_ID (The Twitch Client ID you just generated)
+- TWITCH_APP_ID (The Twitch Client ID you just generated)
 - TWITCH_CLIENT_SECRET (The Twitch Client Secret you just generated)
+- SUPERUSER (your twitch login username)
 - POSTGRES_PW Root Password
 - PORT - If you want to change the port TAU runs on, set `PORT` to this value.
 
